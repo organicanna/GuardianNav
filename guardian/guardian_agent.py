@@ -7,7 +7,7 @@ def trigger_alert():
     print("ALERTE : Vous semblez immobile ou un mot clé vocal a été détecté. Tout va bien ?")
 
 def static_monitor(agent, alert_callback):
-    for position in agent.simulate_gps():
+    for position in agent.simulate_gps(): #mettre Google Maps API au lieu du simulate.gps
         if agent.update_position(position):
             alert_callback()
         time.sleep(1)
