@@ -3,8 +3,7 @@ from typing import Tuple
 from math import radians, cos, sin, asin, sqrt
 import random
 
-def haversine(coord1: Tuple[float, float], coord2: Tuple[float, float]) -> float:
-    """Calcule la distance en mètres entre deux points GPS."""
+def haversine(coord1: Tuple[float, float], coord2: Tuple[float, float]) -> float:  #Calcule la distance en mètres entre deux points GPS.
     lon1, lat1 = coord1
     lon2, lat2 = coord2
     lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
@@ -15,7 +14,7 @@ def haversine(coord1: Tuple[float, float], coord2: Tuple[float, float]) -> float
     r = 6371000
     return c * r
 
-class StaticAgent:
+class StaticAgent: #définition de l'agent statique
     def __init__(self, distance_threshold=10, time_threshold=300):
         self.distance_threshold = distance_threshold
         self.time_threshold = time_threshold
