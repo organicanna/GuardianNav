@@ -3,7 +3,7 @@ import speech_recognition as sr  # type: ignore
 class VoiceAgent:
     def __init__(self, keywords=None):
         if keywords is None:
-            keywords = ["aide", "stop", "emergency"]
+            keywords = ["aide", "help", "stop", "emergency"]
         self.keywords = [k.lower() for k in keywords]
         self.recognizer = sr.Recognizer()
         self.micro = sr.Microphone()
