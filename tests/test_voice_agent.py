@@ -7,7 +7,7 @@ agent = VoiceAgent(
     model_path=MODEL_PATH
 )
 
-print("Parlez, je vous écoute…")
+print("Parlez, je vous écoute… (prononcez un mot clé)")
 while True:
     if agent.listen_for_keywords():
         print("Mot clé détecté !")

@@ -41,7 +41,7 @@ class StaticAgent: #Début de l'agent statique
         self.last_time = now #mise à jour temps
         return alert 
 
-    def simulate_gps(self): #simulation de coordonnées GPS aléatoire autour d'un point fixe car pas de vrai GPS
+    def simulate_gps(self): #simulation de coordonnées GPS aléatoire autour d'un point fixe car pas de vrai GPS pour l'instant
         lat, lon = 48.8566, 2.3522 #point de départ est Paris
         while True: #boucle infinie
             jitter = random.choice([0, 0.00001, 0.00002, 0.00005]) #petits déplacements aléatoires
