@@ -3,7 +3,7 @@ import time
 from guardian.GPS_agent import StaticAgent
 from guardian.voice_agent import VoiceAgent
 
-def get_response_voice_or_text(voice_agent, prompt="Votre réponse (oui/non) : ", valid_responses=None):
+def get_response_voice_or_text(voice_agent, prompt="Votre réponse : ", valid_responses=None):
     print(prompt)
     response = None
 
@@ -13,14 +13,18 @@ def get_response_voice_or_text(voice_agent, prompt="Votre réponse (oui/non) : "
         while response is None:
             voice = voice_agent.listen_for_keywords()
             if voice:
-                response = voice
-                break
+                # Si valid_responses est défini (ex: ["oui", "non"]), filtrer dessus
+                if valid_responses:
+                    if voice.lower() in valid_responses:
+                        response = voice.lower()
+                        break
+                else:
+                    response = voice
+                    break
 
-    # Démarre le thread vocal
     thread_voice = threading.Thread(target=listen_voice)
     thread_voice.start()
 
-    # Attend l'entrée clavier, ou la réponse vocale
     while response is None:
         text = input()
         if valid_responses:
@@ -63,7 +67,10 @@ def voice_monitor(agent, alert_callback, agents_lock, voice_agent):
 
 if __name__ == "__main__":
     static_agent = StaticAgent(distance_threshold=10, time_threshold=30)
-    voice_agent = VoiceAgent(keywords=["aide", "stop", "urgence", "secours", "oui", "non"], model_path="/Users/anna/Desktop/GuardianNav/vosk-model-small-fr-0.22")
+    voice_agent = VoiceAgent(
+        keywords=["aide", "stop", "urgence", "secours", "oui", "non"],
+        model_path="/Users/anna/Desktop/GuardianNav/vosk-model-small-fr-0.22"
+    )
 
     agents_lock = threading.Lock()
 
