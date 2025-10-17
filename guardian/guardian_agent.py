@@ -2,17 +2,18 @@ import threading
 import time
 from guardian.GPS_agent import StaticAgent
 from guardian.voice_agent import VoiceAgent
-# from guardian.path_agent import PathAgent  # À créer si tu veux gérer la déviation de trajet
+# from guardian.path_agent import PathAgent  # ajoute si tu as PathAgent
 
-def ask_user():
-    response = input("ALERTE : Tout va bien ? (oui/non) : ").strip().lower()
+def ask_user(trigger_type):
+    print(f"\nALERTE ({trigger_type}) : Tout va bien ? (oui/non)")
+    response = input().strip().lower()
     if response == "oui":
-        print("OK, pas de question supplémentaire.")
+        print("OK, pas de question supplémentaire.\n")
     elif response == "non":
         reason = input("Pourquoi ? : ")
-        print(f"Motif reçu : {reason}")
+        print(f"Motif reçu : {reason}\n")
     else:
-        print("Réponse non reconnue. Aucune action prise.")
+        print("Réponse non reconnue. Aucune action prise.\n")
 
 def static_monitor(agent, alert_callback):
     for position in agent.simulate_gps():
@@ -33,13 +34,12 @@ def path_monitor(agent, alert_callback):
         time.sleep(1)
 
 if __name__ == "__main__":
-    static_agent = StaticAgent(distance_threshold=10, time_threshold=180)
-    voice_agent = VoiceAgent(keywords=["aide", "stop", "urgence", "secours"])
-    # path_agent = PathAgent(...)  # Instancie avec ton itinéraire si tu as la classe
+    static_agent = StaticAgent(distance_threshold=10, time_threshold=30)  # seuils pour test rapide
+    voice_agent = VoiceAgent(keywords=["aide", "stop", "urgence", "secours"], model_path="/Users/anna/Desktop/GuardianNav/vosk-model-small-fr-0.22")
+    # path_agent = PathAgent(...)
 
     def orchestrator(trigger_type):
-        print(f"\nDéclencheur détecté ({trigger_type})")
-        ask_user()
+        ask_user(trigger_type)
 
     t_static = threading.Thread(target=static_monitor, args=(static_agent, orchestrator))
     t_voice = threading.Thread(target=voice_monitor, args=(voice_agent, orchestrator))
