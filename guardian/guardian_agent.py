@@ -12,8 +12,7 @@ def get_response_voice_or_text(voice_agent, prompt="Votre réponse : ", valid_re
         print("Vous pouvez répondre à l'oral…")
         while response is None:
             voice = voice_agent.listen_for_keywords()
-            if voice:
-                # Si valid_responses est défini (ex: ["oui", "non"]), filtrer dessus
+            if voice and isinstance(voice, str):
                 if valid_responses:
                     if voice.lower() in valid_responses:
                         response = voice.lower()
