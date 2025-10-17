@@ -11,7 +11,7 @@ def get_response_voice_or_text(voice_agent, prompt="Votre réponse (oui/non) : "
         nonlocal response
         print("Vous pouvez répondre à l'oral…")
         while response is None:
-            voice = voice_agent.listen_for_keywords(valid_responses or ["oui", "non"])
+            voice = voice_agent.listen_for_keywords()
             if voice:
                 response = voice
                 break
@@ -63,7 +63,7 @@ def voice_monitor(agent, alert_callback, agents_lock, voice_agent):
 
 if __name__ == "__main__":
     static_agent = StaticAgent(distance_threshold=10, time_threshold=30)
-    voice_agent = VoiceAgent(keywords=["aide", "stop", "urgence", "secours"], model_path="/Users/anna/Desktop/GuardianNav/vosk-model-small-fr-0.22")
+    voice_agent = VoiceAgent(keywords=["aide", "stop", "urgence", "secours", "oui", "non"], model_path="/Users/anna/Desktop/GuardianNav/vosk-model-small-fr-0.22")
 
     agents_lock = threading.Lock()
 
