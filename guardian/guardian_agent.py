@@ -1,5 +1,6 @@
 import threading
 import time
+import os
 from guardian.GPS_agent import StaticAgent
 from guardian.voice_agent import VoiceAgent
 
@@ -64,22 +65,66 @@ def voice_monitor(agent, alert_callback, agents_lock, voice_agent):
                 agents_lock.release()
         time.sleep(1)
 
+def main():
+    """Point d'entrée principal pour GuardianNav"""
+    import logging
+    from guardian.config import Config
+    
+    logger = logging.getLogger(__name__)
+    
+    try:
+        # Charger la configuration
+        config = Config()
+        
+        # Créer les agents avec la configuration
+        static_config = config.get_static_agent_config()
+        voice_config = config.get_voice_agent_config()
+        
+        logger.info("Initialisation des agents...")
+        static_agent = StaticAgent(**static_config)
+        
+        # Vérifier que le modèle Vosk existe
+        model_path = voice_config.get("model_path")
+        if not model_path or not os.path.exists(model_path):
+            logger.warning(f"Modèle Vosk non trouvé à {model_path}")
+            logger.info("Fonctionnement en mode GPS uniquement")
+            voice_agent = None
+        else:
+            voice_agent = VoiceAgent(**voice_config)
+        
+        agents_lock = threading.Lock()
+
+        def orchestrator(trigger_type, agents_lock, voice_agent):
+            ask_user(trigger_type, agents_lock, voice_agent)
+
+        # Démarrer le monitoring GPS
+        logger.info("Démarrage du monitoring GPS...")
+        t_static = threading.Thread(target=static_monitor, 
+                                   args=(static_agent, orchestrator, agents_lock, voice_agent))
+        t_static.daemon = True
+        t_static.start()
+        
+        # Démarrer le monitoring vocal si disponible
+        if voice_agent:
+            logger.info("Démarrage du monitoring vocal...")
+            t_voice = threading.Thread(target=voice_monitor, 
+                                     args=(voice_agent, orchestrator, agents_lock, voice_agent))
+            t_voice.daemon = True
+            t_voice.start()
+        
+        logger.info("GuardianNav démarré avec succès!")
+        print("GuardianNav est actif. Appuyez sur Ctrl+C pour arrêter.")
+        
+        # Attendre indéfiniment (les threads sont en daemon)
+        try:
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            logger.info("Arrêt demandé par l'utilisateur")
+            
+    except Exception as e:
+        logger.error(f"Erreur lors du démarrage: {e}")
+        raise
+
 if __name__ == "__main__":
-    static_agent = StaticAgent(distance_threshold=10, time_threshold=30)
-    voice_agent = VoiceAgent(
-        keywords=["aide", "stop", "urgence", "secours", "oui", "non"],
-        model_path="/Users/anna/Desktop/GuardianNav/vosk-model-small-fr-0.22"
-    )
-
-    agents_lock = threading.Lock()
-
-    def orchestrator(trigger_type, agents_lock, voice_agent):
-        ask_user(trigger_type, agents_lock, voice_agent)
-
-    t_static = threading.Thread(target=static_monitor, args=(static_agent, orchestrator, agents_lock, voice_agent))
-    t_voice = threading.Thread(target=voice_monitor, args=(voice_agent, orchestrator, agents_lock, voice_agent))
-
-    t_static.start()
-    t_voice.start()
-    t_static.join()
-    t_voice.join()
+    main()

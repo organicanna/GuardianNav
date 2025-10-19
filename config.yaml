@@ -1,0 +1,38 @@
+# Configuration par défaut pour GuardianNav
+default:
+  # Paramètres de l'agent statique
+  static_agent:
+    distance_threshold: 10  # mètres
+    time_threshold: 300     # secondes (5 minutes)
+  
+  # Paramètres de l'agent vocal
+  voice_agent:
+    keywords:
+      - "aide"
+      - "stop" 
+      - "urgence"
+      - "secours"
+      - "oui"
+      - "non"
+    model_path: "vosk-model-small-fr-0.22"  # Chemin relatif au projet
+    samplerate: 16000
+  
+  # Paramètres de l'agent de déviation de route  
+  wrong_path_agent:
+    deviation_threshold: 50  # mètres
+  
+  # Configuration des logs
+  logging:
+    level: "INFO"
+    filename: "guardiannav.log"
+
+# Configuration pour les tests (seuils réduits)
+test:
+  static_agent:
+    distance_threshold: 5
+    time_threshold: 30  # 30 secondes pour tests rapides
+  voice_agent:
+    keywords:
+      - "aide"
+      - "test"
+    model_path: "vosk-model-small-fr-0.22"

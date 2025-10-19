@@ -1,6 +1,8 @@
 import googlemaps #type: ignore
 from math import radians, cos, sin, asin, sqrt
 import time
+import logging
+from typing import List, Tuple, Optional
 
 def haversine(coord1, coord2): #même chose que pour le GPS_agent
     lon1, lat1 = coord1
@@ -14,12 +16,37 @@ def haversine(coord1, coord2): #même chose que pour le GPS_agent
     return c * r
 
 class WrongPathAgent:
-    def __init__(self, api_key, origin, destination, deviation_threshold=50):
-        self.gmaps = googlemaps.Client(key=api_key)
+    def __init__(self, api_key: str, origin: str, destination: str, deviation_threshold: float = 50):
+        """
+        Initialise l'agent de détection de déviation de route
+        
+        Args:
+            api_key: Clé API Google Maps
+            origin: Point de départ
+            destination: Point d'arrivée  
+            deviation_threshold: Seuil de déviation en mètres
+        """
+        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
+        
+        try:
+            self.gmaps = googlemaps.Client(key=api_key)
+            self.logger.info("Client Google Maps initialisé")
+        except Exception as e:
+            self.logger.error(f"Erreur d'initialisation Google Maps: {e}")
+            raise
+            
         self.origin = origin
         self.destination = destination
         self.deviation_threshold = deviation_threshold
-        self.route = self.get_route_points()
+        
+        self.logger.info(f"Route: {origin} → {destination}, seuil: {deviation_threshold}m")
+        
+        try:
+            self.route = self.get_route_points()
+            self.logger.info(f"Route calculée avec {len(self.route)} points")
+        except Exception as e:
+            self.logger.error(f"Erreur lors du calcul de route: {e}")
+            self.route = []
 
     def get_route_points(self):
         result = self.gmaps.directions(self.origin, self.destination, mode="walking")

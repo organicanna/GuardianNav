@@ -1,0 +1,12 @@
+# Core dependencies for GuardianNav
+vosk>=0.3.45
+sounddevice>=0.4.6
+googlemaps>=4.10.0
+numpy>=1.24.0
+
+# Development and testing
+pytest>=7.0.0
+pytest-cov>=4.0.0
+
+# Logging and configuration
+pyyaml>=6.0
