@@ -4,7 +4,7 @@ Système de recherche de refuges et transports d'urgence pour GuardianNav
 import requests
 import logging
 import json
-from typing import List, Dict, Tuple, Optional
+from typing import List, Dict, Tuple, Optional, Any
 import yaml
 from datetime import datetime
 
@@ -119,19 +119,61 @@ class EmergencyLocationService:
         
         simulated_places = {
             'bar': [
-                {'name': 'Le Refuge Bar', 'distance_m': 150, 'is_open': True},
-                {'name': 'Café de la Paix', 'distance_m': 280, 'is_open': True},
-                {'name': 'Brasserie du Centre', 'distance_m': 420, 'is_open': False}
+                {
+                    'name': 'Le Refuge Bar', 
+                    'distance_m': 150, 
+                    'is_open': True,
+                    'location': {'lat': lat + 0.0015, 'lng': lon + 0.0010},
+                    'address': '12 Rue de la Paix'
+                },
+                {
+                    'name': 'Café de la Paix', 
+                    'distance_m': 280, 
+                    'is_open': True,
+                    'location': {'lat': lat - 0.0020, 'lng': lon + 0.0025},
+                    'address': '45 Avenue des Champs'
+                },
+                {
+                    'name': 'Brasserie du Centre', 
+                    'distance_m': 420, 
+                    'is_open': False,
+                    'location': {'lat': lat + 0.0030, 'lng': lon - 0.0015},
+                    'address': '78 Boulevard Saint-Michel'
+                }
             ],
             'pharmacy': [
-                {'name': 'Pharmacie de Garde', 'distance_m': 320, 'is_open': True},
-                {'name': 'Pharmacie Centrale', 'distance_m': 480, 'is_open': False}
+                {
+                    'name': 'Pharmacie de Garde', 
+                    'distance_m': 320, 
+                    'is_open': True,
+                    'location': {'lat': lat + 0.0020, 'lng': lon + 0.0015},
+                    'address': '67 Place de la République'
+                },
+                {
+                    'name': 'Pharmacie Centrale', 
+                    'distance_m': 480, 
+                    'is_open': False,
+                    'location': {'lat': lat - 0.0030, 'lng': lon + 0.0010},
+                    'address': '89 Rue de la Liberté'
+                }
             ],
             'police': [
-                {'name': 'Commissariat Central', 'distance_m': 800, 'is_open': True}
+                {
+                    'name': 'Commissariat Central', 
+                    'distance_m': 800, 
+                    'is_open': True,
+                    'location': {'lat': lat + 0.0050, 'lng': lon - 0.0040},
+                    'address': '1 Place du Châtelet'
+                }
             ],
             'hospital': [
-                {'name': 'Hôpital Saint-Jean', 'distance_m': 1200, 'is_open': True}
+                {
+                    'name': 'Hôpital Saint-Jean', 
+                    'distance_m': 1200, 
+                    'is_open': True,
+                    'location': {'lat': lat - 0.0080, 'lng': lon + 0.0060},
+                    'address': '156 Boulevard de l\'Hôpital'
+                }
             ]
         }
         
@@ -251,17 +293,113 @@ class EmergencyLocationService:
         # Priorité : ouverts d'abord, puis fermés
         return open_refuges + closed_refuges
     
-    def format_emergency_locations_message(self, refuges: List[Dict], transports: Dict[str, List]) -> str:
-        """Formate un message avec les lieux d'urgence"""
+    def get_escape_route_to_refuge(self, start_location: Tuple[float, float], refuge_location: Tuple[float, float]) -> Dict[str, Any]:
+        """
+        Calcule un itinéraire d'évacuation vers un refuge en utilisant l'API Directions
+        
+        Args:
+            start_location: Position actuelle (lat, lon)
+            refuge_location: Position du refuge (lat, lon)
+            
+        Returns:
+            Dict avec itinéraire et instructions
+        """
+        try:
+            if not self.maps_api_key:
+                return self._simulate_escape_route(start_location, refuge_location)
+            
+            url = "https://maps.googleapis.com/maps/api/directions/json"
+            
+            start_lat, start_lon = start_location
+            end_lat, end_lon = refuge_location
+            
+            params = {
+                'origin': f"{start_lat},{start_lon}",
+                'destination': f"{end_lat},{end_lon}",
+                'mode': 'walking',  # Mode piéton pour évacuation
+                'alternatives': 'true',  # Plusieurs itinéraires possibles
+                'avoid': 'highways',  # Éviter autoroutes (pas accessibles à pied)
+                'language': 'fr',
+                'key': self.maps_api_key
+            }
+            
+            response = requests.get(url, params=params)
+            data = response.json()
+            
+            if data.get('status') == 'OK' and data.get('routes'):
+                route = data['routes'][0]  # Meilleur itinéraire
+                
+                return {
+                    'duration': route['legs'][0]['duration']['text'],
+                    'distance': route['legs'][0]['distance']['text'],
+                    'steps': self._format_escape_steps(route['legs'][0]['steps']),
+                    'polyline': route['overview_polyline']['points'],
+                    'warnings': route.get('warnings', [])
+                }
+            else:
+                self.logger.warning(f"Erreur API Directions: {data.get('status', 'Inconnue')}")
+                return self._simulate_escape_route(start_location, refuge_location)
+                
+        except Exception as e:
+            self.logger.error(f"Erreur calcul itinéraire d'évacuation: {e}")
+            return self._simulate_escape_route(start_location, refuge_location)
+    
+    def _format_escape_steps(self, steps: List[Dict]) -> List[str]:
+        """Formate les étapes d'évacuation en instructions claires"""
+        formatted_steps = []
+        
+        for i, step in enumerate(steps[:5]):  # Max 5 étapes principales
+            instruction = step.get('html_instructions', '')
+            distance = step.get('distance', {}).get('text', '')
+            
+            # Nettoyer les instructions HTML
+            import re
+            clean_instruction = re.sub('<[^<]+?>', '', instruction)
+            
+            formatted_steps.append(f"{i+1}. {clean_instruction} ({distance})")
+        
+        return formatted_steps
+    
+    def _simulate_escape_route(self, start: Tuple[float, float], end: Tuple[float, float]) -> Dict[str, Any]:
+        """Simule un itinéraire d'évacuation pour les tests"""
+        distance_m = self._calculate_distance(start, end)
+        
+        return {
+            'duration': f"{max(1, distance_m // 80)} min",  # ~80m/min marche rapide
+            'distance': f"{distance_m}m",
+            'steps': [
+                "1. Sortez immédiatement de votre position actuelle",
+                "2. Dirigez-vous vers la rue principale la plus proche", 
+                "3. Suivez la direction du refuge en restant visible",
+                "4. Évitez les ruelles sombres et isolées",
+                "5. Arrivée au refuge - demandez de l'aide"
+            ],
+            'polyline': 'simulation_polyline',
+            'warnings': ['Itinéraire simulé - utilisez votre jugement sur le terrain']
+        }
+
+    def format_emergency_locations_message(self, refuges: List[Dict], transports: Dict[str, List], current_location: Tuple[float, float] = None) -> str:
+        """Formate un message avec les lieux d'urgence et itinéraires"""
         
         message = "🆘 **LIEUX SÛRS ET TRANSPORTS D'URGENCE À PROXIMITÉ**\n\n"
         
-        # Refuges
+        # Refuges avec itinéraires
         if refuges:
             message += "🏠 **REFUGES SÛRS:**\n"
-            for refuge in refuges[:5]:  # Top 5
+            for i, refuge in enumerate(refuges[:3]):  # Top 3 avec itinéraires
                 status = "🟢 OUVERT" if refuge.get('is_open') else "🔴 FERMÉ"
                 message += f"   • {refuge['name']} ({refuge['distance_m']}m) {status}\n"
+                
+                # Ajouter itinéraire pour le refuge le plus proche
+                if i == 0 and current_location and 'location' in refuge:
+                    route = self.get_escape_route_to_refuge(
+                        current_location, 
+                        (refuge['location']['lat'], refuge['location']['lng'])
+                    )
+                    
+                    message += f"     🏃 Temps d'évacuation: {route['duration']}\n"
+                    if route.get('warnings'):
+                        message += f"     ⚠️ {route['warnings'][0]}\n"
         
         message += "\n🚇 **TRANSPORTS D'URGENCE:**\n"
         
@@ -289,3 +427,59 @@ class EmergencyLocationService:
         message += "   • Police: 17\n   • SAMU: 15\n   • Pompiers: 18\n   • Urgence EU: 112"
         
         return message
+    
+    def get_detailed_evacuation_plan(self, current_location: Tuple[float, float]) -> str:
+        """
+        Génère un plan d'évacuation détaillé avec plusieurs options
+        
+        Args:
+            current_location: Position actuelle (lat, lon)
+            
+        Returns:
+            Message avec plan d'évacuation complet
+        """
+        try:
+            # Trouver les 3 meilleurs refuges
+            refuges = self.find_emergency_refuges(current_location, radius_m=2000)
+            
+            if not refuges:
+                return "❌ Aucun refuge sûr trouvé dans un rayon de 2km"
+                
+            message = "🚨 **PLAN D'ÉVACUATION D'URGENCE** 🚨\n\n"
+            
+            # Plan pour les 3 meilleurs refuges
+            for i, refuge in enumerate(refuges[:3]):
+                message += f"**Option {i+1}: {refuge['name']}**\n"
+                
+                route = self.get_escape_route_to_refuge(
+                    current_location,
+                    (refuge['location']['lat'], refuge['location']['lng'])
+                )
+                
+                message += f"📍 Distance: {route['distance']} - Temps: {route['duration']}\n"
+                message += f"📞 Adresse: {refuge.get('address', 'Non disponible')}\n"
+                
+                # Instructions d'évacuation étape par étape
+                message += "🏃 **INSTRUCTIONS D'ÉVACUATION:**\n"
+                for step in route['steps']:
+                    message += f"   {step}\n"
+                
+                # Avertissements
+                if route.get('warnings'):
+                    message += f"⚠️ **Attention:** {route['warnings'][0]}\n"
+                    
+                message += "\n" + "="*50 + "\n\n"
+            
+            # Conseils généraux d'évacuation
+            message += "🔥 **CONSEILS D'ÉVACUATION:**\n"
+            message += "• Restez calme et suivez les instructions\n"
+            message += "• Gardez votre téléphone chargé et allumé\n"
+            message += "• Évitez les zones sombres et isolées\n"
+            message += "• Signalez-vous aux forces de l'ordre si vous les croisez\n"
+            message += "• Une fois en sécurité, contactez vos proches\n"
+            
+            return message
+            
+        except Exception as e:
+            self.logger.error(f"Erreur génération plan d'évacuation: {e}")
+            return "❌ Erreur lors de la génération du plan d'évacuation"

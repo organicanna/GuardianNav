@@ -167,8 +167,10 @@ class GuardianOrchestrator:
             refuges = self.emergency_locations.find_emergency_refuges(self.current_position, radius_m=300)
             transports = self.emergency_locations.find_emergency_transport(self.current_position, radius_m=500)
             
-            # Formatter les informations
-            refuges_message = self.emergency_locations.format_emergency_locations_message(refuges, transports)
+            # Formatter les informations avec itinéraires d'évacuation
+            refuges_message = self.emergency_locations.format_emergency_locations_message(
+                refuges, transports, current_location=self.current_position
+            )
             
             print(refuges_message)
             
@@ -200,8 +202,10 @@ class GuardianOrchestrator:
             refuges = self.emergency_locations.find_emergency_refuges(self.current_position)
             transports = self.emergency_locations.find_emergency_transport(self.current_position)
             
-            # Formatter et afficher
-            refuges_message = self.emergency_locations.format_emergency_locations_message(refuges, transports)
+            # Formatter et afficher avec itinéraires
+            refuges_message = self.emergency_locations.format_emergency_locations_message(
+                refuges, transports, current_location=self.current_position
+            )
             print(refuges_message)
             
             # Notification avec informations de refuges
