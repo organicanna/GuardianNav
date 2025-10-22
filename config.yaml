@@ -33,9 +33,9 @@ default:
     
     # Contacts d'urgence
     emergency_contacts:
-      - name: "Contact 1"
-        phone: "+33123456789"
-        email: "contact1@example.com"
+      - name: "Anna PERRET"
+        phone: "+33631309788"
+        email: "anna.perret63@gmail.com"
       - name: "Contact 2" 
         phone: "+33987654321"
         email: "contact2@example.com"
