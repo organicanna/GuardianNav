@@ -25,6 +25,28 @@ default:
   logging:
     level: "INFO"
     filename: "guardiannav.log"
+  
+  # Configuration de la réponse d'urgence
+  emergency_response:
+    timeout_seconds: 600  # 10 minutes avant escalade
+    notify_on_confirmation: false
+    
+    # Contacts d'urgence
+    emergency_contacts:
+      - name: "Contact 1"
+        phone: "+33123456789"
+        email: "contact1@example.com"
+      - name: "Contact 2" 
+        phone: "+33987654321"
+        email: "contact2@example.com"
+    
+    # Configuration email (optionnel)
+    email:
+      enabled: false  # Activez si vous voulez les notifications email
+      smtp_server: "smtp.gmail.com"
+      smtp_port: 587
+      from_email: "your-email@gmail.com"
+      password: "your-app-password"
 
 # Configuration pour les tests (seuils réduits)
 test:
@@ -36,3 +58,39 @@ test:
       - "aide"
       - "test"
     model_path: "vosk-model-small-fr-0.22"
+
+# Configuration du système d'urgence
+emergency_response:
+  timeout_seconds: 600  # 10 minutes avant escalade
+  notify_on_confirmation: false
+  
+  # Contacts d'urgence (à personnaliser)
+  emergency_contacts:
+    - name: "Contact Urgence 1"
+      phone: "+33123456789"
+      email: "urgence1@example.com"
+    - name: "Contact Urgence 2"  
+      phone: "+33987654321"
+      email: "urgence2@example.com"
+  
+  # Configuration email
+  email:
+    enabled: false
+    smtp_server: "smtp.gmail.com"
+    smtp_port: 587
+    from_email: "guardiannav@example.com"
+    password: "app_password"
+
+# Configuration IA et APIs
+ai_system:
+  enabled: true
+  api_keys_file: "api_keys.yaml"
+  confidence_threshold: 0.7
+  
+  # Types d'urgence supportés
+  emergency_types:
+    - "medical"
+    - "security" 
+    - "lost"
+    - "technical"
+    - "general"
