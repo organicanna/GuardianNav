@@ -5,6 +5,8 @@ import logging
 import queue
 from guardian.GPS_agent import StaticAgent
 from guardian.voice_agent import VoiceAgent
+from guardian.speech_agent import SpeechAgent
+from guardian.vertex_ai_agent import VertexAIAgent
 from guardian.emergency_response import EmergencyResponse
 from guardian.intelligent_advisor import IntelligentAdvisor, SmartResponseSystem
 from guardian.emergency_locations import EmergencyLocationService
@@ -26,7 +28,13 @@ class GuardianOrchestrator:
             
         self.emergency_response = EmergencyResponse(config.get('emergency_response', {}), api_keys_config)
         
-        # Système d'IA et de conseils
+        # Agent de synthèse vocale
+        self.speech_agent = SpeechAgent(api_keys_config)
+        
+        # Agent Vertex AI pour l'analyse avancée
+        self.vertex_ai_agent = VertexAIAgent(api_keys_config)
+        
+        # Système d'IA et de conseils (fallback si Vertex AI indisponible)
         self.intelligent_advisor = IntelligentAdvisor()
         self.smart_response_system = SmartResponseSystem(self.intelligent_advisor)
         
@@ -62,8 +70,12 @@ class GuardianOrchestrator:
         if position:
             self.current_position = position
         
+        alert_message = f"ALERTE {trigger_type}. Tout va bien ? Répondez oui ou non."
         print(f"\n🚨 ALERTE ({trigger_type}) : Tout va bien ? 🚨")
         print("Répondez 'oui' ou 'non' (vocal ou texte)")
+        
+        # Synthèse vocale de l'alerte
+        self.speech_agent.speak_alert("emergency", alert_message)
         
         # Démarrer l'écoute de réponse avec timeout
         response = self._wait_for_response()
@@ -91,7 +103,11 @@ class GuardianOrchestrator:
     def _handle_positive_response(self):
         """Gère une réponse positive ('oui')"""
         self.logger.info("Réponse positive reçue - Situation normale")
+        confirmation_message = "OK, merci de votre réponse. Surveillance continue."
         print("✅ OK, merci de votre réponse. Surveillance continue.\n")
+        
+        # Synthèse vocale de confirmation
+        self.speech_agent.speak_alert("confirmation", confirmation_message)
         
         # Envoyer notification de confirmation si configuré
         self.emergency_response.send_confirmation_alert("Situation normale - Utilisateur a confirmé")
@@ -99,23 +115,55 @@ class GuardianOrchestrator:
     def _handle_negative_response(self):
         """Gère une réponse négative ('non') avec IA"""
         self.logger.warning("Réponse négative reçue - Demande d'aide")
+        question_message = "Que se passe-t-il ? Décrivez votre situation. Le système IA va analyser votre réponse."
         print("⚠️  Que se passe-t-il ? Décrivez votre situation :")
         print("🤖 Le système IA va analyser votre réponse pour vous conseiller...")
+        
+        # Synthèse vocale de la question
+        self.speech_agent.speak_alert("emergency", question_message)
         
         # Demander des détails sur la situation
         try:
             reason = self.response_queue.get(timeout=120)  # 2 minutes pour expliquer
             self.logger.warning(f"Motif reçu: {reason}")
             
-            # Analyser la situation avec l'IA
-            smart_response = self.smart_response_system.process_emergency_response(reason, "emergency_description")
-            
-            print("\n" + "="*60)
-            print(smart_response["message"])
-            print("="*60)
-            
-            # Déclencher l'assistance avec les conseils IA
-            self._trigger_emergency_assistance_with_ai(reason, smart_response["analysis"])
+            # Analyser la situation avec Vertex AI ou IA de fallback
+            if self.vertex_ai_agent.is_available:
+                ai_analysis = self.vertex_ai_agent.analyze_emergency_situation(
+                    reason, 
+                    {
+                        'position': self.current_position,
+                        'trigger_type': 'user_negative_response',
+                        'time_of_day': 'current'
+                    }
+                )
+                
+                # Message personnalisé de Vertex AI
+                personalized_message = self.vertex_ai_agent.get_personalized_emergency_message(ai_analysis)
+                print("\n" + "="*60)
+                print(f"🤖 ANALYSE VERTEX AI GEMINI:")
+                print(personalized_message)
+                print("="*60)
+                
+                # Synthèse vocale des conseils IA
+                self.speech_agent.speak_alert("info", ai_analysis.get('specific_advice', ''))
+                
+                # Déclencher l'assistance avec l'analyse Vertex AI
+                self._trigger_emergency_assistance_with_vertex_ai(reason, ai_analysis)
+                
+            else:
+                # Fallback vers l'ancien système IA
+                smart_response = self.smart_response_system.process_emergency_response(reason, "emergency_description")
+                
+                print("\n" + "="*60)
+                print(smart_response["message"])
+                print("="*60)
+                
+                # Synthèse vocale des conseils IA
+                self.speech_agent.speak_alert("info", smart_response["message"])
+                
+                # Déclencher l'assistance avec les conseils IA
+                self._trigger_emergency_assistance_with_ai(reason, smart_response["analysis"])
             
         except queue.Empty:
             reason = "Aucun détail fourni"
@@ -126,7 +174,11 @@ class GuardianOrchestrator:
     def _handle_no_response(self):
         """Gère l'absence de réponse (timeout)"""
         self.logger.critical("AUCUNE RÉPONSE - Déclenchement d'urgence automatique")
+        emergency_message = "AUCUNE RÉPONSE DÉTECTÉE. Je déclenche automatiquement l'urgence."
         print("🚨 AUCUNE RÉPONSE DÉTECTÉE - DÉCLENCHEMENT D'URGENCE AUTOMATIQUE 🚨")
+        
+        # Synthèse vocale d'urgence critique
+        self.speech_agent.speak_alert("emergency", emergency_message)
         
         self._trigger_emergency_assistance("Aucune réponse de l'utilisateur")
     
@@ -170,6 +222,140 @@ class GuardianOrchestrator:
         urgency_multiplier = {"high": 0.3, "medium": 1.0, "low": 2.0}
         escalation_delay = 300 * urgency_multiplier.get(ai_analysis['urgency_level'], 1.0)  # 1.5-10 min
         self._schedule_emergency_escalation(reason, int(escalation_delay))
+    
+    def _trigger_emergency_assistance_with_vertex_ai(self, reason: str, vertex_analysis: dict):
+        """Déclenche l'assistance d'urgence avec analyse Vertex AI avancée"""
+        self.logger.critical(f"Déclenchement assistance d'urgence avec Vertex AI: {reason}")
+        
+        urgency_level = vertex_analysis.get('urgency_level', 5)
+        emergency_type = vertex_analysis.get('emergency_type', 'Urgence')
+        
+        # Actions immédiates basées sur l'analyse Vertex AI
+        print(f"\n🧠 **VERTEX AI GEMINI ACTIVÉ** - Type: {emergency_type}")
+        print(f"🚨 Niveau d'urgence: {urgency_level}/10 ({vertex_analysis.get('urgency_category', 'modérée')})")
+        
+        # Afficher les risques identifiés
+        risks = vertex_analysis.get('risks_identified', [])
+        if risks:
+            print(f"\n⚠️ **RISQUES IDENTIFIÉS:**")
+            for risk in risks:
+                print(f"   • {risk}")
+        
+        # Actions immédiates
+        actions = vertex_analysis.get('immediate_actions', [])
+        if actions:
+            print(f"\n📋 **ACTIONS IMMÉDIATES:**")
+            for i, action in enumerate(actions, 1):
+                print(f"   {i}. {action}")
+        
+        # Services d'urgence recommandés
+        emergency_services = vertex_analysis.get('emergency_services', 'Aucun')
+        if emergency_services != 'Aucun':
+            print(f"\n📞 **SERVICE RECOMMANDÉ:** {emergency_services}")
+        
+        # Cas spéciaux selon le niveau d'urgence Vertex AI
+        if urgency_level >= 8:
+            self._handle_vertex_ai_critical_emergency(reason, vertex_analysis)
+        elif urgency_level >= 6:
+            self._handle_vertex_ai_high_emergency(reason, vertex_analysis)
+        else:
+            self._handle_vertex_ai_standard_emergency(reason, vertex_analysis)
+        
+        # Programmer l'escalade basée sur l'urgence Vertex AI
+        escalation_delays = {
+            10: 60,   # 1 minute pour urgence maximale
+            9: 120,   # 2 minutes pour critique
+            8: 180,   # 3 minutes pour grave
+            7: 300,   # 5 minutes pour élevée
+            6: 450,   # 7.5 minutes pour modérée-haute
+            5: 600,   # 10 minutes standard
+        }
+        delay = escalation_delays.get(urgency_level, 600)
+        self._schedule_emergency_escalation(reason, delay)
+    
+    def _handle_vertex_ai_critical_emergency(self, reason: str, analysis: dict):
+        """Gère les urgences critiques selon Vertex AI (niveau 8-10)"""
+        self.logger.critical("URGENCE CRITIQUE VERTEX AI")
+        
+        print(f"\n🚨 **URGENCE CRITIQUE DÉTECTÉE PAR IA** 🚨")
+        print(f"🤖 Confidence Gemini: Situation nécessitant intervention immédiate")
+        
+        # Instructions vocales d'urgence critique
+        critical_instructions = analysis.get('immediate_actions', [])[:3]
+        if critical_instructions:
+            self.speech_agent.speak_emergency_instructions(critical_instructions)
+        
+        # Localiser l'aide d'urgence
+        if self.current_position and self.emergency_locations:
+            print(f"\n🚑 Recherche d'aide d'urgence immédiate...")
+            
+            emergency_help = self.emergency_locations.find_emergency_refuges(self.current_position, radius_m=1000)
+            transports = self.emergency_locations.find_emergency_transport(self.current_position, radius_m=500)
+            
+            help_message = self.emergency_locations.format_emergency_locations_message(
+                emergency_help, transports, current_location=self.current_position
+            )
+            
+            # Alerte immédiate avec analyse Vertex AI
+            enhanced_reason = f"{reason}\n\n🧠 ANALYSE VERTEX AI GEMINI:\n"
+            enhanced_reason += f"- Type: {analysis['emergency_type']}\n"
+            enhanced_reason += f"- Urgence: {analysis['urgency_level']}/10\n"
+            enhanced_reason += f"- Conseils IA: {analysis.get('specific_advice', '')}\n\n{help_message}"
+            
+            self.emergency_response.send_immediate_danger_alert(self.current_position, enhanced_reason)
+        else:
+            # Alerte critique sans localisation
+            enhanced_reason = f"{reason}\n\n🧠 ANALYSE VERTEX AI CRITIQUE:\n{analysis.get('specific_advice', '')}"
+            self.emergency_response.send_immediate_danger_alert(self.current_position, enhanced_reason)
+    
+    def _handle_vertex_ai_high_emergency(self, reason: str, analysis: dict):
+        """Gère les urgences élevées selon Vertex AI (niveau 6-7)"""
+        print(f"\n🆘 **URGENCE ÉLEVÉE - ASSISTANCE IA RENFORCÉE**")
+        
+        if self.current_position and self.emergency_locations:
+            print(f"\n🔍 Recherche d'assistance adaptée...")
+            
+            refuges = self.emergency_locations.find_emergency_refuges(self.current_position)
+            transports = self.emergency_locations.find_emergency_transport(self.current_position)
+            
+            refuges_message = self.emergency_locations.format_emergency_locations_message(
+                refuges, transports, current_location=self.current_position
+            )
+            
+            # Notification avec analyse Vertex AI complète
+            enhanced_reason = f"{reason}\n\n🧠 ANALYSE VERTEX AI:\n"
+            enhanced_reason += f"- Type: {analysis['emergency_type']}\n"
+            enhanced_reason += f"- Niveau: {analysis['urgency_level']}/10 ({analysis['urgency_category']})\n"
+            enhanced_reason += f"- Conseils: {analysis.get('specific_advice', '')}\n"
+            if analysis.get('emergency_services') != 'Aucun':
+                enhanced_reason += f"- Service recommandé: {analysis['emergency_services']}\n"
+            enhanced_reason += f"\n{refuges_message}"
+            
+            self.emergency_response.send_location_with_refuges_info(self.current_position, refuges_message, enhanced_reason)
+        else:
+            # Fallback sans localisation
+            enhanced_reason = f"{reason}\n\n🧠 ANALYSE VERTEX AI:\n{analysis.get('specific_advice', '')}"
+            self.emergency_response.send_location_to_contacts(self.current_position, enhanced_reason)
+    
+    def _handle_vertex_ai_standard_emergency(self, reason: str, analysis: dict):
+        """Gère les urgences standard avec analyse Vertex AI (niveau 1-5)"""
+        print(f"\n📋 **ASSISTANCE AVEC ANALYSE IA PERSONNALISÉE**")
+        
+        # Message rassurant de Vertex AI
+        reassurance = analysis.get('reassurance_message', '')
+        if reassurance:
+            print(f"💬 {reassurance}")
+            self.speech_agent.speak_alert("confirmation", reassurance)
+        
+        # Notification standard avec conseils IA
+        enhanced_reason = f"{reason}\n\n🤖 CONSEILS VERTEX AI:\n{analysis.get('specific_advice', '')}"
+        
+        if analysis.get('follow_up_needed', True):
+            enhanced_reason += f"\n\nSuivi recommandé par l'IA."
+        
+        self.emergency_response.send_location_to_contacts(self.current_position, enhanced_reason)
+        
+        print(f"\n✅ Contacts notifiés avec analyse personnalisée Vertex AI")
 
     def _handle_immediate_danger_situation(self, reason: str, ai_analysis: dict):
         """Gère une situation de danger immédiat (agression, menace, etc.)"""
@@ -207,6 +393,15 @@ class GuardianOrchestrator:
         print("   2. 🏃 Dirigez-vous vers le refuge le plus proche")
         print("   3. 🚇 Utilisez les transports publics pour vous éloigner")
         print("   4. 📱 Restez en contact avec vos proches")
+        
+        # Instructions vocales d'urgence
+        emergency_instructions = [
+            "Appelez le 17 si en danger immédiat",
+            "Dirigez-vous vers le refuge le plus proche", 
+            "Utilisez les transports publics pour vous éloigner",
+            "Restez en contact avec vos proches"
+        ]
+        self.speech_agent.speak_emergency_instructions(emergency_instructions)
 
     def _handle_standard_emergency(self, reason: str, ai_analysis: dict):
         """Gère une urgence standard avec refuges et transports"""
@@ -257,9 +452,16 @@ class GuardianOrchestrator:
         message = self._get_fall_response_message(fall_type, severity)
         print(f"\n🤖 Guardian: {message}")
         
+        # Synthèse vocale pour la chute
+        self.speech_agent.speak_fall_alert(fall_info)
+        
         # Demander confirmation de l'état
+        confirmation_question = "Êtes-vous blessé ? Répondez oui ou non dans les 30 secondes. Sans réponse, j'alerterai les secours."
         print(f"\n❓ Êtes-vous blessé(e) ? (Répondez 'oui' ou 'non' dans les 30 secondes)")
         print("   Si aucune réponse, j'alerterai automatiquement les secours...")
+        
+        # Synthèse vocale de la question
+        self.speech_agent.speak_alert("emergency", confirmation_question)
         
         # Démarrer countdown d'urgence
         self._start_fall_emergency_countdown(fall_info)
@@ -323,15 +525,24 @@ class GuardianOrchestrator:
                     response = self.response_queue.get(timeout=1.0)
                     
                     if response.lower() == 'non':
+                        recovery_message = "Bien reçu. Vous semblez aller bien. Parfait ! Je continue la surveillance au cas où. Prenez votre temps pour vous remettre."
                         print("\n✅ Bien reçu - Vous semblez aller bien")
                         print("🤖 Guardian: Parfait ! Je continue la surveillance au cas où.")
                         print("   Prenez votre temps pour vous remettre et soyez prudent(e).")
+                        
+                        # Synthèse vocale de confirmation
+                        self.speech_agent.speak_alert("confirmation", recovery_message)
                         
                         # Reset du détecteur mais continuer surveillance
                         return
                         
                     elif response.lower() == 'oui':
+                        injury_message = "URGENCE CONFIRMÉE. Blessure après chute. Je déclenche immédiatement les secours."
                         print("\n🚨 URGENCE CONFIRMÉE - BLESSURE APRÈS CHUTE")
+                        
+                        # Synthèse vocale d'urgence
+                        self.speech_agent.speak_alert("emergency", injury_message)
+                        
                         self._trigger_fall_emergency_response(fall_info, user_confirmed=True)
                         return
                         
@@ -374,8 +585,32 @@ class GuardianOrchestrator:
         if immediate:
             reason += f"⚠️ Personne immobile depuis {fall_info.get('time_since_fall', 0):.0f} secondes après la chute"
         
-        # Utiliser l'IA pour analyser la situation de chute
-        if self.intelligent_advisor:
+        # Utiliser Vertex AI pour analyser la situation de chute
+        if self.vertex_ai_agent.is_available:
+            # Analyse avancée de chute avec Vertex AI
+            user_response_text = None
+            if user_confirmed:
+                user_response_text = "Je suis blessé après ma chute"
+            elif timeout:
+                user_response_text = None  # Aucune réponse
+            
+            vertex_analysis = self.vertex_ai_agent.analyze_fall_emergency(fall_info, user_response_text)
+            
+            print(f"\n🧠 **ANALYSE VERTEX AI DE LA CHUTE:**")
+            print(f"   🎯 Type: {vertex_analysis['emergency_type']}")
+            print(f"   📊 Urgence: {vertex_analysis['urgency_level']}/10")
+            
+            # Conseils spécifiques aux chutes
+            fall_advice = vertex_analysis.get('fall_specific_advice', [])
+            if fall_advice:
+                print(f"   🏥 Conseils spécialisés:")
+                for advice in fall_advice[:3]:
+                    print(f"      • {advice}")
+            
+            ai_analysis = vertex_analysis
+            
+        elif self.intelligent_advisor:
+            # Fallback vers l'ancien système IA
             ai_context = f"Chute détectée: {fall_type}, sévérité {severity}, "
             if user_confirmed:
                 ai_context += "utilisateur confirme être blessé"
@@ -390,7 +625,7 @@ class GuardianOrchestrator:
                 ai_context, position, "chute_accident"
             )
         else:
-            ai_analysis = {'emergency_type': 'Accident/Chute', 'urgency_level': 'Élevée'}
+            ai_analysis = {'emergency_type': 'Accident/Chute', 'urgency_level': 8}
         
         # Recherche d'aide médicale d'urgence à proximité
         if self.emergency_locations and position:
@@ -561,11 +796,34 @@ def main():
         t_input.start()
         
         logger.info("GuardianNav démarré avec succès!")
+        
+        startup_message = "GuardianNav est actif et surveille votre sécurité"
         print("🛡️  GuardianNav est actif et surveille votre sécurité")
         print("📱 Tapez 'oui' ou 'non' pour répondre aux alertes")
         print("🔄 Le système surveille votre position et écoute les mots-clés d'urgence")
         print("⏹️  Appuyez sur Ctrl+C pour arrêter")
         print("-" * 60)
+        
+        # Test de synthèse vocale au démarrage
+        try:
+            orchestrator.speech_agent.speak_alert("info", startup_message)
+            print("🔊 Synthèse vocale activée")
+        except Exception as e:
+            logger.warning(f"Synthèse vocale non disponible: {e}")
+            print("🔇 Synthèse vocale en mode simulation")
+        
+        # Test de Vertex AI au démarrage
+        try:
+            vertex_test = orchestrator.vertex_ai_agent.test_vertex_ai_connection()
+            if vertex_test['success']:
+                print("🧠 Vertex AI Gemini activé")
+                print(f"   📊 {vertex_test['details']}")
+            else:
+                print("🤖 Vertex AI en mode simulation")
+                print(f"   ⚠️ {vertex_test['message']}")
+        except Exception as e:
+            logger.warning(f"Vertex AI non disponible: {e}")
+            print("🤖 Vertex AI en mode simulation")
         
         # Attendre indéfiniment (les threads sont en daemon)
         try:
