@@ -1,0 +1,100 @@
+# Configuration des clés API Google Cloud - TEMPLATE
+# IMPORTANT: Copiez ce fichier vers 'api_keys.yaml' et remplacez les valeurs par vos vraies clés
+# Le fichier 'api_keys.yaml' ne sera jamais commité grâce au .gitignore
+
+# Configuration Google Cloud APIs
+google_cloud:
+  project_id: "your-google-cloud-project-id"
+  
+  # API Key pour les services Google Cloud (obtenez-la sur Google Cloud Console)
+  api_key: "YOUR_GOOGLE_CLOUD_API_KEY_HERE"
+  
+  # Clés pour différents services Google Cloud Platform
+  services:
+    # Google Maps Platform APIs (https://console.cloud.google.com/apis/library/maps-backend.googleapis.com)
+    maps_api_key: "YOUR_MAPS_API_KEY_HERE"
+    
+    # Google Cloud Translation API (https://console.cloud.google.com/apis/library/translate.googleapis.com)
+    translation_api_key: "YOUR_TRANSLATION_API_KEY_HERE"
+    
+    # Google Cloud Natural Language API (https://console.cloud.google.com/apis/library/language.googleapis.com)
+    natural_language_api_key: "YOUR_NL_API_KEY_HERE"
+    
+    # Google Cloud Speech-to-Text API (https://console.cloud.google.com/apis/library/speech.googleapis.com)
+    speech_to_text_api_key: "YOUR_SPEECH_API_KEY_HERE"
+    
+    # Google Cloud Text-to-Speech API (https://console.cloud.google.com/apis/library/texttospeech.googleapis.com)
+    text_to_speech_api_key: "YOUR_TTS_API_KEY_HERE"
+
+# APIs de transport et localisation
+transport_apis:
+  # API Vélib Paris (OpenData - gratuit)
+  velib_api_url: "https://velib-metropole-opendata.smoove.pro/opendata/Velib_Metropole/"
+  
+  # API RATP (transport en commun - gratuit avec inscription)
+  ratp_api_key: "YOUR_RATP_API_KEY_HERE"
+  ratp_api_url: "https://api-ratp.pierre-grimaud.fr/v4/"
+  
+  # API Citymapper (directions - payant)
+  citymapper_api_key: "YOUR_CITYMAPPER_API_KEY_HERE"
+  
+  # What3Words (localisation précise - freemium)
+  what3words_api_key: "YOUR_WHAT3WORDS_API_KEY_HERE"
+
+# SMS et notifications d'urgence
+notification_services:
+  # Twilio SMS (https://console.twilio.com/)
+  twilio:
+    account_sid: "YOUR_TWILIO_ACCOUNT_SID"
+    auth_token: "YOUR_TWILIO_AUTH_TOKEN"
+    phone_number: "YOUR_TWILIO_PHONE_NUMBER"
+  
+  # SendGrid Email (https://sendgrid.com/)
+  sendgrid:
+    api_key: "YOUR_SENDGRID_API_KEY"
+    from_email: "guardiannav@yourdomain.com"
+
+# Configuration pour les services d'urgence
+emergency_services:
+  # Numéros d'urgence par pays
+  france:
+    police: "17"
+    samu: "15" 
+    pompiers: "18"
+    urgence_europeenne: "112"
+    
+  # Services de géolocalisation d'urgence
+  location_services:
+    what3words_api_key: "YOUR_WHAT3WORDS_API_KEY"
+    
+# Configuration des contacts d'urgence - REMPLACEZ PAR VOS VRAIS CONTACTS
+emergency_contacts:
+  - name: "Contact Famille"
+    phone: "+33123456789"
+    email: "famille@example.com"
+    relation: "famille"
+    
+  - name: "Contact Ami"  
+    phone: "+33987654321"
+    email: "ami@example.com"
+    relation: "ami"
+    
+  - name: "Contact Médecin"
+    phone: "+33555123456"
+    email: "medecin@example.com"
+    relation: "médecin"
+
+# Configuration email pour notifications - REMPLACEZ PAR VOS PARAMÈTRES
+email:
+  enabled: false  # Mettre à true pour activer les notifications email
+  smtp_server: "smtp.gmail.com"
+  smtp_port: 587
+  from_email: "your-email@gmail.com"
+  password: "your-app-password"  # Utilisez un mot de passe d'application Gmail
+
+# Instructions d'installation:
+# 1. Copiez ce fichier vers 'api_keys.yaml'
+# 2. Remplacez toutes les valeurs 'YOUR_*_HERE' par vos vraies clés API
+# 3. Ajoutez vos vrais contacts d'urgence
+# 4. Configurez vos paramètres email si vous voulez les notifications
+# 5. Le fichier 'api_keys.yaml' ne sera jamais commité grâce au .gitignore
