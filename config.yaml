@@ -31,14 +31,14 @@ default:
     timeout_seconds: 600  # 10 minutes avant escalade
     notify_on_confirmation: false
     
-    # Contacts d'urgence
+    # Contacts d'urgence (remplacez par vos vrais contacts)
     emergency_contacts:
-      - name: "Anna PERRET"
-        phone: "+33631309788"
-        email: "anna.perret63@gmail.com"
-      - name: "Contact 2" 
+      - name: "Contact Famille"
+        phone: "+33123456789"
+        email: "famille@example.com"
+      - name: "Contact Ami" 
         phone: "+33987654321"
-        email: "contact2@example.com"
+        email: "ami@example.com"
     
     # Configuration email (optionnel)
     email:
