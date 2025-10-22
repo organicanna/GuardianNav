@@ -8,15 +8,19 @@ import time
 from typing import List, Dict, Any
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from guardian.emergency_email_generator import EmergencyEmailGenerator
 
 class EmergencyResponse:
     """Système de réponse d'urgence avec notifications et escalade"""
     
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: Dict[str, Any], api_keys_config: Dict[str, Any] = None):
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
         self.config = config
         self.emergency_contacts = config.get('emergency_contacts', [])
         self.email_config = config.get('email', {})
+        
+        # Initialiser le générateur d'emails visuels
+        self.email_generator = EmergencyEmailGenerator(api_keys_config)
         
     def send_immediate_danger_alert(self, location: tuple, situation: str = ""):
         """Envoie une alerte de danger immédiat aux contacts proches"""
@@ -231,4 +235,171 @@ Tout semble normal.
         self.send_location_to_contacts(
             location, 
             f"URGENCE - Aucune réponse depuis {no_response_duration} secondes"
+        )
+    
+    def send_visual_emergency_alert(self, 
+                                  location: tuple, 
+                                  emergency_type: str,
+                                  urgency_level: str,
+                                  situation_details: str,
+                                  person_name: str = "Utilisateur GuardianNav",
+                                  additional_info: Dict[str, Any] = None):
+        """
+        Envoie un email visuel d'urgence enrichi avec carte et géolocalisation
+        
+        Args:
+            location: (latitude, longitude)
+            emergency_type: Type d'urgence 
+            urgency_level: Niveau d'urgence (critique, élevée, modérée)
+            situation_details: Description de la situation
+            person_name: Nom de la personne en urgence
+            additional_info: Informations supplémentaires (chute, vitesse, etc.)
+        """
+        
+        if not self.email_config.get('enabled', False):
+            self.logger.info("Emails désactivés - Simulation d'envoi d'email visuel d'urgence")
+            self._simulate_visual_email_alert(location, emergency_type, urgency_level)
+            return
+        
+        try:
+            # Générer l'email HTML
+            html_content = self.email_generator.generate_emergency_email_html(
+                location=location,
+                emergency_type=emergency_type,
+                urgency_level=urgency_level,
+                situation_details=situation_details,
+                person_name=person_name,
+                additional_info=additional_info
+            )
+            
+            # Préparer l'email
+            subject = f"🚨 URGENCE {urgency_level.upper()} - {person_name} a besoin d'aide"
+            
+            # Envoyer à tous les contacts d'urgence
+            for contact in self.emergency_contacts:
+                self._send_html_email(
+                    to_email=contact.get('email'),
+                    to_name=contact.get('name', 'Contact d\'urgence'),
+                    subject=subject,
+                    html_content=html_content
+                )
+                
+            self.logger.info(f"Emails visuels d'urgence envoyés à {len(self.emergency_contacts)} contacts")
+            
+        except Exception as e:
+            self.logger.error(f"Erreur envoi email visuel d'urgence: {e}")
+            # Fallback vers email texte simple
+            self.send_location_to_contacts(location, f"{emergency_type}: {situation_details}")
+    
+    def _send_html_email(self, to_email: str, to_name: str, subject: str, html_content: str):
+        """Envoie un email HTML formaté"""
+        
+        try:
+            # Créer le message
+            msg = MIMEMultipart('alternative')
+            msg['From'] = self.email_config['from_email']
+            msg['To'] = to_email
+            msg['Subject'] = subject
+            
+            # Version HTML
+            html_part = MIMEText(html_content, 'html', 'utf-8')
+            msg.attach(html_part)
+            
+            # Version texte de secours
+            text_content = self._html_to_text_fallback(html_content)
+            text_part = MIMEText(text_content, 'plain', 'utf-8')
+            msg.attach(text_part)
+            
+            # Envoyer
+            with smtplib.SMTP(self.email_config['smtp_server'], self.email_config['smtp_port']) as server:
+                server.starttls()
+                server.login(self.email_config['from_email'], self.email_config['password'])
+                server.send_message(msg)
+            
+            self.logger.info(f"Email HTML envoyé à {to_name} ({to_email})")
+            
+        except Exception as e:
+            self.logger.error(f"Erreur envoi email HTML à {to_email}: {e}")
+    
+    def _html_to_text_fallback(self, html_content: str) -> str:
+        """Convertit le HTML en texte simple pour fallback"""
+        
+        # Extraction simple des informations principales
+        import re
+        
+        # Supprimer les balises HTML
+        text = re.sub(r'<[^>]+>', '', html_content)
+        
+        # Nettoyer les espaces multiples
+        text = re.sub(r'\s+', ' ', text).strip()
+        
+        return text
+    
+    def _simulate_visual_email_alert(self, location: tuple, emergency_type: str, urgency_level: str):
+        """Simule l'envoi d'un email visuel pour démonstration"""
+        
+        lat, lon = location
+        maps_url = f"https://maps.google.com/?q={lat},{lon}"
+        what3words = "simulation.exemple.mots"  # Simulé
+        
+        print(f"\n📧 SIMULATION - Email visuel d'urgence:")
+        print(f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print(f"🚨 ALERTE URGENCE {urgency_level.upper()}")
+        print(f"📋 Type: {emergency_type}")
+        print(f"📍 Position: {lat:.6f}, {lon:.6f}")
+        print(f"🎯 What3Words: {what3words}")
+        print(f"🗺️  Carte: {maps_url}")
+        print(f"📧 Envoyé à: {len(self.emergency_contacts)} contacts")
+        print(f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        
+        # Afficher un aperçu de l'email pour chaque contact
+        for i, contact in enumerate(self.emergency_contacts, 1):
+            print(f"   {i}. {contact.get('name', 'Contact')} ({contact.get('email', 'email@example.com')})")
+    
+    def generate_preview_email(self) -> str:
+        """Génère un aperçu d'email pour tests et prévisualisation"""
+        
+        return self.email_generator.generate_test_email()
+    
+    def send_fall_emergency_alert(self, location: tuple, fall_info: Dict[str, Any]):
+        """Envoie une alerte spécialisée pour les chutes"""
+        
+        fall_type = fall_info.get('fall_type', 'chute_generale')
+        severity = fall_info.get('severity', 'modérée')
+        
+        # Traduire le type de chute
+        fall_types_fr = {
+            'chute_velo': '🚴 Chute à vélo',
+            'chute_haute_vitesse': '🏃 Chute à haute vitesse',
+            'impact_brutal': '💥 Impact brutal',
+            'chute_generale': '⚠️ Chute détectée'
+        }
+        
+        emergency_type = fall_types_fr.get(fall_type, 'Chute détectée')
+        
+        # Déterminer le niveau d'urgence
+        urgency_mapping = {
+            'légère': 'modérée',
+            'modérée': 'modérée', 
+            'grave': 'élevée',
+            'critique': 'critique'
+        }
+        
+        urgency_level = urgency_mapping.get(severity, 'élevée')
+        
+        # Description de la situation
+        situation = f"Chute détectée par les capteurs GuardianNav. "
+        if fall_info.get('previous_speed'):
+            situation += f"Vitesse avant chute: {fall_info['previous_speed']:.1f} km/h. "
+        if fall_info.get('acceleration'):
+            situation += f"Décélération: {fall_info['acceleration']:.1f} m/s². "
+        situation += "La personne ne répond pas aux sollicitations."
+        
+        # Envoyer l'alerte visuelle
+        self.send_visual_emergency_alert(
+            location=location,
+            emergency_type=emergency_type,
+            urgency_level=urgency_level,
+            situation_details=situation,
+            additional_info=fall_info
         )

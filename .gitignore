@@ -211,3 +211,7 @@ api_keys.yaml
 *.key
 secrets/
 guardiannav.log
+
+# Aperçus emails HTML générés par les tests
+preview_*.html
+demo_*.html

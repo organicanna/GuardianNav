@@ -16,7 +16,15 @@ class GuardianOrchestrator:
     def __init__(self, config):
         self.config = config
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
-        self.emergency_response = EmergencyResponse(config.get('emergency_response', {}))
+        # Charger les clés API pour emails visuels
+        try:
+            import yaml
+            with open('api_keys.yaml', 'r', encoding='utf-8') as f:
+                api_keys_config = yaml.safe_load(f)
+        except Exception:
+            api_keys_config = {}
+            
+        self.emergency_response = EmergencyResponse(config.get('emergency_response', {}), api_keys_config)
         
         # Système d'IA et de conseils
         self.intelligent_advisor = IntelligentAdvisor()
@@ -397,11 +405,18 @@ class GuardianOrchestrator:
             
             print(medical_message)
             
-            # Message d'urgence enrichi
+            # Envoyer l'alerte visuelle de chute avec informations complètes
+            self.emergency_response.send_fall_emergency_alert(position, fall_info)
+            
+            # Envoyer aussi l'alerte traditionnelle avec refuges
             enhanced_reason = f"{reason}\n\nAnalyse IA:\n- Type: {ai_analysis['emergency_type']}\n- Urgence: {ai_analysis['urgency_level']}\n\n{medical_message}"
             self.emergency_response.send_critical_alert_with_refuges(position, medical_message, enhanced_reason)
             
         else:
+            # Envoyer l'alerte visuelle de chute
+            self.emergency_response.send_fall_emergency_alert(position, fall_info)
+            
+            # Alerte traditionnelle de fallback
             enhanced_reason = f"{reason}\n\nAnalyse IA:\n- Type: {ai_analysis['emergency_type']}\n- Urgence: {ai_analysis['urgency_level']}"
             self.emergency_response.send_critical_alert(position, enhanced_reason)
         
