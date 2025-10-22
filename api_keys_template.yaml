@@ -9,21 +9,12 @@ google_cloud:
   # API Key pour les services Google Cloud (obtenez-la sur Google Cloud Console)
   api_key: "YOUR_GOOGLE_CLOUD_API_KEY_HERE"
   
-  # Clés pour différents services Google Cloud Platform
+  # Clés pour différents services Google Cloud Platform (seulement ceux utilisés)
   services:
-    # Google Maps Platform APIs (https://console.cloud.google.com/apis/library/maps-backend.googleapis.com)
+    # Google Maps Platform APIs (utilisé pour emergency_email_generator.py)
     maps_api_key: "YOUR_MAPS_API_KEY_HERE"
     
-    # Google Cloud Translation API (https://console.cloud.google.com/apis/library/translate.googleapis.com)
-    translation_api_key: "YOUR_TRANSLATION_API_KEY_HERE"
-    
-    # Google Cloud Natural Language API (https://console.cloud.google.com/apis/library/language.googleapis.com)
-    natural_language_api_key: "YOUR_NL_API_KEY_HERE"
-    
-    # Google Cloud Speech-to-Text API (https://console.cloud.google.com/apis/library/speech.googleapis.com)
-    speech_to_text_api_key: "YOUR_SPEECH_API_KEY_HERE"
-    
-    # Google Cloud Text-to-Speech API (https://console.cloud.google.com/apis/library/texttospeech.googleapis.com)
+    # Google Cloud Text-to-Speech API (utilisé par speech_agent.py)
     text_to_speech_api_key: "YOUR_TTS_API_KEY_HERE"
 
 # APIs de transport et localisation

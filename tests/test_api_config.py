@@ -55,10 +55,9 @@ def test_api_keys_configuration():
                 if 'services' in gc_config:
                     services = gc_config['services']
                     configured_services = 0
-                    total_services = 5
+                    total_services = 2  # Seulement maps_api_key et text_to_speech_api_key
                     
-                    for service_name in ['maps_api_key', 'translation_api_key', 'natural_language_api_key', 
-                                       'speech_to_text_api_key', 'text_to_speech_api_key']:
+                    for service_name in ['maps_api_key', 'text_to_speech_api_key']:
                         if services.get(service_name, '').startswith('YOUR_'):
                             print(f"   ⚠️  {service_name} : Non configuré")
                         elif services.get(service_name):

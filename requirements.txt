@@ -9,10 +9,7 @@ pygame>=2.5.2
 requests>=2.31.0
 aiohttp>=3.8.0
 
-# Google Cloud APIs
-google-cloud-language>=2.9.0
-google-cloud-translate>=3.11.0
-google-cloud-speech>=2.18.0
+# Google Cloud APIs (only used ones)
 google-cloud-texttospeech>=2.14.0
 
 # Vertex AI and Generative AI
