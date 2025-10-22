@@ -8,6 +8,7 @@ from guardian.voice_agent import VoiceAgent
 from guardian.emergency_response import EmergencyResponse
 from guardian.intelligent_advisor import IntelligentAdvisor, SmartResponseSystem
 from guardian.emergency_locations import EmergencyLocationService
+from guardian.fall_detector import FallDetector
 
 class GuardianOrchestrator:
     """Orchestrateur principal pour GuardianNav selon le workflow défini"""
@@ -28,6 +29,14 @@ class GuardianOrchestrator:
         except Exception as e:
             self.logger.warning(f"Service de localisation d'urgence non disponible: {e}")
             self.emergency_locations = None
+        
+        # Détecteur de chute
+        self.fall_detector = FallDetector(
+            speed_threshold_high=15.0,  # km/h - vitesse élevée à vélo
+            speed_threshold_low=2.0,    # km/h - quasi-immobile
+            acceleration_threshold=-8.0, # m/s² - décélération brutale
+            stationary_time=30.0        # secondes sans mouvement = urgence
+        )
         
         # États du système
         self.current_position = None
@@ -219,6 +228,190 @@ class GuardianOrchestrator:
         
         print("\n✅ Contacts notifiés avec informations d'aide à proximité")
     
+    def handle_fall_detection(self, fall_info: dict):
+        """
+        Gère la détection d'une chute
+        
+        Args:
+            fall_info: Informations sur la chute détectée
+        """
+        fall_type = fall_info.get('fall_type', 'chute_generale')
+        severity = fall_info.get('severity', 'modérée')
+        position = fall_info.get('position', self.current_position)
+        
+        print(f"\n🚨 CHUTE DÉTECTÉE ! 🚨")
+        print(f"Type: {self._translate_fall_type(fall_type)}")
+        print(f"Sévérité: {severity}")
+        print(f"Vitesse avant chute: {fall_info.get('previous_speed', 0):.1f} km/h")
+        print(f"Décélération: {fall_info.get('acceleration', 0):.1f} m/s²")
+        
+        # Message personnalisé selon le type de chute
+        message = self._get_fall_response_message(fall_type, severity)
+        print(f"\n🤖 Guardian: {message}")
+        
+        # Demander confirmation de l'état
+        print(f"\n❓ Êtes-vous blessé(e) ? (Répondez 'oui' ou 'non' dans les 30 secondes)")
+        print("   Si aucune réponse, j'alerterai automatiquement les secours...")
+        
+        # Démarrer countdown d'urgence
+        self._start_fall_emergency_countdown(fall_info)
+    
+    def handle_post_fall_emergency(self, post_fall_info: dict):
+        """
+        Gère l'urgence prolongée après une chute
+        """
+        time_since_fall = post_fall_info.get('time_since_fall', 0)
+        
+        print(f"\n🆘 URGENCE MAXIMALE - IMMOBILITÉ PROLONGÉE APRÈS CHUTE 🆘")
+        print(f"Temps écoulé depuis la chute: {time_since_fall:.0f} secondes")
+        print(f"Mouvement détecté: {post_fall_info.get('movement_since_fall', 0):.1f}m")
+        
+        # Alerte immédiate sans demander confirmation
+        self._trigger_fall_emergency_response(post_fall_info, immediate=True)
+    
+    def _translate_fall_type(self, fall_type: str) -> str:
+        """Traduit les types de chute en français"""
+        translations = {
+            'chute_velo': '🚴 Chute à vélo',
+            'chute_haute_vitesse': '🏃 Chute à haute vitesse', 
+            'impact_brutal': '💥 Impact brutal',
+            'chute_generale': '⚠️ Chute générale'
+        }
+        return translations.get(fall_type, fall_type)
+    
+    def _get_fall_response_message(self, fall_type: str, severity: str) -> str:
+        """
+        Génère un message personnalisé selon le type et la sévérité de chute
+        """
+        if fall_type == 'chute_velo':
+            if severity in ['critique', 'grave']:
+                return "J'ai détecté une chute à vélo potentiellement grave. Restez immobile si possible et ne bougez pas la tête si vous ressentez des douleurs au cou. Les secours arrivent."
+            else:
+                return "Chute à vélo détectée. Vérifiez si vous pouvez bouger vos membres sans douleur. Attention aux blessures qui ne sont pas immédiatement visibles."
+                
+        elif fall_type == 'chute_haute_vitesse':
+            return "Chute à haute vitesse détectée ! Ne bougez pas si vous ressentez des douleurs. J'alerte immédiatement les secours et vos contacts d'urgence."
+            
+        elif fall_type == 'impact_brutal':
+            return "Impact brutal détecté. Restez calme et évaluez vos blessures. Si vous avez mal à la tête, au cou ou au dos, ne bougez pas."
+            
+        else:
+            return "Chute détectée. Prenez votre temps pour vous relever et vérifiez que vous n'êtes pas blessé(e). Je surveille votre état."
+    
+    def _start_fall_emergency_countdown(self, fall_info: dict):
+        """
+        Démarre un countdown d'urgence après chute avec possibilité d'annulation
+        """
+        def emergency_countdown():
+            # Attendre réponse utilisateur pendant 30 secondes
+            start_time = time.time()
+            timeout = 30.0
+            
+            while time.time() - start_time < timeout:
+                if self.shutdown_event.is_set():
+                    return
+                    
+                try:
+                    response = self.response_queue.get(timeout=1.0)
+                    
+                    if response.lower() == 'non':
+                        print("\n✅ Bien reçu - Vous semblez aller bien")
+                        print("🤖 Guardian: Parfait ! Je continue la surveillance au cas où.")
+                        print("   Prenez votre temps pour vous remettre et soyez prudent(e).")
+                        
+                        # Reset du détecteur mais continuer surveillance
+                        return
+                        
+                    elif response.lower() == 'oui':
+                        print("\n🚨 URGENCE CONFIRMÉE - BLESSURE APRÈS CHUTE")
+                        self._trigger_fall_emergency_response(fall_info, user_confirmed=True)
+                        return
+                        
+                except queue.Empty:
+                    continue
+            
+            # Timeout - déclencher urgence automatique
+            print("\n⏰ TIMEOUT - AUCUNE RÉPONSE APRÈS CHUTE")
+            print("🚨 Je déclenche automatiquement l'alerte d'urgence")
+            self._trigger_fall_emergency_response(fall_info, timeout=True)
+        
+        # Démarrer le countdown dans un thread séparé
+        countdown_thread = threading.Thread(target=emergency_countdown, daemon=True)
+        countdown_thread.start()
+    
+    def _trigger_fall_emergency_response(self, fall_info: dict, user_confirmed: bool = False, 
+                                       timeout: bool = False, immediate: bool = False):
+        """
+        Déclenche la réponse d'urgence pour chute avec contexte spécialisé
+        """
+        fall_type = fall_info.get('fall_type', 'chute_generale')
+        severity = fall_info.get('severity', 'modérée')
+        position = fall_info.get('position', self.current_position)
+        
+        # Construire le message d'urgence spécialisé
+        if immediate:
+            reason = f"🆘 URGENCE MAXIMALE - IMMOBILITÉ PROLONGÉE APRÈS CHUTE\n\n"
+        elif user_confirmed:
+            reason = f"🚨 URGENCE CONFIRMÉE - BLESSURE APRÈS CHUTE\n\n"
+        elif timeout:
+            reason = f"⏰ URGENCE AUTOMATIQUE - AUCUNE RÉPONSE APRÈS CHUTE\n\n"
+        else:
+            reason = f"🚨 CHUTE DÉTECTÉE NÉCESSITANT ASSISTANCE\n\n"
+        
+        reason += f"Type de chute: {self._translate_fall_type(fall_type)}\n"
+        reason += f"Sévérité évaluée: {severity}\n"
+        reason += f"Vitesse avant chute: {fall_info.get('previous_speed', 0):.1f} km/h\n"
+        reason += f"Décélération mesurée: {fall_info.get('acceleration', 0):.1f} m/s²\n"
+        
+        if immediate:
+            reason += f"⚠️ Personne immobile depuis {fall_info.get('time_since_fall', 0):.0f} secondes après la chute"
+        
+        # Utiliser l'IA pour analyser la situation de chute
+        if self.intelligent_advisor:
+            ai_context = f"Chute détectée: {fall_type}, sévérité {severity}, "
+            if user_confirmed:
+                ai_context += "utilisateur confirme être blessé"
+            elif timeout:
+                ai_context += "aucune réponse de l'utilisateur après 30 secondes"
+            elif immediate:
+                ai_context += "immobilité prolongée après chute"
+            else:
+                ai_context += "chute nécessitant vérification"
+                
+            ai_analysis = self.intelligent_advisor.analyze_emergency_situation(
+                ai_context, position, "chute_accident"
+            )
+        else:
+            ai_analysis = {'emergency_type': 'Accident/Chute', 'urgency_level': 'Élevée'}
+        
+        # Recherche d'aide médicale d'urgence à proximité
+        if self.emergency_locations and position:
+            print("\n🚑 Recherche d'aide médicale d'urgence à proximité...")
+            
+            medical_help = self.emergency_locations.find_emergency_refuges(position, radius_m=2000)
+            transports = self.emergency_locations.find_emergency_transport(position, radius_m=1000)
+            
+            medical_message = self.emergency_locations.format_emergency_locations_message(
+                medical_help, transports, current_location=position
+            )
+            
+            print(medical_message)
+            
+            # Message d'urgence enrichi
+            enhanced_reason = f"{reason}\n\nAnalyse IA:\n- Type: {ai_analysis['emergency_type']}\n- Urgence: {ai_analysis['urgency_level']}\n\n{medical_message}"
+            self.emergency_response.send_critical_alert_with_refuges(position, medical_message, enhanced_reason)
+            
+        else:
+            enhanced_reason = f"{reason}\n\nAnalyse IA:\n- Type: {ai_analysis['emergency_type']}\n- Urgence: {ai_analysis['urgency_level']}"
+            self.emergency_response.send_critical_alert(position, enhanced_reason)
+        
+        print(f"\n✅ Alerte d'urgence envoyée pour chute")
+        print(f"🚑 Les secours et vos contacts ont été notifiés")
+        
+        if not immediate:
+            print(f"📱 Gardez votre téléphone près de vous")
+            print(f"🏥 Des informations sur l'aide médicale à proximité ont été partagées")
+    
     def _schedule_emergency_escalation(self, reason: str, delay_seconds: int = 600):
         """Programme une escalade d'urgence après délai personnalisé"""
         def escalate():
@@ -252,8 +445,20 @@ def static_monitor(orchestrator, agent):
         
         if orchestrator.agents_lock.acquire(blocking=False):
             try:
+                # Vérifier immobilité prolongée
                 if agent.update_position(position):
                     orchestrator.handle_alert("immobilité prolongée", position)
+                
+                # Vérifier détection de chute
+                fall_info = orchestrator.fall_detector.update_position(position)
+                if fall_info:
+                    orchestrator.handle_fall_detection(fall_info)
+                    
+                # Vérifier statut post-chute
+                post_fall_info = orchestrator.fall_detector.check_post_fall_status(position)
+                if post_fall_info:
+                    orchestrator.handle_post_fall_emergency(post_fall_info)
+                    
             finally:
                 orchestrator.agents_lock.release()
         
