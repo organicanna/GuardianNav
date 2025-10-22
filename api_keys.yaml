@@ -1,5 +1,3 @@
-# Configuration des clés API Google Cloud - TEMPLATE
-# IMPORTANT: Copiez ce fichier vers 'api_keys.yaml' et remplacez les valeurs par vos vraies clés
 # Le fichier 'api_keys.yaml' ne sera jamais commité grâce au .gitignore
 
 # Configuration Google Cloud APIs
