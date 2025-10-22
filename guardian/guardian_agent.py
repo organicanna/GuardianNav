@@ -7,6 +7,7 @@ from guardian.GPS_agent import StaticAgent
 from guardian.voice_agent import VoiceAgent
 from guardian.emergency_response import EmergencyResponse
 from guardian.intelligent_advisor import IntelligentAdvisor, SmartResponseSystem
+from guardian.emergency_locations import EmergencyLocationService
 
 class GuardianOrchestrator:
     """Orchestrateur principal pour GuardianNav selon le workflow défini"""
@@ -19,6 +20,14 @@ class GuardianOrchestrator:
         # Système d'IA et de conseils
         self.intelligent_advisor = IntelligentAdvisor()
         self.smart_response_system = SmartResponseSystem(self.intelligent_advisor)
+        
+        # Système de localisation d'urgence
+        try:
+            api_config = {}  # Chargé depuis api_keys.yaml si disponible
+            self.emergency_locations = EmergencyLocationService(api_config)
+        except Exception as e:
+            self.logger.warning(f"Service de localisation d'urgence non disponible: {e}")
+            self.emergency_locations = None
         
         # États du système
         self.current_position = None
@@ -134,17 +143,77 @@ class GuardianOrchestrator:
         for action in ai_analysis['immediate_actions']:
             print(f"   ✓ {action}")
         
-        # Notification des contacts avec analyse IA
-        if self.current_position:
+        # Cas spéciaux selon le type d'urgence
+        if ai_analysis['emergency_type'] == 'security' and ai_analysis['urgency_level'] == 'high':
+            self._handle_immediate_danger_situation(reason, ai_analysis)
+        else:
+            self._handle_standard_emergency(reason, ai_analysis)
+        
+        # Programmer l'escalade avec priorité selon l'urgence
+        urgency_multiplier = {"high": 0.3, "medium": 1.0, "low": 2.0}
+        escalation_delay = 300 * urgency_multiplier.get(ai_analysis['urgency_level'], 1.0)  # 1.5-10 min
+        self._schedule_emergency_escalation(reason, int(escalation_delay))
+
+    def _handle_immediate_danger_situation(self, reason: str, ai_analysis: dict):
+        """Gère une situation de danger immédiat (agression, menace, etc.)"""
+        self.logger.critical("SITUATION DE DANGER IMMÉDIAT DÉTECTÉE")
+        
+        print("\n🚨 **DANGER IMMÉDIAT DÉTECTÉ - PROTOCOLE D'URGENCE ACTIVÉ** 🚨")
+        
+        if self.current_position and self.emergency_locations:
+            print("\n🔍 Recherche de refuges et moyens d'évasion...")
+            
+            # Trouver refuges et transports d'urgence
+            refuges = self.emergency_locations.find_emergency_refuges(self.current_position, radius_m=300)
+            transports = self.emergency_locations.find_emergency_transport(self.current_position, radius_m=500)
+            
+            # Formatter les informations
+            refuges_message = self.emergency_locations.format_emergency_locations_message(refuges, transports)
+            
+            print(refuges_message)
+            
+            # Envoyer alerte critique aux contacts avec refuges
+            enhanced_reason = f"DANGER IMMÉDIAT: {reason}\n\n{refuges_message}"
+            self.emergency_response.send_immediate_danger_alert(self.current_position, enhanced_reason)
+            
+            print("\n🚨 ALERTE DE DANGER IMMÉDIAT envoyée à tous vos contacts!")
+            print("📍 Informations sur les refuges et transports incluses")
+            
+        else:
+            # Fallback si pas de service de localisation
+            self.emergency_response.send_immediate_danger_alert(self.current_position, reason)
+        
+        print("\n⚡ **ACTIONS RECOMMANDÉES IMMÉDIATEMENT:**")
+        print("   1. 📞 Appelez le 17 (Police) si en danger immédiat")
+        print("   2. 🏃 Dirigez-vous vers le refuge le plus proche")
+        print("   3. 🚇 Utilisez les transports publics pour vous éloigner")
+        print("   4. 📱 Restez en contact avec vos proches")
+
+    def _handle_standard_emergency(self, reason: str, ai_analysis: dict):
+        """Gère une urgence standard avec refuges et transports"""
+        print("\n🆘 **ASSISTANCE D'URGENCE AVEC REFUGES**")
+        
+        if self.current_position and self.emergency_locations:
+            print("\n🔍 Recherche d'aide à proximité...")
+            
+            # Trouver refuges et transports
+            refuges = self.emergency_locations.find_emergency_refuges(self.current_position)
+            transports = self.emergency_locations.find_emergency_transport(self.current_position)
+            
+            # Formatter et afficher
+            refuges_message = self.emergency_locations.format_emergency_locations_message(refuges, transports)
+            print(refuges_message)
+            
+            # Notification avec informations de refuges
+            enhanced_reason = f"{reason}\n\nAnalyse IA:\n- Type: {ai_analysis['emergency_type']}\n- Urgence: {ai_analysis['urgency_level']}\n\n{refuges_message}"
+            self.emergency_response.send_location_with_refuges_info(self.current_position, refuges_message, enhanced_reason)
+            
+        else:
+            # Fallback standard
             enhanced_reason = f"{reason}\n\nAnalyse IA:\n- Type: {ai_analysis['emergency_type']}\n- Urgence: {ai_analysis['urgency_level']}\n- Actions: {', '.join(ai_analysis['immediate_actions'])}"
             self.emergency_response.send_location_to_contacts(self.current_position, enhanced_reason)
         
-        print("\n✅ Assistance IA et contacts notifiés. Aide spécialisée en route.")
-        
-        # Programmer l'escalade avec priorité selon l'urgence
-        urgency_multiplier = {"high": 0.5, "medium": 1.0, "low": 2.0}
-        escalation_delay = 300 * urgency_multiplier.get(ai_analysis['urgency_level'], 1.0)  # 2.5-10 min
-        self._schedule_emergency_escalation(reason, int(escalation_delay))
+        print("\n✅ Contacts notifiés avec informations d'aide à proximité")
     
     def _schedule_emergency_escalation(self, reason: str, delay_seconds: int = 600):
         """Programme une escalade d'urgence après délai personnalisé"""

@@ -94,3 +94,26 @@ ai_system:
     - "lost"
     - "technical"
     - "general"
+
+# Configuration des services de localisation d'urgence
+emergency_locations:
+  enabled: true
+  search_radius_refuges: 500    # mètres
+  search_radius_transport: 1000 # mètres
+  
+  # Priorité des types de refuges (1=haute, 5=basse)
+  refuge_priorities:
+    police: 1
+    hospital: 1
+    pharmacy: 2
+    bar: 3
+    restaurant: 3
+    hotel: 3
+    gas_station: 4
+    bank: 4
+    
+  # APIs de transport
+  transport_apis:
+    velib_enabled: true
+    ratp_enabled: true  # API RATP pour bus/métro temps réel
+    taxi_enabled: true

@@ -130,11 +130,16 @@ class IntelligentAdvisor:
         """Classifie le type d'urgence"""
         text_lower = text.lower()
         
+        # Mots-clés de danger immédiat (priorité absolue)
+        immediate_danger = ["agression", "agressé", "attaqué", "menace", "menacé", "poursuite", "poursuit", "harcèle", "braquage", "kidnapping"]
+        
         # Classification basée sur les mots-clés (ordre par priorité)
-        if any(word in text_lower for word in ["tombé", "blessé", "blessure", "sang", "douleur", "mal", "fracture", "accident", "malaise"]):
-            return "medical"
-        elif any(word in text_lower for word in ["suit", "suivi", "agression", "menace", "vol", "danger", "peur", "menacé"]):
+        if any(word in text_lower for word in immediate_danger):
             return "security"
+        elif any(word in text_lower for word in ["suit", "suivi", "vol", "danger", "peur", "menacé", "suspect"]):
+            return "security"
+        elif any(word in text_lower for word in ["tombé", "blessé", "blessure", "sang", "douleur", "mal", "fracture", "accident", "malaise"]):
+            return "medical"
         elif any(word in text_lower for word in ["perdu", "égaré", "chemin", "reconnais pas", "ne sais pas où"]):
             return "lost"
         elif any(word in text_lower for word in ["panne", "problème technique", "téléphone", "batterie"]):
