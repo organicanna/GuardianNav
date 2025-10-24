@@ -1,0 +1,28 @@
+name: GuardianNav CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    env:
+      TEXT_TO_SPEECH_API_KEY: ${{ secrets.TEXT_TO_SPEECH_API_KEY }}
+      MAPS_API_KEY: ${{ secrets.MAPS_API_KEY }}
+      VERTEX_API_KEY: ${{ secrets.VERTEX_API_KEY }}
+      WHAT3WORDS_API_KEY: ${{ secrets.WHAT3WORDS_API_KEY }}
+      IDF_API_KEY: ${{ secrets.IDF_API_KEY }}
+      VELIB_API_URL: ${{ secrets.VELIB_API_URL }}
+      GUARDIANNAV_ENV: test
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install --upgrade pip
+      - run: pip install -r requirements.txt
+      - run: pytest -q
