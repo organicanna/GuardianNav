@@ -83,18 +83,22 @@ def test_api_keys_configuration():
                 
                 print(f"\n📞 Contacts d'urgence configurés: {real_contacts}/{len(contacts)}")
             
+            # Vérifier What3Words API
+            if 'location_apis' in config:
+                if config['location_apis'].get('what3words_api_key', '').startswith('YOUR_'):
+                    print("   ⚠️  What3Words : Non configuré")
+                elif config['location_apis'].get('what3words_api_key'):
+                    print("   ✅ What3Words : Configuré")
+            
+            # Vérifier Vertex AI
+            if 'vertex_ai' in config.get('google_cloud', {}):
+                if config['google_cloud']['vertex_ai'].get('enabled', False):
+                    print("   ✅ Vertex AI : Activé")
+                else:
+                    print("   ⚠️  Vertex AI : Désactivé")
+            
             # Vérifier les notifications
             print("\n📧 Services de notification:")
-            
-            if config.get('notification_services', {}).get('twilio', {}).get('account_sid', '').startswith('YOUR_'):
-                print("   ⚠️  Twilio SMS : Non configuré")
-            elif config.get('notification_services', {}).get('twilio', {}).get('account_sid'):
-                print("   ✅ Twilio SMS : Configuré")
-            
-            if config.get('notification_services', {}).get('sendgrid', {}).get('api_key', '').startswith('YOUR_'):
-                print("   ⚠️  SendGrid Email : Non configuré")
-            elif config.get('notification_services', {}).get('sendgrid', {}).get('api_key'):
-                print("   ✅ SendGrid Email : Configuré")
             
             if config.get('email', {}).get('enabled'):
                 print("   ✅ Notifications email : Activées")

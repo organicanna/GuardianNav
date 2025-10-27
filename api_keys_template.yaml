@@ -1,49 +1,30 @@
-# Configuration des clés API Google Cloud - TEMPLATE
+# Configuration des clés API - TEMPLATE NETTOYÉ
 # IMPORTANT: Copiez ce fichier vers 'api_keys.yaml' et remplacez les valeurs par vos vraies clés
 # Le fichier 'api_keys.yaml' ne sera jamais commité grâce au .gitignore
 
-# Configuration Google Cloud APIs
+# Configuration Google Cloud APIs - SEULEMENT LES APIs UTILISÉES
 google_cloud:
   project_id: "your-google-cloud-project-id"
   
-  # API Key pour les services Google Cloud (obtenez-la sur Google Cloud Console)
-  api_key: "YOUR_GOOGLE_CLOUD_API_KEY_HERE"
+  # Vertex AI Configuration (utilisé par vertex_ai_agent.py)
+  vertex_ai:
+    enabled: true
+    region: "europe-west1"  # Région Europe pour la latence optimale
+    # Service Account JSON path ou utiliser gcloud auth application-default login
+    service_account_path: "path/to/service-account.json"  # Optionnel
   
-  # Clés pour différents services Google Cloud Platform (seulement ceux utilisés)
+  # Clés pour les services Google Cloud Platform UTILISÉS
   services:
-    # Google Maps Platform APIs (utilisé pour emergency_email_generator.py)
+    # Google Maps Platform APIs (utilisé par demo_live_alerte_paris.py et emergency_email_generator.py)
     maps_api_key: "YOUR_MAPS_API_KEY_HERE"
     
     # Google Cloud Text-to-Speech API (utilisé par speech_agent.py)
     text_to_speech_api_key: "YOUR_TTS_API_KEY_HERE"
 
-# APIs de transport et localisation
-transport_apis:
-  # API Vélib Paris (OpenData - gratuit)
-  velib_api_url: "https://velib-metropole-opendata.smoove.pro/opendata/Velib_Metropole/"
-  
-  # API RATP (transport en commun - gratuit avec inscription)
-  ratp_api_key: "YOUR_RATP_API_KEY_HERE"
-  ratp_api_url: "https://api-ratp.pierre-grimaud.fr/v4/"
-  
-  # API Citymapper (directions - payant)
-  citymapper_api_key: "YOUR_CITYMAPPER_API_KEY_HERE"
-  
-  # What3Words (localisation précise - freemium)
+# APIs de localisation UTILISÉES
+location_apis:
+  # What3Words (utilisé par emergency_email_generator.py)
   what3words_api_key: "YOUR_WHAT3WORDS_API_KEY_HERE"
-
-# SMS et notifications d'urgence
-notification_services:
-  # Twilio SMS (https://console.twilio.com/)
-  twilio:
-    account_sid: "YOUR_TWILIO_ACCOUNT_SID"
-    auth_token: "YOUR_TWILIO_AUTH_TOKEN"
-    phone_number: "YOUR_TWILIO_PHONE_NUMBER"
-  
-  # SendGrid Email (https://sendgrid.com/)
-  sendgrid:
-    api_key: "YOUR_SENDGRID_API_KEY"
-    from_email: "guardiannav@yourdomain.com"
 
 # Configuration pour les services d'urgence
 emergency_services:
