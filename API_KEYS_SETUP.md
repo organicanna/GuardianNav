@@ -19,7 +19,6 @@ cp api_keys_template.yaml api_keys.yaml
 1. Créez un projet sur [Google Cloud Console](https://console.cloud.google.com/)
 2. Activez les APIs nécessaires :
    - **Google Maps API** pour la géolocalisation
-   - **Google Translate API** pour la traduction
    - **Google Natural Language API** pour l'analyse IA
    - **Google Speech-to-Text API** pour reconnaissance vocale
    - **Google Text-to-Speech API** pour réponses vocales

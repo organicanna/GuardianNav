@@ -10,7 +10,9 @@ google_cloud:
   vertex_ai:
     enabled: true
     region: "europe-west1"  # Région Europe pour la latence optimale
-    # Service Account JSON path ou utiliser gcloud auth application-default login
+    # API Key pour Vertex AI (plus simple que service account)
+    api_key: "YOUR_VERTEX_AI_API_KEY"  # Clé API Vertex AI de Google Cloud Console
+    # Service Account JSON path (optionnel, fallback)
     service_account_path: "path/to/service-account.json"  # Optionnel
   
   # Clés pour les services Google Cloud Platform UTILISÉS
@@ -25,6 +27,14 @@ google_cloud:
 location_apis:
   # What3Words (utilisé par emergency_email_generator.py)
   what3words_api_key: "YOUR_WHAT3WORDS_API_KEY_HERE"
+
+# SMS et notifications d'urgence
+notification_services:
+  # Twilio SMS (https://console.twilio.com/) - pour envoi SMS d'urgence
+  twilio:
+    account_sid: "YOUR_TWILIO_ACCOUNT_SID"
+    auth_token: "YOUR_TWILIO_AUTH_TOKEN"
+    phone_number: "YOUR_TWILIO_PHONE_NUMBER"  # Numéro Twilio (ex: +33123456789)
 
 # Configuration pour les services d'urgence
 emergency_services:

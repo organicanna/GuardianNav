@@ -6,7 +6,8 @@ import queue
 from guardian.GPS_agent import StaticAgent
 from guardian.voice_agent import VoiceAgent
 from guardian.speech_agent import SpeechAgent
-from guardian.vertex_ai_agent import VertexAIAgent
+from guardian.vertex_ai_agent_rest import VertexAIAgent
+from guardian.sms_agent import SMSAgent
 from guardian.emergency_response import EmergencyResponse
 from guardian.intelligent_advisor import IntelligentAdvisor, SmartResponseSystem
 from guardian.emergency_locations import EmergencyLocationService
@@ -30,6 +31,9 @@ class GuardianOrchestrator:
         
         # Agent de synthèse vocale
         self.speech_agent = SpeechAgent(api_keys_config)
+        
+        # Agent SMS pour notifications d'urgence
+        self.sms_agent = SMSAgent(api_keys_config)
         
         # Agent Vertex AI pour l'analyse avancée
         self.vertex_ai_agent = VertexAIAgent(api_keys_config)
@@ -195,6 +199,13 @@ class GuardianOrchestrator:
         if self.current_position:
             self.emergency_response.send_location_to_contacts(self.current_position, reason)
         
+        # Envoyer aussi le SMS d'urgence
+        emergency_context = {
+            'emergency_type': 'URGENCE GÉNÉRALE',
+            'what3words': ''
+        }
+        self._send_emergency_notifications(emergency_context, reason)
+        
         # Programmer l'escalade d'urgence
         self._schedule_emergency_escalation(reason)
         
@@ -303,10 +314,24 @@ class GuardianOrchestrator:
             enhanced_reason += f"- Conseils IA: {analysis.get('specific_advice', '')}\n\n{help_message}"
             
             self.emergency_response.send_immediate_danger_alert(self.current_position, enhanced_reason)
+            
+            # Envoyer aussi le SMS d'urgence
+            emergency_context = {
+                'emergency_type': 'URGENCE CRITIQUE',
+                'what3words': analysis.get('what3words', '')
+            }
+            self._send_emergency_notifications(emergency_context, reason)
         else:
             # Alerte critique sans localisation
             enhanced_reason = f"{reason}\n\n🧠 ANALYSE VERTEX AI CRITIQUE:\n{analysis.get('specific_advice', '')}"
             self.emergency_response.send_immediate_danger_alert(self.current_position, enhanced_reason)
+            
+            # Envoyer aussi le SMS d'urgence
+            emergency_context = {
+                'emergency_type': 'URGENCE CRITIQUE',
+                'what3words': analysis.get('what3words', '')
+            }
+            self._send_emergency_notifications(emergency_context, reason)
     
     def _handle_vertex_ai_high_emergency(self, reason: str, analysis: dict):
         """Gère les urgences élevées selon Vertex AI (niveau 6-7)"""
@@ -332,10 +357,24 @@ class GuardianOrchestrator:
             enhanced_reason += f"\n{refuges_message}"
             
             self.emergency_response.send_location_with_refuges_info(self.current_position, refuges_message, enhanced_reason)
+            
+            # Envoyer aussi le SMS d'urgence
+            emergency_context = {
+                'emergency_type': 'URGENCE ÉLEVÉE',
+                'what3words': analysis.get('what3words', '')
+            }
+            self._send_emergency_notifications(emergency_context, reason)
         else:
             # Fallback sans localisation
             enhanced_reason = f"{reason}\n\n🧠 ANALYSE VERTEX AI:\n{analysis.get('specific_advice', '')}"
             self.emergency_response.send_location_to_contacts(self.current_position, enhanced_reason)
+            
+            # Envoyer aussi le SMS d'urgence
+            emergency_context = {
+                'emergency_type': 'URGENCE ÉLEVÉE',
+                'what3words': analysis.get('what3words', '')
+            }
+            self._send_emergency_notifications(emergency_context, reason)
     
     def _handle_vertex_ai_standard_emergency(self, reason: str, analysis: dict):
         """Gère les urgences standard avec analyse Vertex AI (niveau 1-5)"""
@@ -355,7 +394,14 @@ class GuardianOrchestrator:
         
         self.emergency_response.send_location_to_contacts(self.current_position, enhanced_reason)
         
-        print(f"\n✅ Contacts notifiés avec analyse personnalisée Vertex AI")
+        # Envoyer aussi le SMS d'urgence
+        emergency_context = {
+            'emergency_type': 'URGENCE STANDARD',
+            'what3words': analysis.get('what3words', '')
+        }
+        self._send_emergency_notifications(emergency_context, reason)
+        
+        print(f"\n✅ Contacts notifiés avec analyse personnalisée Vertex AI (Email + SMS)")
 
     def _handle_immediate_danger_situation(self, reason: str, ai_analysis: dict):
         """Gère une situation de danger immédiat (agression, menace, etc.)"""
@@ -381,12 +427,26 @@ class GuardianOrchestrator:
             enhanced_reason = f"DANGER IMMÉDIAT: {reason}\n\n{refuges_message}"
             self.emergency_response.send_immediate_danger_alert(self.current_position, enhanced_reason)
             
-            print("\n🚨 ALERTE DE DANGER IMMÉDIAT envoyée à tous vos contacts!")
+            # Envoyer aussi le SMS d'urgence
+            emergency_context = {
+                'emergency_type': 'DANGER IMMÉDIAT',
+                'what3words': ai_analysis.get('what3words', '')
+            }
+            self._send_emergency_notifications(emergency_context, f"DANGER IMMÉDIAT: {reason}")
+            
+            print("\n🚨 ALERTE DE DANGER IMMÉDIAT envoyée à tous vos contacts! (Email + SMS)")
             print("📍 Informations sur les refuges et transports incluses")
             
         else:
             # Fallback si pas de service de localisation
             self.emergency_response.send_immediate_danger_alert(self.current_position, reason)
+            
+            # Envoyer aussi le SMS d'urgence
+            emergency_context = {
+                'emergency_type': 'DANGER IMMÉDIAT',
+                'what3words': ai_analysis.get('what3words', '')
+            }
+            self._send_emergency_notifications(emergency_context, f"DANGER IMMÉDIAT: {reason}")
         
         print("\n⚡ **ACTIONS RECOMMANDÉES IMMÉDIATEMENT:**")
         print("   1. 📞 Appelez le 17 (Police) si en danger immédiat")
@@ -424,12 +484,26 @@ class GuardianOrchestrator:
             enhanced_reason = f"{reason}\n\nAnalyse IA:\n- Type: {ai_analysis['emergency_type']}\n- Urgence: {ai_analysis['urgency_level']}\n\n{refuges_message}"
             self.emergency_response.send_location_with_refuges_info(self.current_position, refuges_message, enhanced_reason)
             
+            # Envoyer aussi le SMS d'urgence
+            emergency_context = {
+                'emergency_type': 'URGENCE STANDARD',
+                'what3words': ai_analysis.get('what3words', '')
+            }
+            self._send_emergency_notifications(emergency_context, reason)
+            
         else:
             # Fallback standard
             enhanced_reason = f"{reason}\n\nAnalyse IA:\n- Type: {ai_analysis['emergency_type']}\n- Urgence: {ai_analysis['urgency_level']}\n- Actions: {', '.join(ai_analysis['immediate_actions'])}"
             self.emergency_response.send_location_to_contacts(self.current_position, enhanced_reason)
+            
+            # Envoyer aussi le SMS d'urgence
+            emergency_context = {
+                'emergency_type': 'URGENCE STANDARD',
+                'what3words': ai_analysis.get('what3words', '')
+            }
+            self._send_emergency_notifications(emergency_context, reason)
         
-        print("\n✅ Contacts notifiés avec informations d'aide à proximité")
+        print("\n✅ Contacts notifiés avec informations d'aide à proximité (Email + SMS)")
     
     def handle_fall_detection(self, fall_info: dict):
         """
@@ -647,6 +721,13 @@ class GuardianOrchestrator:
             enhanced_reason = f"{reason}\n\nAnalyse IA:\n- Type: {ai_analysis['emergency_type']}\n- Urgence: {ai_analysis['urgency_level']}\n\n{medical_message}"
             self.emergency_response.send_critical_alert_with_refuges(position, medical_message, enhanced_reason)
             
+            # Envoyer aussi le SMS d'urgence
+            emergency_context = {
+                'emergency_type': 'CHUTE DÉTECTÉE',
+                'what3words': ai_analysis.get('what3words', '')
+            }
+            self._send_emergency_notifications(emergency_context, reason)
+            
         else:
             # Envoyer l'alerte visuelle de chute
             self.emergency_response.send_fall_emergency_alert(position, fall_info)
@@ -654,6 +735,13 @@ class GuardianOrchestrator:
             # Alerte traditionnelle de fallback
             enhanced_reason = f"{reason}\n\nAnalyse IA:\n- Type: {ai_analysis['emergency_type']}\n- Urgence: {ai_analysis['urgency_level']}"
             self.emergency_response.send_critical_alert(position, enhanced_reason)
+            
+            # Envoyer aussi le SMS d'urgence
+            emergency_context = {
+                'emergency_type': 'CHUTE DÉTECTÉE',
+                'what3words': ai_analysis.get('what3words', '')
+            }
+            self._send_emergency_notifications(emergency_context, reason)
         
         print(f"\n✅ Alerte d'urgence envoyée pour chute")
         print(f"🚑 Les secours et vos contacts ont été notifiés")
@@ -682,6 +770,50 @@ class GuardianOrchestrator:
         else:
             # Pour les explications détaillées
             self.response_queue.put(text_input)
+
+    def _send_emergency_notifications(self, emergency_context: dict, reason: str):
+        """Envoie les notifications d'urgence (email + SMS)"""
+        
+        # Préparer les contacts d'urgence
+        contacts = self.config.get('emergency_contacts', [])
+        
+        if not contacts:
+            self.logger.warning("Aucun contact d'urgence configuré")
+            return
+        
+        # L'email d'urgence sera envoyé par les méthodes appelantes
+        # Cette fonction se concentre uniquement sur les SMS
+        
+        # Envoyer le SMS d'urgence (nouveau)
+        try:
+            sms_context = {
+                'user_name': 'Votre proche',  # Peut être configuré
+                'emergency_type': emergency_context.get('emergency_type', 'Urgence'),
+                'location': {
+                    'address': self._get_location_address(),
+                    'what3words': emergency_context.get('what3words', '')
+                }
+            }
+            
+            sms_sent = self.sms_agent.send_emergency_sms(contacts, sms_context)
+            
+            if sms_sent:
+                self.logger.info("✅ SMS d'urgence envoyé avec succès")
+                print("📱 SMS d'urgence envoyé aux contacts")
+            else:
+                self.logger.warning("⚠️ Échec envoi SMS d'urgence")
+                print("📱 SMS d'urgence en mode simulation")
+                
+        except Exception as e:
+            self.logger.error(f"Erreur envoi SMS: {e}")
+    
+    def _get_location_address(self) -> str:
+        """Retourne l'adresse actuelle formatée"""
+        if not self.current_position:
+            return "Position inconnue"
+        
+        lat, lon = self.current_position
+        return f"{lat:.6f}, {lon:.6f}"
 
 def static_monitor(orchestrator, agent):
     """Surveille les positions GPS"""

@@ -33,7 +33,7 @@ default:
     
     # Contacts d'urgence (remplacez par vos vrais contacts)
     emergency_contacts:
-      - name: "Contact Famille"
+      - name: "Contact Famille Anna"
         phone: "+33123456789"
         email: "famille@example.com"
       - name: "Contact Ami" 

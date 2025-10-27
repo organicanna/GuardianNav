@@ -11,12 +11,14 @@ requests>=2.31.0
 google-cloud-texttospeech>=2.14.0
 googlemaps>=4.10.0
 
-# Vertex AI and Generative AI
-google-cloud-aiplatform>=1.60.0
-vertexai>=1.60.0
+# Vertex AI via API REST (plus léger)
+requests>=2.25.0
 
 # Location APIs
 urllib3>=2.0.0
+
+# SMS notifications
+twilio>=8.10.0
 
 # Development and testing
 pytest>=7.0.0
