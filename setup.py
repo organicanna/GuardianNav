@@ -10,7 +10,7 @@ setup(
     name="guardiannav",
     version="0.1.0",
     author="Anna",
-    author_email="your.email@example.com",
+    author_email="anna.perret63@gmail.com",
     description="Agent de sécurité personnelle basé sur IA, surveillant le trajet d'un utilisateur et déclenchant une assistance en cas d'anomalie.",
     long_description=long_description,
     long_description_content_type="text/markdown",
