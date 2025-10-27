@@ -39,7 +39,7 @@ class WrongPathAgent:
         self.destination = destination
         self.deviation_threshold = deviation_threshold
         
-        self.logger.info(f"Route: {origin} → {destination}, seuil: {deviation_threshold}m")
+        self.logger.info(f"Route: {origin} -> {destination}, seuil: {deviation_threshold}m")
         
         try:
             self.route = self.get_route_points()

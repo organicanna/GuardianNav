@@ -798,10 +798,10 @@ class GuardianOrchestrator:
             sms_sent = self.sms_agent.send_emergency_sms(contacts, sms_context)
             
             if sms_sent:
-                self.logger.info("✅ SMS d'urgence envoyé avec succès")
+                self.logger.info("SMS d'urgence envoyé avec succès")
                 print("📱 SMS d'urgence envoyé aux contacts")
             else:
-                self.logger.warning("⚠️ Échec envoi SMS d'urgence")
+                self.logger.warning("Échec envoi SMS d'urgence")
                 print("📱 SMS d'urgence en mode simulation")
                 
         except Exception as e:

@@ -35,25 +35,65 @@ class VertexAIAgent:
             self.logger.warning("Configuration Vertex AI incomplète - fonctionnement en mode simulation")
     
     def _initialize_api(self):
-        """Initialise la connexion à l'API Vertex AI"""
+        """Initialise la connexion à l'API Gemini"""
         try:
-            # Note: Pour l'authentification, nous devrons utiliser OAuth2 ou service account
-            # Pour simplifier le test, nous commençons en mode simulation
-            self.logger.warning("⚠️ Mode simulation activé - implémentation OAuth2 requise pour API réelle")
-            self.is_available = False  # Sera True quand OAuth2 sera implémenté
+            # Test de connectivité avec l'API Gemini
+            test_prompt = "Test de connectivité. Répondez simplement 'OK'."
             
+            response = self._make_api_request(test_prompt, max_tokens=10)
+            
+            if response and 'candidates' in response and response != self._simulate_response(test_prompt):
+                self.is_available = True
+                self.logger.info("API Gemini connectée avec succès")
+            else:
+                self.is_available = False
+                self.logger.warning("Mode simulation activé - implémentation OAuth2 requise pour API réelle")
+                
         except Exception as e:
-            self.logger.error(f"❌ Erreur initialisation Vertex AI API: {e}")
+            self.logger.error(f"Erreur initialisation API Gemini: {e}")
             self.is_available = False
     
     def _make_api_request(self, prompt: str, max_tokens: int = 1000) -> Optional[Dict]:
-        """Effectue une requête à l'API Vertex AI (actuellement en simulation)"""
-        # Mode simulation pour le développement
-        return self._simulate_response(prompt)
+        """Effectue une requête à l'API Gemini"""
+        if not self.api_key or self.api_key == "YOUR_VERTEX_AI_API_KEY":
+            return self._simulate_response(prompt)
+        
+        # Essayer l'API Gemini directe (plus simple que Vertex AI)
+        try:
+            gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={self.api_key}"
+            
+            headers = {
+                'Content-Type': 'application/json'
+            }
+            
+            payload = {
+                "contents": [{
+                    "parts": [{"text": prompt}]
+                }],
+                "generationConfig": {
+                    "temperature": 0.1,
+                    "maxOutputTokens": max_tokens
+                }
+            }
+            
+            response = requests.post(gemini_url, headers=headers, json=payload, timeout=15)
+            
+            if response.status_code == 200:
+                return response.json()
+            elif response.status_code == 403:
+                self.logger.warning("API Gemini: Clé invalide ou API non activée - mode simulation")
+                return self._simulate_response(prompt)
+            else:
+                self.logger.warning(f"API Gemini erreur {response.status_code} - mode simulation")
+                return self._simulate_response(prompt)
+                
+        except Exception as e:
+            self.logger.warning(f"Erreur API Gemini: {e} - mode simulation")
+            return self._simulate_response(prompt)
     
     def _simulate_response(self, prompt: str) -> Dict:
         """Génère une réponse simulée intelligente"""
-        self.logger.info("🎭 Mode simulation Vertex AI")
+        self.logger.info("Mode simulation Vertex AI")
         
         # Analyse du prompt pour générer une réponse cohérente
         prompt_lower = prompt.lower()
@@ -160,7 +200,7 @@ class VertexAIAgent:
                     analysis = json.loads(response_text.strip())
                     analysis = self._validate_analysis_response(analysis)
                     
-                    self.logger.info("✅ Analyse Vertex AI générée avec succès")
+                    self.logger.info("Analyse Vertex AI générée avec succès")
                     return analysis
                     
                 except json.JSONDecodeError as e:
@@ -209,7 +249,7 @@ class VertexAIAgent:
     
     def _fallback_analysis(self, context: str) -> Dict[str, Any]:
         """Analyse de fallback si Vertex AI échoue"""
-        self.logger.warning("🔄 Utilisation analyse de fallback")
+        self.logger.warning("Utilisation analyse de fallback")
         
         context_lower = context.lower()
         
@@ -368,3 +408,32 @@ class VertexAIAgent:
             return response is not None and 'candidates' in response
         except:
             return False
+    
+    def test_vertex_ai_connection(self) -> Dict[str, Any]:
+        """Test la connexion Vertex AI avec retour détaillé (compatibilité)"""
+        try:
+            # Test de base
+            connection_ok = self.test_connection()
+            
+            if connection_ok and self.is_available:
+                return {
+                    "success": True,
+                    "available": True,
+                    "details": f"Modèle: {self.model_name}, Région: {self.region}",
+                    "message": "Vertex AI REST API connectée avec succès"
+                }
+            else:
+                return {
+                    "success": False,
+                    "available": False,
+                    "details": f"Mode simulation - Modèle: {self.model_name}",
+                    "message": "Vertex AI en mode simulation (clé API manquante ou OAuth2 non implémenté)"
+                }
+        
+        except Exception as e:
+            return {
+                "success": False,
+                "available": False,
+                "details": "Erreur de connexion",
+                "message": f"Erreur de connexion: {e}"
+            }

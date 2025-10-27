@@ -35,7 +35,7 @@ class FallDetector:
         self.last_speed = 0.0
         
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
-        self.logger.info(f"Détecteur de chute initialisé - Seuils: {speed_threshold_high}km/h → {speed_threshold_low}km/h")
+        self.logger.info(f"Détecteur de chute initialisé - Seuils: {speed_threshold_high}km/h -> {speed_threshold_low}km/h")
     
     def _calculate_speed(self, pos1: Tuple[float, float], pos2: Tuple[float, float], 
                         time1: float, time2: float) -> float:
@@ -64,7 +64,7 @@ class FallDetector:
         if time_diff <= 0:
             return 0.0
             
-        # Conversion km/h → m/s
+        # Conversion km/h -> m/s
         speed1_ms = speed1 / 3.6
         speed2_ms = speed2 / 3.6
         

@@ -53,7 +53,7 @@ class SMSAgent:
             # Créer le client Twilio
             self.twilio_client = Client(account_sid, auth_token)
             self.is_available = True
-            self.logger.info("✅ Twilio SMS configuré et disponible")
+            self.logger.info("Twilio SMS configuré et disponible")
             
         except Exception as e:
             self.logger.error(f"Erreur configuration Twilio: {e}")
@@ -172,10 +172,10 @@ class SMSAgent:
             account = self.twilio_client.api.accounts(self.twilio_config.get('account_sid')).fetch()
             test_result['test_success'] = True
             test_result['account_name'] = account.friendly_name
-            self.logger.info("✅ Test connexion Twilio réussi")
+            self.logger.info("Test connexion Twilio réussi")
             
         except Exception as e:
             test_result['error'] = str(e)
-            self.logger.error(f"❌ Test Twilio échoué: {e}")
+            self.logger.error(f"Test Twilio échoué: {e}")
         
         return test_result
