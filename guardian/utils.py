@@ -42,9 +42,9 @@ def format_message_efficiently(*parts: str) -> str:
     Efficiently concatenate message parts using join instead of += operations
     
     Args:
-        *parts: Message parts to concatenate
+        *parts: Message parts to concatenate (None and empty strings are filtered out)
         
     Returns:
         Concatenated message
     """
-    return '\n'.join(filter(None, parts))
+    return '\n'.join(str(p) for p in parts if p)

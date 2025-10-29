@@ -6,15 +6,16 @@ This document outlines the performance improvements made to GuardianNav to addre
 ## Optimizations Implemented
 
 ### 1. Consolidated Duplicate Code
-**Issue**: The `haversine` distance calculation function was duplicated in 3 different files:
+**Issue**: The `haversine` distance calculation function was duplicated in 4 different files:
 - `guardian/GPS_agent.py`
 - `guardian/fall_detector.py`
 - `guardian/emergency_locations.py`
+- `guardian/wrongpath_agent.py`
 
 **Solution**: Created a shared utility module (`guardian/utils.py`) with a single, cached implementation.
 
 **Impact**:
-- Reduced code duplication by ~30 lines
+- Reduced code duplication by ~40 lines
 - Added LRU caching with `@lru_cache(maxsize=1024)` for frequently calculated distances
 - Improved maintainability - single source of truth for distance calculations
 
@@ -98,10 +99,10 @@ Performance improvements (estimated based on code analysis):
 
 ## Code Quality Metrics
 
-- **Lines of code reduced**: ~45 lines (duplicate code removal)
+- **Lines of code reduced**: ~55 lines (duplicate code removal)
 - **Cyclomatic complexity**: Improved in `find_emergency_refuges`
 - **Test coverage**: Maintained at same level, added 9 new tests
-- **Code duplication**: Reduced from 3 instances to 1 (haversine)
+- **Code duplication**: Reduced from 4 instances to 1 (haversine)
 
 ## Future Optimization Opportunities
 
@@ -144,4 +145,5 @@ The implemented optimizations significantly improve the performance and reliabil
 - `guardian/fall_detector.py`
 - `guardian/emergency_locations.py`
 - `guardian/vertex_ai_agent_rest.py`
+- `guardian/wrongpath_agent.py`
 - `tests/test_utils.py` (new)

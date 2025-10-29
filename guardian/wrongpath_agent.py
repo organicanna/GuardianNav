@@ -1,19 +1,8 @@
 import googlemaps #type: ignore
-from math import radians, cos, sin, asin, sqrt
 import time
 import logging
 from typing import List, Tuple, Optional
-
-def haversine(coord1, coord2): #même chose que pour le GPS_agent
-    lon1, lat1 = coord1
-    lon2, lat2 = coord2
-    lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
-    dlon = lon2 - lon1
-    dlat = lat2 - lat1
-    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
-    c = 2 * asin(sqrt(a))
-    r = 6371000
-    return c * r
+from guardian.utils import haversine
 
 class WrongPathAgent:
     def __init__(self, api_key: str, origin: str, destination: str, deviation_threshold: float = 50):
