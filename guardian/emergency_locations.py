@@ -5,8 +5,10 @@ import requests
 import logging
 import json
 from typing import List, Dict, Tuple, Optional, Any
+from functools import lru_cache
 import yaml
 from datetime import datetime
+from guardian.utils import haversine
 
 class EmergencyLocationService:
     """Service de localisation d'urgence pour trouver refuges et transports"""
@@ -16,9 +18,20 @@ class EmergencyLocationService:
         self.config = api_keys_config
         self.maps_api_key = api_keys_config.get('google_cloud', {}).get('services', {}).get('maps_api_key')
         
+        # Connection pooling for better performance
+        self.session = requests.Session()
+        adapter = requests.adapters.HTTPAdapter(
+            pool_connections=10,
+            pool_maxsize=20,
+            max_retries=2
+        )
+        self.session.mount('https://', adapter)
+        self.session.mount('http://', adapter)
+        
     def find_emergency_refuges(self, location: Tuple[float, float], radius_m: int = 500) -> List[Dict]:
         """
         Trouve des refuges d'urgence à proximité (bars, cafés, commerces ouverts)
+        Optimisé pour batching les types de lieux similaires
         
         Args:
             location: (latitude, longitude)
@@ -30,20 +43,31 @@ class EmergencyLocationService:
         lat, lon = location
         self.logger.info(f"Recherche refuges d'urgence près de {lat}, {lon} (rayon: {radius_m}m)")
         
+        # Group place types by priority for more efficient searching
+        high_priority_types = ['hospital', 'police', 'fire_station', 'pharmacy']
+        medium_priority_types = ['restaurant', 'bar', 'cafe', 'shopping_mall', 'hotel']
+        low_priority_types = ['gas_station', 'bank']
+        
         refuges = []
         
-        # Types de lieux sûrs à rechercher
-        safe_place_types = [
-            'restaurant', 'bar', 'cafe', 'pharmacy', 'hospital', 
-            'police', 'fire_station', 'shopping_mall', 'hotel',
-            'gas_station', 'bank'  # Souvent ouverts et avec sécurité
-        ]
-        
-        for place_type in safe_place_types:
+        # Search high priority first (critical emergency services)
+        for place_type in high_priority_types:
             places = self._search_places_nearby(location, place_type, radius_m)
             refuges.extend(places)
         
-        # Filtrer et trier par distance
+        # Only search medium priority if we don't have enough refuges
+        if len(refuges) < 5:
+            for place_type in medium_priority_types:
+                places = self._search_places_nearby(location, place_type, radius_m)
+                refuges.extend(places)
+        
+        # Search low priority only if still insufficient
+        if len(refuges) < 3:
+            for place_type in low_priority_types:
+                places = self._search_places_nearby(location, place_type, radius_m)
+                refuges.extend(places)
+        
+        # Filtrer et trier par pertinence
         refuges = self._filter_and_sort_refuges(refuges, location)
         
         self.logger.info(f"Trouvé {len(refuges)} refuges potentiels")
@@ -74,7 +98,7 @@ class EmergencyLocationService:
         return transport_options
     
     def _search_places_nearby(self, location: Tuple[float, float], place_type: str, radius: int) -> List[Dict]:
-        """Recherche des lieux spécifiques avec Google Places API"""
+        """Recherche des lieux spécifiques avec Google Places API (optimisé avec session)"""
         try:
             if not self.maps_api_key:
                 # Simulation si pas de clé API
@@ -90,7 +114,8 @@ class EmergencyLocationService:
                 'key': self.maps_api_key
             }
             
-            response = requests.get(url, params=params)
+            # Use session with timeout for better performance
+            response = self.session.get(url, params=params, timeout=10)
             data = response.json()
             
             places = []
@@ -102,13 +127,16 @@ class EmergencyLocationService:
                     'rating': result.get('rating', 0),
                     'is_open': self._check_if_open(result),
                     'location': result['geometry']['location'],
-                    'distance_m': self._calculate_distance(location, 
+                    'distance_m': haversine(location, 
                         (result['geometry']['location']['lat'], result['geometry']['location']['lng']))
                 }
                 places.append(place)
             
             return places
             
+        except requests.exceptions.Timeout:
+            self.logger.warning(f"Timeout lors de la recherche {place_type}, utilisation simulation")
+            return self._simulate_places(location, place_type)
         except Exception as e:
             self.logger.error(f"Erreur recherche places {place_type}: {e}")
             return self._simulate_places(location, place_type)
@@ -263,22 +291,6 @@ class EmergencyLocationService:
         opening_hours = place_data.get('opening_hours', {})
         return opening_hours.get('open_now', False)
     
-    def _calculate_distance(self, loc1: Tuple[float, float], loc2: Tuple[float, float]) -> int:
-        """Calcule la distance entre deux points (approximation simple)"""
-        from math import radians, cos, sin, asin, sqrt
-        
-        lon1, lat1 = loc1
-        lon2, lat2 = loc2
-        
-        # Formule haversine
-        lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
-        dlon = lon2 - lon1
-        dlat = lat2 - lat1
-        a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
-        c = 2 * asin(sqrt(a))
-        r = 6371000  # Rayon de la Terre en mètres
-        return int(c * r)
-    
     def _filter_and_sort_refuges(self, refuges: List[Dict], location: Tuple[float, float]) -> List[Dict]:
         """Filtre et trie les refuges par pertinence"""
         
@@ -362,7 +374,7 @@ class EmergencyLocationService:
     
     def _simulate_escape_route(self, start: Tuple[float, float], end: Tuple[float, float]) -> Dict[str, Any]:
         """Simule un itinéraire d'évacuation pour les tests"""
-        distance_m = self._calculate_distance(start, end)
+        distance_m = haversine(start, end)
         
         return {
             'duration': f"{max(1, distance_m // 80)} min",  # ~80m/min marche rapide
@@ -379,16 +391,16 @@ class EmergencyLocationService:
         }
 
     def format_emergency_locations_message(self, refuges: List[Dict], transports: Dict[str, List], current_location: Tuple[float, float] = None) -> str:
-        """Formate un message avec les lieux d'urgence et itinéraires"""
+        """Formate un message avec les lieux d'urgence et itinéraires (optimisé)"""
         
-        message = "🆘 **LIEUX SÛRS ET TRANSPORTS D'URGENCE À PROXIMITÉ**\n\n"
+        message_parts = ["🆘 **LIEUX SÛRS ET TRANSPORTS D'URGENCE À PROXIMITÉ**\n"]
         
         # Refuges avec itinéraires
         if refuges:
-            message += "🏠 **REFUGES SÛRS:**\n"
+            message_parts.append("🏠 **REFUGES SÛRS:**")
             for i, refuge in enumerate(refuges[:3]):  # Top 3 avec itinéraires
                 status = "🟢 OUVERT" if refuge.get('is_open') else "🔴 FERMÉ"
-                message += f"   • {refuge['name']} ({refuge['distance_m']}m) {status}\n"
+                message_parts.append(f"   • {refuge['name']} ({refuge['distance_m']}m) {status}")
                 
                 # Ajouter itinéraire pour le refuge le plus proche
                 if i == 0 and current_location and 'location' in refuge:
@@ -397,36 +409,38 @@ class EmergencyLocationService:
                         (refuge['location']['lat'], refuge['location']['lng'])
                     )
                     
-                    message += f"     🏃 Temps d'évacuation: {route['duration']}\n"
+                    message_parts.append(f"     🏃 Temps d'évacuation: {route['duration']}")
                     if route.get('warnings'):
-                        message += f"     ⚠️ {route['warnings'][0]}\n"
+                        message_parts.append(f"     ⚠️ {route['warnings'][0]}")
         
-        message += "\n🚇 **TRANSPORTS D'URGENCE:**\n"
+        message_parts.append("\n🚇 **TRANSPORTS D'URGENCE:**")
         
         # Métro/Bus
         if transports.get('metro_stations'):
             station = transports['metro_stations'][0]
-            message += f"   🚇 Métro {station['name']} ({station['distance_m']}m) - Lignes: {', '.join(station['lines'])}\n"
+            message_parts.append(f"   🚇 Métro {station['name']} ({station['distance_m']}m) - Lignes: {', '.join(station['lines'])}")
         
         if transports.get('bus_stops'):
             stop = transports['bus_stops'][0]
-            message += f"   🚌 Bus {stop['name']} ({stop['distance_m']}m) - Prochains: {', '.join(stop['next_buses'])}\n"
+            message_parts.append(f"   🚌 Bus {stop['name']} ({stop['distance_m']}m) - Prochains: {', '.join(stop['next_buses'])}")
         
         # Vélib
         if transports.get('velib_stations'):
             station = transports['velib_stations'][0]
             if station['available_bikes'] > 0:
-                message += f"   🚴 Vélib {station['name']} ({station['distance_m']}m) - {station['available_bikes']} vélos dispo\n"
+                message_parts.append(f"   🚴 Vélib {station['name']} ({station['distance_m']}m) - {station['available_bikes']} vélos dispo")
         
         # Taxi
         if transports.get('taxi_stands'):
             taxi = transports['taxi_stands'][0]
-            message += f"   🚕 Taxi {taxi['name']} ({taxi['distance_m']}m) - Tel: {taxi['phone']}\n"
+            message_parts.append(f"   🚕 Taxi {taxi['name']} ({taxi['distance_m']}m) - Tel: {taxi['phone']}")
         
-        message += "\n📞 **NUMÉROS D'URGENCE:**\n"
-        message += "   • Police: 17\n   • SAMU: 15\n   • Pompiers: 18\n   • Urgence EU: 112"
+        message_parts.extend([
+            "\n📞 **NUMÉROS D'URGENCE:**",
+            "   • Police: 17\n   • SAMU: 15\n   • Pompiers: 18\n   • Urgence EU: 112"
+        ])
         
-        return message
+        return '\n'.join(message_parts)
     
     def get_detailed_evacuation_plan(self, current_location: Tuple[float, float]) -> str:
         """

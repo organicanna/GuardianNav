@@ -27,6 +27,15 @@ class VertexAIAgent:
         self.model_name = "gemini-1.5-flash-002"
         self.is_available = False
         
+        # Session HTTP avec connection pooling pour meilleures performances
+        self.session = requests.Session()
+        adapter = requests.adapters.HTTPAdapter(
+            pool_connections=5,
+            pool_maxsize=10,
+            max_retries=2
+        )
+        self.session.mount('https://', adapter)
+        
         # URL de base pour l'API Vertex AI
         if self.project_id and self.api_key and self.enabled:
             self.base_url = f"https://{self.region}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{self.region}/publishers/google/models/{self.model_name}"
@@ -54,7 +63,7 @@ class VertexAIAgent:
             self.is_available = False
     
     def _make_api_request(self, prompt: str, max_tokens: int = 1000) -> Optional[Dict]:
-        """Effectue une requête à l'API Gemini"""
+        """Effectue une requête à l'API Gemini avec timeout et retry"""
         if not self.api_key or self.api_key == "YOUR_VERTEX_AI_API_KEY":
             return self._simulate_response(prompt)
         
@@ -76,7 +85,8 @@ class VertexAIAgent:
                 }
             }
             
-            response = requests.post(gemini_url, headers=headers, json=payload, timeout=15)
+            # Use session with timeout for better performance
+            response = self.session.post(gemini_url, headers=headers, json=payload, timeout=15)
             
             if response.status_code == 200:
                 return response.json()
@@ -87,6 +97,9 @@ class VertexAIAgent:
                 self.logger.warning(f"API Gemini erreur {response.status_code} - mode simulation")
                 return self._simulate_response(prompt)
                 
+        except requests.exceptions.Timeout:
+            self.logger.warning("Timeout API Gemini - mode simulation")
+            return self._simulate_response(prompt)
         except Exception as e:
             self.logger.warning(f"Erreur API Gemini: {e} - mode simulation")
             return self._simulate_response(prompt)

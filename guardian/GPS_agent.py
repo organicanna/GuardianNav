@@ -1,19 +1,8 @@
 import time
 import logging
 from typing import Tuple, Generator
-from math import radians, cos, sin, asin, sqrt
 import random
-
-def haversine(coord1: Tuple[float, float], coord2: Tuple[float, float]) -> float:  #Calcule la distance en mètres entre deux points GPS
-    lon1, lat1 = coord1 #coordonnée 1 = longitude et latitude du premier point
-    lon2, lat2 = coord2 #idem pour le deuxième point
-    lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2]) #convertir en radians pour faire de la trigonométrie et calculer les distances
-    dlon = lon2 - lon1 #calcul de la diff de longitude entre deux points
-    dlat = lat2 - lat1 #idem pour la latitude
-    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2 #formule de Haversine 
-    c = 2 * asin(sqrt(a)) #convertit a en radian donc résultat en distance angulaire
-    r = 6371000 #rayon moyen de la terre
-    return c * r #calcul de la distance linéaire entre 2 points
+from guardian.utils import haversine
 
 class StaticAgent: #Début de l'agent statique
     def __init__(self, distance_threshold=10, time_threshold=300): #définition du seuil à partir de quand qq est "statique"
@@ -46,7 +35,7 @@ class StaticAgent: #Début de l'agent statique
                 self.logger.info(f"Position initiale définie: {coord}")
                 return False
                 
-            dist = haversine(coord, self.last_position) #calcule la distance en mètres entre position actuelle et dernière position
+            dist = haversine(self.last_position, coord) #calcule la distance en mètres entre position actuelle et dernière position
             elapsed = now - self.last_time
             
             if dist < self.distance_threshold: #si la distance est inférieure au seuil de distance

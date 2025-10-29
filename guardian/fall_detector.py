@@ -6,8 +6,8 @@ Analyse les mouvements suspects et détecte les chutes potentielles
 import time
 import logging
 from typing import Tuple, List, Optional, Dict
-from math import radians, cos, sin, asin, sqrt
 import random
+from guardian.utils import haversine
 
 class FallDetector:
     """
@@ -45,8 +45,8 @@ class FallDetector:
         if time2 <= time1:
             return 0.0
             
-        # Distance en mètres
-        distance = self._haversine_distance(pos1, pos2)
+        # Distance en mètres using shared haversine function
+        distance = haversine(pos1, pos2)
         
         # Temps en secondes
         time_diff = time2 - time1
@@ -71,21 +71,6 @@ class FallDetector:
         # Accélération en m/s²
         acceleration = (speed2_ms - speed1_ms) / time_diff
         return acceleration
-    
-    def _haversine_distance(self, coord1: Tuple[float, float], coord2: Tuple[float, float]) -> float:
-        """Calcule la distance en mètres entre deux points GPS"""
-        lat1, lon1 = coord1
-        lat2, lon2 = coord2
-        
-        lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
-        dlat = lat2 - lat1
-        dlon = lon2 - lon1
-        
-        a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
-        c = 2 * asin(sqrt(a))
-        r = 6371000  # Rayon de la Terre en mètres
-        
-        return c * r
     
     def update_position(self, position: Tuple[float, float]) -> Optional[Dict]:
         """
@@ -270,19 +255,18 @@ class FallDetector:
     
     def _calculate_recent_movement(self) -> float:
         """
-        Calcule le mouvement total sur les dernières positions
+        Calcule le mouvement total sur les dernières positions (optimisé)
         """
         if len(self.position_history) < 2:
             return 0.0
-            
-        total_distance = 0.0
-        for i in range(1, len(self.position_history)):
-            distance = self._haversine_distance(
-                self.position_history[i-1]['position'],
-                self.position_history[i]['position']
-            )
-            total_distance += distance
-            
+        
+        # Optimized: single pass through history
+        total_distance = sum(
+            haversine(self.position_history[i-1]['position'], 
+                     self.position_history[i]['position'])
+            for i in range(1, len(self.position_history))
+        )
+        
         return total_distance
     
     def reset_fall_detection(self):
