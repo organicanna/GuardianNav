@@ -1,0 +1,29 @@
+# Dépendances pour la conversation vocale GuardianNav
+# Installation: pip install -r requirements_voice.txt
+
+# === RECONNAISSANCE VOCALE ===
+sounddevice>=0.4.6          # Capture audio du microphone
+vosk>=1.0.28                # Reconnaissance vocale offline français
+
+# === SYNTHÈSE VOCALE ET AUDIO ===  
+pygame>=2.5.2               # Lecture audio pour TTS
+google-cloud-texttospeech>=2.16.3  # Google Cloud Text-to-Speech
+
+# === RECONNAISSANCE VOCALE CLOUD (OPTIONNEL) ===
+google-cloud-speech>=2.21.0 # Google Cloud Speech-to-Text
+
+# === INTELLIGENCE ARTIFICIELLE ===
+google-cloud-aiplatform>=1.38.1  # Vertex AI / Gemini
+
+# === CONFIGURATION ET UTILITAIRES ===
+pyyaml>=6.0.1               # Configuration YAML
+requests>=2.31.0            # Requêtes HTTP pour APIs
+
+# === DÉJÀ PRÉSENTES (vérification) ===
+# Ces dépendances sont normalement déjà dans requirements.txt
+# asyncio                   # Programmation asynchrone (built-in Python 3.7+)
+# threading                 # Multi-threading (built-in)
+# json                      # Manipulation JSON (built-in)  
+# logging                   # Journalisation (built-in)
+# pathlib                   # Manipulation chemins (built-in)
+# typing                    # Annotations de type (built-in)

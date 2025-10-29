@@ -1,0 +1,28 @@
+# Core dependencies for GuardianNav
+vosk>=0.3.45
+sounddevice>=0.4.6
+numpy>=1.24.0
+pygame>=2.5.2
+
+# API and HTTP requests
+requests>=2.31.0
+
+# Google Cloud APIs (ONLY USED ONES)
+google-cloud-texttospeech>=2.14.0
+googlemaps>=4.10.0
+
+# Vertex AI via API REST (plus léger)
+requests>=2.25.0
+
+# Location APIs
+urllib3>=2.0.0
+
+# SMS notifications
+twilio>=8.10.0
+
+# Development and testing
+pytest>=7.0.0
+pytest-cov>=4.0.0
+
+# Configuration
+pyyaml>=6.0
