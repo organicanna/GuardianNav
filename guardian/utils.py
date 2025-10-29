@@ -2,7 +2,7 @@
 Shared utility functions for GuardianNav
 Consolidates common operations to avoid code duplication
 """
-from typing import Tuple
+from typing import Tuple, Optional
 from math import radians, cos, sin, asin, sqrt
 from functools import lru_cache
 
@@ -37,14 +37,15 @@ def haversine(coord1: Tuple[float, float], coord2: Tuple[float, float]) -> float
     return c * r
 
 
-def format_message_efficiently(*parts: str) -> str:
+def format_message_efficiently(*parts: Optional[str]) -> str:
     """
-    Efficiently concatenate message parts using join instead of += operations
+    Efficiently concatenate message parts using join instead of += operations.
+    Filters out None values and empty strings.
     
     Args:
         *parts: Message parts to concatenate (None and empty strings are filtered out)
         
     Returns:
-        Concatenated message
+        Concatenated message with parts joined by newlines
     """
-    return '\n'.join(str(p) for p in parts if p)
+    return '\n'.join(str(p) for p in parts if p is not None and p != '')
