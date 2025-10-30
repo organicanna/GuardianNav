@@ -504,7 +504,7 @@ def test_gmail_agent():
             
             subject, html_body, text_body = agent.create_emergency_email(
                 recipient_email="test@example.com",
-                user_name="Test GuardianNav",
+                user_name="Test Guardian",
                 location="Paris, France",
                 situation="Test de fonctionnement du système d'urgence",
                 location_coords=(48.8566, 2.3522)

@@ -1,5 +1,5 @@
 """
-Système de recherche de refuges et transports d'urgence pour GuardianNav
+Système de recherche de refuges et transports d'urgence pour Guardian
 """
 import requests
 import logging

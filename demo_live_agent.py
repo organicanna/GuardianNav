@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-DÉMO GUARDIANNAV - AGENT LIVE AVEC VRAIE RECONNAISSANCE VOCALE
+DÉMO GUARDIAN - AGENT LIVE AVEC VRAIE RECONNAISSANCE VOCALE
 Démonstration interactive avec speech-to-text réel (Vosk) + IA Gemini
 Personnalisation complète : prénom, nom, numéro + scénario d'urgence réaliste
 """
@@ -158,7 +158,7 @@ class VoiceRecognizer:
             return None
 
 def load_guardian_agent():
-    """Charge l'agent GuardianNav avec configuration et diagnostics"""
+    """Charge l'agent Guardian avec configuration et diagnostics"""
     try:
         # Charger la configuration
         print("📁 Chargement de api_keys.yaml...")
@@ -198,7 +198,7 @@ def load_guardian_agent():
                 location_text = real_location or "8 rue de Londres, 75009 Paris (bureaux Google France)"
                 
                 # Utiliser la vraie situation rapportée ou celle par défaut  
-                situation_text = real_situation or "Situation d'urgence détectée par l'IA GuardianNav"
+                situation_text = real_situation or "Situation d'urgence détectée par l'IA Guardian"
                 
                 # Obtenir les contacts d'urgence de la config
                 emergency_contacts = config.get('emergency_contacts', [
@@ -236,7 +236,7 @@ def load_guardian_agent():
         # Attacher la méthode à l'agent
         agent.send_emergency_email_alert = send_emergency_email_alert
         
-        print(f"🤖 Agent GuardianNav:")
+        print(f"🤖 Agent Guardian:")
         print(f"   - IA: {'✅ Disponible' if agent.is_available else '⚠️ Mode simulation'}")
         print(f"   - Gmail: {'✅ Configuré' if gmail_agent.is_available else '❌ Non configuré'}")
         print(f"   - Prêt: {'✅ Opérationnel' if agent.api_key and agent.api_key != 'YOUR_VERTEX_AI_API_KEY' else '❌ Non configuré'}")
@@ -478,7 +478,7 @@ def format_route_response(route_info):
 
 def simulate_tts_response(text):
     """Simule la synthèse vocale"""
-    print("\n🔊 **GUARDIANNAV RÉPOND:**")
+    print("\n🔊 **GUARDIAN RÉPOND:**")
     print("="*60)
     print(f"{text}")
     print("="*60)
@@ -488,7 +488,7 @@ def analyze_situation_with_ai(agent, situation_text):
     """Analyse la situation avec l'IA Gemini - VRAIE API SEULEMENT"""
     if not agent:
         print("❌ Agent non disponible")
-        return "**ERREUR** : Agent GuardianNav non initialisé correctement"
+        return "**ERREUR** : Agent Guardian non initialisé correctement"
     
     # Vérifier que l'agent est correctement configuré
     if not hasattr(agent, 'api_key') or not agent.api_key or agent.api_key == "YOUR_VERTEX_AI_API_KEY":
@@ -524,7 +524,7 @@ def analyze_situation_with_ai(agent, situation_text):
 
 def display_scenario_intro():
     """Affiche l'introduction du scénario"""
-    print("🎭 DÉMO GUARDIANNAV - AGENT LIVE (RECONNAISSANCE VOCALE)")
+    print("🎭 DÉMO GUARDIAN - AGENT LIVE (RECONNAISSANCE VOCALE)")
     print("="*70)
     print("👤 **UTILISATEUR :** Personnalisable")
     print("📍 **LOCALISATION :** 8 rue de Londres, 75009 Paris (bureaux Google France)")  
@@ -539,7 +539,7 @@ def display_scenario_intro():
     print("Le quartier Europe/Saint-Lazare se vide après les heures de bureau.")
     print("Vous devez vous rendre Place de la Concorde, mais vous avez")
     print("l'impression d'être suivie et vous commencez à avoir peur.")
-    print("Vous décidez d'activer GuardianNav pour obtenir de l'aide.")
+    print("Vous décidez d'activer Guardian pour obtenir de l'aide.")
     print()
     
     print("🎙️ **VRAIE RECONNAISSANCE VOCALE:**")
@@ -633,12 +633,12 @@ def run_live_agent_demo():
         return
     
     # Chargement de l'agent
-    print("\n🔧 **INITIALISATION DE GUARDIANNAV**")
+    print("\n🔧 **INITIALISATION DE GUARDIAN**")
     print("="*40)
     agent, gmail_agent, agent_loaded = load_guardian_agent()
     
     if agent_loaded:
-        print("✅ Agent GuardianNav chargé avec succès")
+        print("✅ Agent Guardian chargé avec succès")
         print(f"🤖 IA Gemini: {'✅ Disponible' if agent.is_available else '⚠️ Mode simulation'}")
         
         # Test de connectivité API
@@ -660,7 +660,7 @@ def run_live_agent_demo():
                 return
     else:
         print("⚠️ Agent en mode simulation")
-        print("❌ ERREUR: Impossible de charger l'agent GuardianNav")
+        print("❌ ERREUR: Impossible de charger l'agent Guardian")
         return
     
     print()
@@ -669,8 +669,8 @@ def run_live_agent_demo():
     print("🎙️ **DÉBUT DE LA CONVERSATION VOCALE**")
     print("="*45)
     
-    # Message d'accueil GuardianNav
-    welcome_msg = f"""Bonjour {user_firstname}. Je suis GuardianNav, votre assistant de sécurité personnel. 
+    # Message d'accueil Guardian
+    welcome_msg = f"""Bonjour {user_firstname}. Je suis Guardian, votre assistant de sécurité personnel. 
 Je détecte que vous m'activez à une heure tardive près des bureaux Google France. 
 Je vois que vous souhaitez vous rendre Place de la Concorde. Êtes-vous en sécurité ? 
 Décrivez-moi votre situation actuelle en parlant dans votre microphone."""
@@ -688,7 +688,7 @@ Décrivez-moi votre situation actuelle en parlant dans votre microphone."""
     print(f"\n📝 **SITUATION RAPPORTÉE:** {situation_vocale}")
     
     # Construction du prompt contextualisé et optimisé pour Gemini
-    full_prompt = f"""Tu es GuardianNav, un assistant IA spécialisé en sécurité personnelle. Une personne nommée {user_fullname} t'appelle à l'aide.
+    full_prompt = f"""Tu es Guardian, un assistant IA spécialisé en sécurité personnelle. Une personne nommée {user_fullname} t'appelle à l'aide.
 
 CONTEXTE DE LA SITUATION:
 • Personne: {user_fullname}
@@ -739,7 +739,7 @@ Si la situation l'exige, demande des lieux sécurisés avec DEMANDE_LIEUX_SECURI
 Réponds uniquement dans ce format. Sois précise, empathique et professionnelle."""
     
     # Analyse IA
-    print("\n🧠 **ANALYSE INTELLIGENTE GUARDIANNAV**")
+    print("\n🧠 **ANALYSE INTELLIGENTE GUARDIAN**")
     print("="*45)
     ai_response = analyze_situation_with_ai(agent, full_prompt)
     
@@ -762,7 +762,7 @@ Réponds uniquement dans ce format. Sois précise, empathique et professionnelle
     # L'agent décide intelligemment s'il faut alerter les proches
     agent_wants_email = "DEMANDE_ENVOI_EMAIL_URGENCE" in ai_response
     if agent_wants_email:
-        print(f"🤖 **L'AGENT GUARDIANNAV DÉCIDE D'ALERTER LES PROCHES**")
+        print(f"🤖 **L'AGENT GUARDIAN DÉCIDE D'ALERTER LES PROCHES**")
         print(f"   → Situation évaluée comme nécessitant une intervention des contacts d'urgence")
     
     # Vérifier si l'IA demande un itinéraire sécurisé
@@ -830,7 +830,7 @@ Réponds uniquement dans ce format. Sois précise, empathique et professionnelle
     if follow_up_vocal:
         print(f"\n📝 **MISE À JOUR:** {follow_up_vocal}")
         
-        follow_prompt = f"""Tu es GuardianNav. {user_fullname} te donne une mise à jour sur sa situation de sécurité.
+        follow_prompt = f"""Tu es Guardian. {user_fullname} te donne une mise à jour sur sa situation de sécurité.
 
 RAPPEL DU CONTEXTE:
 • {user_fullname} était près des bureaux Google France (8 rue de Londres, 75009 Paris) à 22h, se sentait suivie
@@ -867,7 +867,7 @@ Reste concise, empathique et professionnelle."""
     print("="*40)
     print("✅ Démonstration vocale terminée avec succès")
     print(f"🎭 Scénario {user_fullname} avec vraie reconnaissance vocale")
-    print("🤖 GuardianNav + Vosk + Gemini IA")
+    print("🤖 Guardian + Vosk + Gemini IA")
     print()
     print("💡 **POINTS CLÉS DÉMONTRÉS:**")
     print("   ✅ Reconnaissance vocale française (Vosk)")
@@ -884,7 +884,7 @@ def main():
         run_live_agent_demo()
     except KeyboardInterrupt:
         print("\n\n⚠️ Démo interrompue par l'utilisateur")
-        print("🛡️ En situation réelle, GuardianNav resterait disponible")
+        print("🛡️ En situation réelle, Guardian resterait disponible")
     except Exception as e:
         print(f"\n❌ Erreur durant la démo: {e}")
         print("💡 En cas de vraie urgence, contactez directement le 17 ou le 112")

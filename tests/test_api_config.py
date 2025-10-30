@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test de configuration des clés API pour GuardianNav
+Test de configuration des clés API pour Guardian
 Vérifie que les clés sont correctement configurées sans les exposer
 """
 
@@ -17,7 +17,7 @@ import logging
 def test_api_keys_configuration():
     """Test de la configuration des clés API"""
     
-    print("🔑 Test de configuration des clés API GuardianNav")
+    print("🔑 Test de configuration des clés API Guardian")
     print("=" * 55)
     
     # Chemin vers le fichier de configuration
@@ -169,6 +169,6 @@ if __name__ == "__main__":
         print("\n⚠️  AVERTISSEMENT: api_keys.yaml devrait être dans .gitignore")
     
     if success:
-        print("\n🎯 Configuration prête pour GuardianNav !")
+        print("\n🎯 Configuration prête pour Guardian !")
     else:
         print("\n🔧 Configuration incomplète - Suivez les instructions")

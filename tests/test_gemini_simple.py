@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test Simple de Vertex AI - GuardianNav
+Test Simple de Vertex AI - Guardian
 🧠 Test direct de l'analyse d'urgence avec Vertex AI Gemini
 """
 
@@ -22,7 +22,7 @@ def test_vertex_ai_analysis():
             from guardian.gemini_agent import VertexAIAgent
             guardian_available = True
         except ImportError:
-            print("⚠️ Module GuardianNav non disponible - Test avec simulation")
+            print("⚠️ Module Guardian non disponible - Test avec simulation")
             guardian_available = False
             
         # Charger la configuration
@@ -89,7 +89,7 @@ def test_vertex_ai_analysis():
                 print()
                 
         else:
-            # Simulation sans GuardianNav
+            # Simulation sans Guardian
             print("🤖 **MODE SIMULATION - VERTEX AI**")
             print("Les réponses suivantes sont simulées:")
             print()
@@ -164,7 +164,7 @@ def interactive_vertex_test():
                 )
                 
                 if analysis:
-                    print(f"🤖 **Analyse GuardianNav:**")
+                    print(f"🤖 **Analyse Guardian:**")
                     print(f"   📊 Urgence: {analysis.get('urgency_level', 0)}/10")
                     print(f"   🏥 Type: {analysis.get('emergency_type', 'Non classifié')}")
                     print(f"   💡 Conseil: {analysis.get('specific_advice', 'Aucun conseil')}")
@@ -179,13 +179,13 @@ def interactive_vertex_test():
         print("👋 Mode interactif terminé")
         
     except ImportError:
-        print("❌ Modules GuardianNav non disponibles")
+        print("❌ Modules Guardian non disponibles")
     except Exception as e:
         print(f"❌ Erreur: {e}")
 
 def main():
     """Test principal"""
-    print("🧠 TEST VERTEX AI GUARDIANNAV")
+    print("🧠 TEST VERTEX AI GUARDIAN")
     print("=" * 40)
     print("🎯 Test de l'intelligence artificielle d'analyse d'urgence")
     print()

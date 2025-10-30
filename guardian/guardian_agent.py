@@ -15,7 +15,7 @@ from guardian.emergency_locations import EmergencyLocationService
 from guardian.fall_detector import FallDetector
 
 class GuardianOrchestrator:
-    """Orchestrateur principal pour GuardianNav selon le workflow défini"""
+    """Orchestrateur principal pour Guardian selon le workflow défini"""
     
     def __init__(self, config):
         self.config = config
@@ -321,7 +321,7 @@ class GuardianOrchestrator:
             
             # Envoyer emails d'urgence aux proches pour urgence critique
             self.send_emergency_email_alert(
-                user_name="Utilisateur GuardianNav",
+                user_name="Utilisateur Guardian",
                 location=f"Position GPS: {self.current_position}",
                 situation=enhanced_reason,
                 urgency_level=analysis['urgency_level']
@@ -372,7 +372,7 @@ class GuardianOrchestrator:
             
             # Envoyer emails d'urgence aux proches pour urgence élevée
             self.send_emergency_email_alert(
-                user_name="Utilisateur GuardianNav",
+                user_name="Utilisateur Guardian",
                 location=f"Position GPS: {self.current_position}",
                 situation=enhanced_reason,
                 urgency_level=analysis['urgency_level']
@@ -943,7 +943,7 @@ def console_input_monitor(orchestrator):
             time.sleep(1)
 
 def main():
-    """Point d'entrée principal pour GuardianNav"""
+    """Point d'entrée principal pour Guardian"""
     import logging
     from guardian.config import Config
     
@@ -991,10 +991,10 @@ def main():
         t_input.daemon = True
         t_input.start()
         
-        logger.info("GuardianNav démarré avec succès!")
+        logger.info("Guardian démarré avec succès!")
         
-        startup_message = "GuardianNav est actif et surveille votre sécurité"
-        print("🛡️  GuardianNav est actif et surveille votre sécurité")
+        startup_message = "Guardian est actif et surveille votre sécurité"
+        print("🛡️  Guardian est actif et surveille votre sécurité")
         print("📱 Tapez 'oui' ou 'non' pour répondre aux alertes")
         print("🔄 Le système surveille votre position et écoute les mots-clés d'urgence")
         print("⏹️  Appuyez sur Ctrl+C pour arrêter")

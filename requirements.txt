@@ -1,5 +1,5 @@
 # ===============================================================================
-# GUARDIANNAV - DÉPENDANCES COMPLÈTES
+# GUARDIAN - DÉPENDANCES COMPLÈTES
 # Installation: pip install -r requirements.txt
 # ===============================================================================
 

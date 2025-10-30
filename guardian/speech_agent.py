@@ -1,5 +1,5 @@
 """
-Speech Agent for GuardianNav
+Speech Agent for Guardian
 Handles text-to-speech functionality using Google Cloud Text-to-Speech API
 """
 import logging
@@ -17,7 +17,7 @@ except ImportError:
     GOOGLE_TTS_AVAILABLE = False
 
 class SpeechAgent:
-    """Agent de synthèse vocale pour GuardianNav"""
+    """Agent de synthèse vocale pour Guardian"""
     
     def __init__(self, api_keys_config: Dict[str, Any] = None):
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
@@ -318,7 +318,7 @@ class SpeechAgent:
     def test_speech(self) -> bool:
         """Teste la synthèse vocale"""
         
-        test_message = "Test de la synthèse vocale GuardianNav. Le système fonctionne correctement."
+        test_message = "Test de la synthèse vocale Guardian. Le système fonctionne correctement."
         
         print("🎤 Test de la synthèse vocale...")
         success = self.speak(test_message, "normal")

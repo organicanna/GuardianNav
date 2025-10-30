@@ -1,5 +1,5 @@
 """
-Détecteur de chute pour GuardianNav
+Détecteur de chute pour Guardian
 Analyse les mouvements suspects et détecte les chutes potentielles
 """
 

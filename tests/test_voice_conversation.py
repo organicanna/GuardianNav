@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test de la conversation vocale GuardianNav
+Test de la conversation vocale Guardian
 Vérifie le bon fonctionnement de toutes les composantes
 """
 
@@ -176,7 +176,7 @@ def show_installation_guide():
 
 def main():
     """Test principal"""
-    print("🧪 TESTS GUARDIANNAV CONVERSATION VOCALE")
+    print("🧪 TESTS GUARDIAN CONVERSATION VOCALE")
     print("=" * 60)
     
     # Tests des composants

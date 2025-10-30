@@ -1,5 +1,5 @@
 """
-Emergency Response System for GuardianNav
+Emergency Response System for Guardian
 Handles contact notifications and emergency escalation
 """
 import smtplib
@@ -31,7 +31,7 @@ class EmergencyResponse:
         
         # Message d'urgence critique
         urgent_message = f"""
-🚨 ALERTE URGENCE CRITIQUE - GUARDIANNAV 🚨
+🚨 ALERTE URGENCE CRITIQUE - GUARDIAN 🚨
 
 VOTRE CONTACT EST EN DANGER IMMÉDIAT !
 
@@ -64,7 +64,7 @@ Cette alerte a été déclenchée automatiquement par le système de sécurité.
         maps_url = f"https://maps.google.com/?q={lat},{lon}"
         
         message = f"""
-ALERTE GUARDIANNAV - ASSISTANCE REQUISE
+ALERTE GUARDIAN - ASSISTANCE REQUISE
 
 Localisation: {lat}, {lon}
 Lien Google Maps: {maps_url}
@@ -76,7 +76,7 @@ Merci de vérifier sa situation.
 """
         
         for contact in self.emergency_contacts:
-            self._send_email(contact, "ALERTE GUARDIANNAV", message)
+            self._send_email(contact, "ALERTE GUARDIAN", message)
             self._send_sms_notification(contact, location)
             
     def send_location_with_refuges_info(self, location: tuple, refuges_info: str, situation: str = ""):
@@ -87,7 +87,7 @@ Merci de vérifier sa situation.
         maps_url = f"https://maps.google.com/?q={lat},{lon}"
         
         enhanced_message = f"""
-🚨 ALERTE GUARDIANNAV - ASSISTANCE AVEC REFUGES 🚨
+🚨 ALERTE GUARDIAN - ASSISTANCE AVEC REFUGES 🚨
 
 📍 LOCALISATION: {lat}, {lon}
 🗺️ Lien Google Maps: {maps_url}
@@ -106,7 +106,7 @@ Cette alerte contient des informations de sécurité actualisées.
 """
         
         for contact in self.emergency_contacts:
-            self._send_email(contact, "🚨 ALERTE AVEC REFUGES - GUARDIANNAV", enhanced_message)
+            self._send_email(contact, "🚨 ALERTE AVEC REFUGES - GUARDIAN", enhanced_message)
             self._send_sms_notification(contact, location)
     
     def send_confirmation_alert(self, alert_state: str):
@@ -114,7 +114,7 @@ Cette alerte contient des informations de sécurité actualisées.
         self.logger.info(f"Envoi de notification de confirmation: {alert_state}")
         
         message = f"""
-NOTIFICATION GUARDIANNAV
+NOTIFICATION GUARDIAN
 
 État: {alert_state}
 Heure: {time.strftime('%Y-%m-%d %H:%M:%S')}
@@ -125,7 +125,7 @@ Tout semble normal.
         # Envoi optionnel aux contacts selon la configuration
         if self.config.get('notify_on_confirmation', False):
             for contact in self.emergency_contacts:
-                self._send_email(contact, "GuardianNav - Confirmation", message)
+                self._send_email(contact, "Guardian - Confirmation", message)
     
     def _send_email(self, contact: Dict[str, str], subject: str, message: str):
         """Envoie un email à un contact"""
@@ -190,7 +190,7 @@ Tout semble normal.
         lat, lon = location
         
         # Message SMS court mais informatif
-        sms_message = f"🚨 ALERTE GUARDIANNAV 🚨\nVotre contact est en danger!\nPosition: {lat:.4f},{lon:.4f}\nSituation: {situation[:50]}...\nAppelez immédiatement!"
+        sms_message = f"🚨 ALERTE GUARDIAN 🚨\nVotre contact est en danger!\nPosition: {lat:.4f},{lon:.4f}\nSituation: {situation[:50]}...\nAppelez immédiatement!"
         
         self.logger.critical(f"SMS URGENT simulé à {contact.get('phone', 'inconnu')}: {sms_message}")
         
@@ -242,7 +242,7 @@ Tout semble normal.
                                   emergency_type: str,
                                   urgency_level: str,
                                   situation_details: str,
-                                  person_name: str = "Utilisateur GuardianNav",
+                                  person_name: str = "Utilisateur Guardian",
                                   additional_info: Dict[str, Any] = None):
         """
         Envoie un email visuel d'urgence enrichi avec carte et géolocalisation
@@ -395,7 +395,7 @@ Tout semble normal.
         urgency_level = urgency_mapping.get(severity, 'élevée')
         
         # Description de la situation
-        situation = f"Chute détectée par les capteurs GuardianNav. "
+        situation = f"Chute détectée par les capteurs Guardian. "
         if fall_info.get('previous_speed'):
             situation += f"Vitesse avant chute: {fall_info['previous_speed']:.1f} km/h. "
         if fall_info.get('acceleration'):

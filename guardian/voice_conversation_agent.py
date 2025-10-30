@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Agent de Conversation Vocale pour GuardianNav
+Agent de Conversation Vocale pour Guardian
 🎤 Reconnaissance vocale (Speech-to-Text) + 🔊 Synthèse vocale (Text-to-Speech) + 🧠 Vertex AI
-Permet de parler avec GuardianNav et recevoir des réponses intelligentes de Vertex AI
+Permet de parler avec Guardian et recevoir des réponses intelligentes de Vertex AI
 """
 
 import logging
@@ -43,10 +43,10 @@ except ImportError:
         GUARDIAN_MODULES_AVAILABLE = True
     except ImportError:
         GUARDIAN_MODULES_AVAILABLE = False
-        print("⚠️ Modules GuardianNav non disponibles - Mode simulation")
+        print("⚠️ Modules Guardian non disponibles - Mode simulation")
 
 class VoiceConversationAgent:
-    """Agent de conversation vocale complète pour GuardianNav"""
+    """Agent de conversation vocale complète pour Guardian"""
     
     def __init__(self, api_keys_config: Dict[str, Any] = None, vosk_model_path: str = None):
         """
@@ -175,7 +175,7 @@ class VoiceConversationAgent:
         # Message d'accueil
         if not greeting_message:
             greeting_message = (
-                "Bonjour ! GuardianNav est à votre écoute. "
+                "Bonjour ! Guardian est à votre écoute. "
                 "Vous pouvez me parler de votre situation, "
                 "je vais analyser et vous proposer des conseils adaptés. "
                 "Dites 'stop' pour arrêter la conversation."
@@ -196,14 +196,14 @@ class VoiceConversationAgent:
         self.conversation_active = False
         self.is_listening = False
         
-        farewell_message = "Au revoir ! GuardianNav reste disponible si vous avez besoin d'aide."
+        farewell_message = "Au revoir ! Guardian reste disponible si vous avez besoin d'aide."
         self.speak_message(farewell_message)
         
         self.logger.info("🛑 Conversation vocale arrêtée")
         
     def speak_message(self, message: str, priority: str = "normal"):
         """
-        Fait parler GuardianNav
+        Fait parler Guardian
         
         Args:
             message: Message à prononcer
@@ -215,7 +215,7 @@ class VoiceConversationAgent:
         self.is_speaking = True
         
         try:
-            # Arrêter l'écoute pendant que GuardianNav parle
+            # Arrêter l'écoute pendant que Guardian parle
             was_listening = self.is_listening
             self.is_listening = False
             
@@ -223,7 +223,7 @@ class VoiceConversationAgent:
             success = self.speech_agent.speak(message, priority)
             
             if success:
-                self.logger.info(f"🔊 GuardianNav: {message[:100]}...")
+                self.logger.info(f"🔊 Guardian: {message[:100]}...")
                 if self.on_ai_response:
                     self.on_ai_response(message)
             else:

@@ -1,5 +1,5 @@
 """
-SMS Agent for GuardianNav
+SMS Agent for Guardian
 Handles emergency SMS notifications via Twilio
 """
 import logging
@@ -128,9 +128,9 @@ class SMSAgent:
         
         # Message SMS optimisé (160 caractères max pour éviter les frais)
         if what3words:
-            message = f"🚨 URGENCE GuardianNav\\n{user_name} - {emergency_type}\\n📍 {address}\\n🎯 {what3words}\\n🕐 {timestamp}"
+            message = f"🚨 URGENCE Guardian\\n{user_name} - {emergency_type}\\n📍 {address}\\n🎯 {what3words}\\n🕐 {timestamp}"
         else:
-            message = f"🚨 URGENCE GuardianNav\\n{user_name} - {emergency_type}\\n📍 {address}\\n🕐 {timestamp}"
+            message = f"🚨 URGENCE Guardian\\n{user_name} - {emergency_type}\\n📍 {address}\\n🕐 {timestamp}"
         
         # Ajouter numéros d'urgence si la place le permet
         if len(message) < 120:
@@ -144,7 +144,7 @@ class SMSAgent:
             return False
         
         if not message:
-            message = f"✅ GuardianNav: Situation résolue à {datetime.now().strftime('%H:%M')}. Merci pour votre attention."
+            message = f"✅ Guardian: Situation résolue à {datetime.now().strftime('%H:%M')}. Merci pour votre attention."
         
         success_count = 0
         for contact in contacts:

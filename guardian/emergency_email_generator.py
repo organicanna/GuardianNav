@@ -1,5 +1,5 @@
 """
-Générateur d'emails visuels d'urgence pour GuardianNav
+Générateur d'emails visuels d'urgence pour Guardian
 Crée des emails HTML avec cartes, géolocalisation et informations d'urgence
 """
 
@@ -30,7 +30,7 @@ class EmergencyEmailGenerator:
                                     emergency_type: str,
                                     urgency_level: str,
                                     situation_details: str,
-                                    person_name: str = "Utilisateur GuardianNav",
+                                    person_name: str = "Utilisateur Guardian",
                                     additional_info: Dict[str, Any] = None) -> str:
         """
         Génère un email HTML complet pour une urgence
@@ -452,6 +452,6 @@ class EmergencyEmailGenerator:
             emergency_type="🚴 Chute à vélo détectée",
             urgency_level="critique",
             situation_details="Chute à vélo potentiellement grave détectée par les capteurs. La personne ne répond pas depuis 30 secondes.",
-            person_name="Test GuardianNav",
+            person_name="Test Guardian",
             additional_info=test_additional_info
         )

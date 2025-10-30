@@ -1,5 +1,5 @@
 """
-Test et démonstration du SpeechAgent pour GuardianNav
+Test et démonstration du SpeechAgent pour Guardian
 Teste la synthèse vocale avec différents types de messages d'urgence
 """
 import sys
@@ -157,7 +157,7 @@ def test_priority_levels():
     api_keys = load_api_keys()
     speech_agent = SpeechAgent(api_keys)
     
-    test_message = "Ceci est un test de priorité vocale pour GuardianNav."
+    test_message = "Ceci est un test de priorité vocale pour Guardian."
     
     priorities = ["normal", "urgent", "critical"]
     
@@ -186,7 +186,7 @@ def test_google_tts_integration():
         print("   ✅ Client Google TTS configuré")
         
         # Test avec un message d'urgence réaliste
-        emergency_message = "Alerte GuardianNav. Une situation d'urgence a été détectée. Vérifiez immédiatement votre état et celui de vos proches."
+        emergency_message = "Alerte Guardian. Une situation d'urgence a été détectée. Vérifiez immédiatement votre état et celui de vos proches."
         
         print("   Synthèse avec Google TTS...")
         success = speech_agent.speak(emergency_message, "urgent")
@@ -199,7 +199,7 @@ def test_google_tts_integration():
         print("   ⚠️ Client Google TTS non disponible")
         print("   🔄 Test en mode simulation...")
         
-        success = speech_agent.speak("Test de simulation vocale GuardianNav", "normal")
+        success = speech_agent.speak("Test de simulation vocale Guardian", "normal")
         
         if success:
             print("   ✅ Mode simulation - Fonctionnel")
@@ -214,7 +214,7 @@ def demonstrate_full_emergency_scenario():
     api_keys = load_api_keys()
     speech_agent = SpeechAgent(api_keys)
     
-    print("📱 Simulation d'une séquence d'urgence GuardianNav...")
+    print("📱 Simulation d'une séquence d'urgence Guardian...")
     time.sleep(1)
     
     # 1. Détection d'alerte
@@ -245,7 +245,7 @@ def demonstrate_full_emergency_scenario():
 
 def main():
     """Fonction principale du test"""
-    print("🎤 TESTS DE SYNTHÈSE VOCALE - GUARDIANNAV")
+    print("🎤 TESTS DE SYNTHÈSE VOCALE - GUARDIAN")
     print("=" * 50)
     print("Ces tests vérifient le fonctionnement du SpeechAgent")
     print("avec différents types de messages et priorités.\n")
@@ -267,7 +267,7 @@ def main():
             demonstrate_full_emergency_scenario()
         
         print("\n🎉 TESTS TERMINÉS")
-        print("La synthèse vocale GuardianNav est prête à fonctionner!")
+        print("La synthèse vocale Guardian est prête à fonctionner!")
         
     except KeyboardInterrupt:
         print("\n\n⏹️ Tests interrompus par l'utilisateur")

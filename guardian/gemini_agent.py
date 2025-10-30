@@ -1,5 +1,5 @@
 """
-Vertex AI Agent for GuardianNav - Enhanced with Google GenAI
+Vertex AI Agent for Guardian - Enhanced with Google GenAI
 Advanced emergency analysis using Google Generative AI and Vertex AI
 """
 import logging

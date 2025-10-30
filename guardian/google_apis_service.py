@@ -1,5 +1,5 @@
 """
-Service d'intégration complète des APIs Google pour GuardianNav
+Service d'intégration complète des APIs Google pour Guardian
 🌍 Utilise TOUTES les APIs Google disponibles de manière optimale
 🚀 Vertex AI, Maps, Text-to-Speech, Places, Geocoding, Directions
 """
@@ -12,7 +12,7 @@ from typing import Dict, List, Tuple, Optional
 from pathlib import Path
 
 class GoogleAPIsService:
-    """Service unifié pour toutes les APIs Google utilisées par GuardianNav"""
+    """Service unifié pour toutes les APIs Google utilisées par Guardian"""
     
     def __init__(self, api_keys_config: dict = None):
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")

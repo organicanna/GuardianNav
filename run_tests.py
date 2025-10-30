@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test Runner pour GuardianNav
+Test Runner pour Guardian
 Exécute tous les tests ou des catégories spécifiques
 """
 

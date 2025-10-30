@@ -14,7 +14,7 @@ setup(
     description="Agent de sécurité personnelle basé sur IA, surveillant le trajet d'un utilisateur et déclenchant une assistance en cas d'anomalie.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/organicanna/GuardianNav",
+    url="https://github.com/organicanna/Guardian",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 3 - Alpha",

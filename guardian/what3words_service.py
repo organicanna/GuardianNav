@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-What3Words API Integration pour GuardianNav
+What3Words API Integration pour Guardian
 Fournit une localisation précise en 3 mots pour les emails d'urgence
 """
 

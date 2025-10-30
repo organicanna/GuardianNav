@@ -9,7 +9,7 @@
 
 ## 🎯 Vue d'ensemble
 
-**GuardianNav** transforme votre voix en interface d'urgence intelligente. Dites simplement "Au secours, j'ai mal au cœur" et l'IA Gemini analyse votre situation, évalue l'urgence (1-10), guide votre réponse et déclenche automatiquement l'assistance appropriée (SMS famille, email avec carte, services d'urgence).
+**Guardian** transforme votre voix en interface d'urgence intelligente. Dites simplement "Au secours, j'ai mal au cœur" et l'IA Gemini analyse votre situation, évalue l'urgence (1-10), guide votre réponse et déclenche automatiquement l'assistance appropriée (SMS famille, email avec carte, services d'urgence).
 
 ### ✨ Fonctionnalités principales
 - 🎤 **Conversation naturelle** : Interface vocale française (Vosk + Google STT)
@@ -33,8 +33,8 @@
    < 0.5s                    < 2s                < 1s        < 3s
 ```
 
-### 🧠 Différence IA Classique vs GuardianNav
-| Aspect | IA Classique | GuardianNav |
+### 🧠 Différence IA Classique vs Guardian
+| Aspect | IA Classique | Guardian |
 |--------|-------------|-------------|
 | Interface | 📱 Boutons/Apps | 🗣️ Conversation naturelle |
 | Logique | 📋 Règles figées | 🧠 Analyse contextuelle IA |
@@ -312,5 +312,5 @@ MIT License - Voir [LICENSE](LICENSE)
 
 ---
 
-> **🛡️ GuardianNav - Votre sécurité par la voix**  
+> **🛡️ Guardian - Votre sécurité par la voix**  
 > *Développé avec ❤️ pour protéger ce qui compte le plus*

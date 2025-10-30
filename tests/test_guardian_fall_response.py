@@ -75,7 +75,7 @@ def test_guardian_fall_response():
     
     print(f"\n✅ RÉSULTAT:")
     print("─" * 50)
-    print("   🛡️  GuardianNav détecte automatiquement les chutes")
+    print("   🛡️  Guardian détecte automatiquement les chutes")
     print("   🚑 Alerte les secours si vous ne répondez pas")
     print("   📍 Fournit votre position exacte et l'aide à proximité")
     print("   🏥 Guide les secours avec les meilleurs itinéraires")

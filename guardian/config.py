@@ -1,5 +1,5 @@
 """
-Configuration loader for GuardianNav
+Configuration loader for Guardian
 """
 import os
 import yaml
@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Dict, Any
 
 class Config:
-    """Gestionnaire de configuration pour GuardianNav"""
+    """Gestionnaire de configuration pour Guardian"""
     
     def __init__(self, config_file: str = None, profile: str = "default"):
         """

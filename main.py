@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-GuardianNav - Agent de sécurité personnelle basé sur IA
+Guardian - Agent de sécurité personnelle basé sur IA
 Point d'entrée principal pour lancer le système de surveillance
 """
 
@@ -29,24 +29,24 @@ def setup_logging():
 def main():
     """Point d'entrée principal"""
     print("=" * 50)
-    print("GuardianNav - Agent de sécurité personnelle")
+    print("Guardian - Agent de sécurité personnelle")
     print("=" * 50)
     
     setup_logging()
     logger = logging.getLogger(__name__)
     
     try:
-        logger.info("Démarrage de GuardianNav...")
+        logger.info("Démarrage de Guardian...")
         guardian_main()
     except KeyboardInterrupt:
         logger.info("Arrêt demandé par l'utilisateur")
-        print("\nArrêt de GuardianNav...")
+        print("\nArrêt de Guardian...")
     except Exception as e:
         logger.error(f"Erreur critique: {e}")
         print(f"Erreur: {e}")
         sys.exit(1)
     finally:
-        logger.info("GuardianNav arrêté")
+        logger.info("Guardian arrêté")
         print("Au revoir !")
 
 if __name__ == "__main__":

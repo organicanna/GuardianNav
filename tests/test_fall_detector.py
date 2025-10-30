@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test du détecteur de chute pour GuardianNav
+Test du détecteur de chute pour Guardian
 """
 
 import sys
@@ -19,7 +19,7 @@ def test_fall_detection():
     # Configuration des logs
     logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
     
-    print("🧪 Test du détecteur de chute GuardianNav")
+    print("🧪 Test du détecteur de chute Guardian")
     print("=" * 50)
     
     # Initialisation du détecteur
@@ -116,7 +116,7 @@ def test_fall_detection():
 def test_fall_integration():
     """Test d'intégration avec le système principal"""
     print("\n" + "="*50)
-    print("🔗 Test d'intégration avec GuardianNav")
+    print("🔗 Test d'intégration avec Guardian")
     
     # Simuler une séquence réaliste de chute à vélo
     detector = FallDetector()

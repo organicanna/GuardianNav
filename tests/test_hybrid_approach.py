@@ -1,5 +1,5 @@
 """
-Test de l'approche hybride GuardianNav
+Test de l'approche hybride Guardian
 Vertex AI + Google TTS + Système d'urgence intégré
 """
 import sys
@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 def test_hybrid_approach():
     """Test complet de l'approche hybride Vertex AI + TTS"""
     
-    print("🚀 TEST APPROCHE HYBRIDE GUARDIANNAV")
+    print("🚀 TEST APPROCHE HYBRIDE GUARDIAN")
     print("=" * 55)
     print("🧠 Vertex AI Gemini + 🎤 Google TTS + 🛡️ Système d'urgence")
     print("=" * 55)
@@ -96,7 +96,7 @@ def test_hybrid_approach():
         }
         
         orchestrator = GuardianOrchestrator(demo_config)
-        print("   🛡️ GuardianNav orchestrateur initialisé")
+        print("   🛡️ Guardian orchestrateur initialisé")
         
         # Vérifier les capacités hybrides
         hybrid_capabilities = {
@@ -190,7 +190,7 @@ def test_hybrid_approach():
         print(f"   • Gestion automatique des niveaux d'urgence")
         print(f"   • Intégration complète des services Google Cloud")
         
-        print(f"\n🚀 GuardianNav Hybride est opérationnel !")
+        print(f"\n🚀 Guardian Hybride est opérationnel !")
         
         return True
         
@@ -289,7 +289,7 @@ def main():
                 demo_vertex_ai_analysis()
             
             print("\n🎉 APPROCHE HYBRIDE VALIDÉE")
-            print("GuardianNav est prêt avec Vertex AI + Google TTS !")
+            print("Guardian est prêt avec Vertex AI + Google TTS !")
         
     except KeyboardInterrupt:
         print("\n\n⏹️ Tests interrompus par l'utilisateur")

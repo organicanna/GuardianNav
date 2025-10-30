@@ -1,5 +1,5 @@
 """
-Système d'IA et de conseils intelligents pour GuardianNav
+Système d'IA et de conseils intelligents pour Guardian
 Utilise les APIs Google Cloud pour analyser les situations et donner des conseils
 """
 
