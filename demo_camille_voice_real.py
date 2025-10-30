@@ -185,14 +185,20 @@ def load_guardian_agent():
         agent.gmail_agent = gmail_agent
         
         # Ajouter méthode d'envoi d'email pour la démo
-        def send_emergency_email_alert():
-            """Méthode d'envoi d'email d'urgence pour la démo"""
+        def send_emergency_email_alert(user_phone=None, real_location=None, real_situation=None, user_fullname="Utilisateur Inconnu"):
+            """Méthode d'envoi d'email d'urgence pour la démo avec informations réelles"""
             if not gmail_agent.is_available:
                 return False
             
             try:
-                # Coordonnées de Paris pour la démo
-                demo_location = (48.8566, 2.3522)
+                # Coordonnées exactes : 8 rue de Londres, 75009 Paris (Google France)
+                demo_location = (48.8756, 2.3264)  # Coordonnées précises de Google France
+                
+                # Utiliser la vraie localisation ou celle par défaut
+                location_text = real_location or "8 rue de Londres, 75009 Paris (bureaux Google France)"
+                
+                # Utiliser la vraie situation rapportée ou celle par défaut  
+                situation_text = real_situation or "Situation d'urgence détectée par l'IA GuardianNav"
                 
                 # Obtenir les contacts d'urgence de la config
                 emergency_contacts = config.get('emergency_contacts', [
@@ -205,12 +211,13 @@ def load_guardian_agent():
                     try:
                         subject, html_body, text_body = gmail_agent.create_emergency_email(
                             recipient_email=contact.get("email"),
-                            user_name="Camille (Démo)",
-                            location="Paris, France (démonstration)",
-                            situation="Situation d'urgence détectée par l'IA GuardianNav lors de la démonstration vocale",
+                            user_name=user_fullname,
+                            location=location_text,
+                            situation=situation_text,
                             location_coords=demo_location,
-                            emergency_type="🚨 Alerte démo GuardianNav",
-                            urgency_level="élevée"
+                            emergency_type="🚨 Alerte Guardian - Situation d'urgence",
+                            urgency_level="élevée",
+                            user_phone=user_phone
                         )
                         
                         result = gmail_agent.send_email(contact.get("email"), subject, html_body, text_body)
@@ -523,7 +530,6 @@ def display_scenario_intro():
     print("📍 **LOCALISATION :** 8 rue de Londres, 75009 Paris (bureaux Google France)")  
     print("🕙 **HEURE :** 22h00")
     print("📅 **DATE :** Vendredi 31 octobre 2025")
-    print("⚠️ **SITUATION :** Je me sens en danger")
     print("="*70)
     print()
     
@@ -537,9 +543,7 @@ def display_scenario_intro():
     print()
     
     print("🎙️ **VRAIE RECONNAISSANCE VOCALE:**")
-    print("• Parlez dans votre microphone pour interagir 🎤")
-    print("• GuardianNav utilisera Vosk pour vous comprendre 🗣️")
-    print("• L'IA Gemini analysera votre situation en temps réel 🧠")
+    print("• Parlez dans votre microphone pour interagir avec Guardian🎤")
     print("• Dites 'stop' ou 'arrêt' pour terminer une écoute")
     print()
 
@@ -549,13 +553,73 @@ def run_voice_camille_demo():
     # Introduction
     display_scenario_intro()
     
+    # Demande du prénom et nom
+    print("\n� **CONFIGURATION PERSONNELLE**")
+    print("="*50)
+    print("Pour une démonstration personnalisée, veuillez saisir les informations de l'utilisateur:")
+    print()
+    
+    # Saisie du prénom
+    user_firstname = input("📝 Prénom de l'utilisateur (ou appuyez sur Entrée pour 'Camille'): ").strip()
+    if not user_firstname:
+        user_firstname = "Camille"
+        print(f"✅ Prénom par défaut: {user_firstname}")
+    else:
+        print(f"✅ Prénom configuré: {user_firstname}")
+    
+    # Saisie du nom
+    user_lastname = input("📝 Nom de famille de l'utilisateur (ou appuyez sur Entrée pour 'Dupont'): ").strip()
+    if not user_lastname:
+        user_lastname = "Dupont"
+        print(f"✅ Nom par défaut: {user_lastname}")
+    else:
+        print(f"✅ Nom configuré: {user_lastname}")
+    
+    user_fullname = f"{user_firstname} {user_lastname}"
+    print(f"👤 **Utilisateur configuré:** {user_fullname}")
+    print()
+    
+    print("📱 **NUMÉRO DE TÉLÉPHONE**")
+    print("Pour les liens WhatsApp d'urgence, veuillez saisir le numéro de téléphone:")
+    print()
+    
+    # Saisie du numéro avec validation
+    user_phone = None
+    while True:
+        phone_input = input(f"📞 Numéro de {user_firstname} (format: +33612345678): ").strip()
+        
+        if not phone_input:
+            print("⚠️ Pas de numéro saisi - les liens WhatsApp utiliseront le numéro par défaut")
+            user_phone = "+33634129517"  # Numéro par défaut de la config
+            break
+        
+        # Validation basique du format
+        if phone_input.startswith(('+33', '0')) and len(phone_input.replace('+', '').replace(' ', '').replace('-', '')) >= 10:
+            # Nettoyer et formater le numéro
+            clean_phone = phone_input.replace(' ', '').replace('-', '').replace('(', '').replace(')', '')
+            if clean_phone.startswith('0'):
+                clean_phone = '+33' + clean_phone[1:]
+            elif not clean_phone.startswith('+'):
+                clean_phone = '+' + clean_phone
+            
+            user_phone = clean_phone
+            print(f"✅ Numéro configuré: {user_phone}")
+            break
+        else:
+            print("❌ Format invalide. Utilisez +33612345678 ou 0612345678")
+            retry = input("Réessayer ? (o/N): ").lower()
+            if retry != 'o':
+                user_phone = "+33634129517"  # Numéro par défaut
+                print("⚠️ Utilisation du numéro par défaut pour la démo")
+                break
+    
     # Vérification des prérequis
     if not VOICE_AVAILABLE:
-        print("❌ Modules de reconnaissance vocale non disponibles")
+        print("\n❌ Modules de reconnaissance vocale non disponibles")
         print("💡 Installez avec: pip3 install vosk sounddevice")
         return
     
-    input("🚀 Appuyez sur Entrée pour commencer la démo avec reconnaissance vocale...")
+    input("\n🚀 Appuyez sur Entrée pour commencer la démo avec reconnaissance vocale...")
     print()
     
     # Initialisation de la reconnaissance vocale
@@ -606,15 +670,15 @@ def run_voice_camille_demo():
     print("="*45)
     
     # Message d'accueil GuardianNav
-    welcome_msg = """Bonjour Camille. Je suis GuardianNav, votre assistant de sécurité personnel. 
+    welcome_msg = f"""Bonjour {user_firstname}. Je suis GuardianNav, votre assistant de sécurité personnel. 
 Je détecte que vous m'activez à une heure tardive près des bureaux Google France. 
 Je vois que vous souhaitez vous rendre Place de la Concorde. Êtes-vous en sécurité ? 
 Décrivez-moi votre situation actuelle en parlant dans votre microphone."""
     
     simulate_tts_response(welcome_msg)
     
-    # Première interaction - Camille explique sa situation avec sa voix
-    print("🎤 **À VOUS DE PARLER, CAMILLE...**")
+    # Première interaction - L'utilisateur explique sa situation avec sa voix
+    print(f"🎤 **À VOUS DE PARLER, {user_firstname.upper()}...**")
     situation_vocale = recognizer.listen_for_speech(timeout=20)
     
     if not situation_vocale:
@@ -624,21 +688,28 @@ Décrivez-moi votre situation actuelle en parlant dans votre microphone."""
     print(f"\n📝 **SITUATION RAPPORTÉE:** {situation_vocale}")
     
     # Construction du prompt contextualisé et optimisé pour Gemini
-    full_prompt = f"""Tu es GuardianNav, un assistant IA spécialisé en sécurité personnelle. Une femme nommée Camille t'appelle à l'aide.
+    full_prompt = f"""Tu es GuardianNav, un assistant IA spécialisé en sécurité personnelle. Une personne nommée {user_fullname} t'appelle à l'aide.
 
 CONTEXTE DE LA SITUATION:
-• Personne: Camille (femme)
+• Personne: {user_fullname}
 • Moment: 22h00, vendredi 31 octobre 2025 (heure tardive)
 • Lieu: 8 rue de Londres, 75009 Paris (près des bureaux Google France, quartier Europe/Saint-Lazare)
 • Destination souhaitée: Place de la Concorde
 • Situation: "{situation_vocale}"
 
-MISSION: Analyse cette situation d'urgence et réponds directement à Camille de manière professionnelle, rassurante mais ferme.
+MISSION: Analyse cette situation d'urgence et réponds directement à {user_firstname} de manière professionnelle, rassurante mais ferme.
 
 CAPACITÉS DISPONIBLES: 
 - Si tu juges qu'un itinéraire sécurisé est nécessaire, inclus "DEMANDE_ITINERAIRE_SECURISE" dans ta réponse
 - Si tu veux proposer des lieux sécurisés à proximité (hôpitaux, commissariats, pharmacies), inclus "DEMANDE_LIEUX_SECURISES" dans ta réponse
-- Si la situation est grave (niveau 7+/10) et nécessite d'alerter les proches, inclus "DEMANDE_ENVOI_EMAIL_URGENCE" dans ta réponse
+- Si tu estimes que la situation présente un DANGER RÉEL qui nécessite d'alerter immédiatement les proches (ex: poursuivie, harcelée, menacée, blessée, perdue, agression, accident), inclus "DEMANDE_ENVOI_EMAIL_URGENCE" dans ta réponse
+
+DÉCISION D'ALERTE AUX PROCHES: Tu dois décider intelligemment d'alerter les proches quand:
+• La personne est en danger immédiat (suivie, menacée, agressée)
+• Elle est dans une situation potentiellement grave (perdue la nuit, blessée, harcelée)
+• Sa sécurité physique est compromise
+• Elle a besoin d'aide urgente et pourrait ne plus pouvoir communiquer
+NE PAS alerter pour: stress léger, demande d'informations, situations non dangereuses
 
 FORMAT DE RÉPONSE (en français):
 **NIVEAU D'URGENCE:** [1-10]/10
@@ -663,7 +734,7 @@ Si la situation l'exige, demande des lieux sécurisés avec DEMANDE_LIEUX_SECURI
 [Numéro approprié à la situation]
 
 **MESSAGE PERSONNEL:**
-Camille, [message rassurant et encourageant personnalisé]
+{user_firstname}, [message rassurant et encourageant personnalisé]
 
 Réponds uniquement dans ce format. Sois précise, empathique et professionnelle."""
     
@@ -674,6 +745,25 @@ Réponds uniquement dans ce format. Sois précise, empathique et professionnelle
     
     # Charger la configuration une seule fois
     config = yaml.safe_load(open('api_keys.yaml', 'r', encoding='utf-8'))
+    
+    # NOUVELLE FONCTIONNALITÉ: L'agent décide intelligemment d'alerter les proches
+    def extract_urgency_level(response):
+        """Extrait le niveau d'urgence de la réponse IA (format: **NIVEAU D'URGENCE:** X/10)"""
+        import re
+        match = re.search(r'\*\*NIVEAU D\'URGENCE:\*\*\s*(\d+)/10', response)
+        if match:
+            return int(match.group(1))
+        return 0
+    
+    # Afficher le niveau d'urgence détecté
+    urgency_level = extract_urgency_level(ai_response)
+    print(f"🚨 **NIVEAU D'URGENCE DÉTECTÉ:** {urgency_level}/10")
+    
+    # L'agent décide intelligemment s'il faut alerter les proches
+    agent_wants_email = "DEMANDE_ENVOI_EMAIL_URGENCE" in ai_response
+    if agent_wants_email:
+        print(f"🤖 **L'AGENT GUARDIANNAV DÉCIDE D'ALERTER LES PROCHES**")
+        print(f"   → Situation évaluée comme nécessitant une intervention des contacts d'urgence")
     
     # Vérifier si l'IA demande un itinéraire sécurisé
     if "DEMANDE_ITINERAIRE_SECURISE" in ai_response:
@@ -708,11 +798,18 @@ Réponds uniquement dans ce format. Sois précise, empathique et professionnelle
         places_response = format_safe_places_response(places_info, camille_lat, camille_lng)
         ai_response = ai_response.replace("DEMANDE_LIEUX_SECURISES", places_response)
     
-    # Traitement de la demande d'envoi d'email d'urgence
+    # Traitement intelligent de l'envoi d'email décidé par l'agent
     if "DEMANDE_ENVOI_EMAIL_URGENCE" in ai_response:
         if agent.gmail_agent and agent.gmail_agent.is_available:
-            print("🚨 **ENVOI D'EMAIL D'URGENCE EN COURS...**")
-            success = agent.send_emergency_email_alert()
+            print("🚨 **ENVOI D'EMAIL D'URGENCE DÉCIDÉ PAR L'AGENT...**")
+            # Informations exactes pour l'email
+            exact_location = "8 rue de Londres, 75009 Paris (bureaux Google France), près de la gare Saint-Lazare"
+            success = agent.send_emergency_email_alert(
+                user_phone=user_phone, 
+                real_location=exact_location, 
+                real_situation=situation_vocale,
+                user_fullname=user_fullname
+            )
             if success:
                 email_response = "✅ Email d'urgence envoyé avec succès aux contacts d'urgence."
             else:
@@ -733,15 +830,15 @@ Réponds uniquement dans ce format. Sois précise, empathique et professionnelle
     if follow_up_vocal:
         print(f"\n📝 **MISE À JOUR:** {follow_up_vocal}")
         
-        follow_prompt = f"""Tu es GuardianNav. Camille te donne une mise à jour sur sa situation de sécurité.
+        follow_prompt = f"""Tu es GuardianNav. {user_fullname} te donne une mise à jour sur sa situation de sécurité.
 
 RAPPEL DU CONTEXTE:
-• Camille était près des bureaux Google France (8 rue de Londres, 75009 Paris) à 22h, se sentait suivie
+• {user_fullname} était près des bureaux Google France (8 rue de Londres, 75009 Paris) à 22h, se sentait suivie
 • Quartier Europe/Saint-Lazare, zone qui se vide après les heures de bureau
 • Tu lui as déjà donné des conseils de sécurité
-• Elle vient de te répondre par reconnaissance vocale
+• Cette personne vient de te répondre par reconnaissance vocale
 
-MISE À JOUR DE CAMILLE: "{follow_up_vocal}"
+MISE À JOUR DE {user_firstname.upper()}: "{follow_up_vocal}"
 
 MISSION: Réponds à cette mise à jour de manière professionnelle et bienveillante.
 
@@ -769,7 +866,7 @@ Reste concise, empathique et professionnelle."""
     print("\n🎯 **CONCLUSION DE LA DÉMO VOCALE**")
     print("="*40)
     print("✅ Démonstration vocale terminée avec succès")
-    print("🎭 Scénario Camille avec vraie reconnaissance vocale")
+    print(f"🎭 Scénario {user_fullname} avec vraie reconnaissance vocale")
     print("🤖 GuardianNav + Vosk + Gemini IA")
     print()
     print("💡 **POINTS CLÉS DÉMONTRÉS:**")

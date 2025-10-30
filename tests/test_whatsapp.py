@@ -4,7 +4,12 @@ Test de l'intégration WhatsApp dans les emails d'urgence
 """
 
 import sys
-sys.path.append('.')
+import os
+from pathlib import Path
+
+# Ajouter le répertoire parent au path pour les imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 import yaml
 from guardian.gmail_emergency_agent import GmailEmergencyAgent
 
