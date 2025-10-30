@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-DÉMO GUARDIANNAV - SCÉNARIO CAMILLE AVEC VRAIE RECONNAISSANCE VOCALE
-Démonstration avec speech-to-text réel (Vosk) + IA Gemini
-Personnage : Camille, près des locaux Google, 22h, vendredi 31 octobre
+DÉMO GUARDIANNAV - AGENT LIVE AVEC VRAIE RECONNAISSANCE VOCALE
+Démonstration interactive avec speech-to-text réel (Vosk) + IA Gemini
+Personnalisation complète : prénom, nom, numéro + scénario d'urgence réaliste
 """
 
 import sys
@@ -388,7 +388,7 @@ def get_nearby_safe_places(config, location, place_types=['hospital', 'police', 
         print(f"⚠️ Erreur lors de la recherche de lieux: {e}")
         return f"❌ Erreur lors de la recherche de lieux sécurisés: {e}"
 
-def format_safe_places_response(places_info, camille_lat=48.8756, camille_lng=2.3264):
+def format_safe_places_response(places_info, user_lat=48.8756, user_lng=2.3264):
     """Formate la réponse des lieux sécurisés pour l'affichage avec distances"""
     if isinstance(places_info, str):
         return places_info
@@ -399,7 +399,7 @@ def format_safe_places_response(places_info, camille_lat=48.8756, camille_lng=2.
     # Calculer les distances pour chaque lieu
     for place in places_info:
         if place.get('lat') and place.get('lng'):
-            distance_m = calculate_distance(camille_lat, camille_lng, place['lat'], place['lng'])
+            distance_m = calculate_distance(user_lat, user_lng, place['lat'], place['lng'])
             place['distance'] = distance_m
             place['distance_formatted'] = format_distance(distance_m)
         else:
@@ -524,9 +524,9 @@ def analyze_situation_with_ai(agent, situation_text):
 
 def display_scenario_intro():
     """Affiche l'introduction du scénario"""
-    print("🎭 DÉMO GUARDIANNAV - SCÉNARIO CAMILLE (RECONNAISSANCE VOCALE)")
+    print("🎭 DÉMO GUARDIANNAV - AGENT LIVE (RECONNAISSANCE VOCALE)")
     print("="*70)
-    print("👤 **PERSONNAGE :** Camille")
+    print("👤 **UTILISATEUR :** Personnalisable")
     print("📍 **LOCALISATION :** 8 rue de Londres, 75009 Paris (bureaux Google France)")  
     print("🕙 **HEURE :** 22h00")
     print("📅 **DATE :** Vendredi 31 octobre 2025")
@@ -534,7 +534,7 @@ def display_scenario_intro():
     print()
     
     print("🎯 **CONTEXTE DU SCÉNARIO:**")
-    print("Vous êtes Camille, il est tard le soir, vous êtes seule près")
+    print("Vous êtes dans une situation d'urgence, il est tard le soir, vous êtes près")
     print("des bureaux Google France (8 rue de Londres, 9ème arrondissement).")
     print("Le quartier Europe/Saint-Lazare se vide après les heures de bureau.")
     print("Vous devez vous rendre Place de la Concorde, mais vous avez")
@@ -547,8 +547,8 @@ def display_scenario_intro():
     print("• Dites 'stop' ou 'arrêt' pour terminer une écoute")
     print()
 
-def run_voice_camille_demo():
-    """Lance la démonstration du scénario Camille avec vraie reconnaissance vocale"""
+def run_live_agent_demo():
+    """Lance la démonstration de l'agent live avec vraie reconnaissance vocale"""
     
     # Introduction
     display_scenario_intro()
@@ -560,9 +560,9 @@ def run_voice_camille_demo():
     print()
     
     # Saisie du prénom
-    user_firstname = input("📝 Prénom de l'utilisateur (ou appuyez sur Entrée pour 'Camille'): ").strip()
+    user_firstname = input("📝 Prénom de l'utilisateur (ou appuyez sur Entrée pour 'Alex'): ").strip()
     if not user_firstname:
-        user_firstname = "Camille"
+        user_firstname = "Alex"
         print(f"✅ Prénom par défaut: {user_firstname}")
     else:
         print(f"✅ Prénom configuré: {user_firstname}")
@@ -791,11 +791,11 @@ Réponds uniquement dans ce format. Sois précise, empathique et professionnelle
             ['hospital', 'police', 'pharmacy', 'gas_station']
         )
         
-        # Coordonnées de Camille (8 rue de Londres, Paris)
-        camille_coords = location.split(',')
-        camille_lat, camille_lng = float(camille_coords[0]), float(camille_coords[1])
+        # Coordonnées utilisateur (8 rue de Londres, Paris)
+        user_coords = location.split(',')
+        user_lat, user_lng = float(user_coords[0]), float(user_coords[1])
         
-        places_response = format_safe_places_response(places_info, camille_lat, camille_lng)
+        places_response = format_safe_places_response(places_info, user_lat, user_lng)
         ai_response = ai_response.replace("DEMANDE_LIEUX_SECURISES", places_response)
     
     # Traitement intelligent de l'envoi d'email décidé par l'agent
@@ -881,7 +881,7 @@ Reste concise, empathique et professionnelle."""
 def main():
     """Point d'entrée principal"""
     try:
-        run_voice_camille_demo()
+        run_live_agent_demo()
     except KeyboardInterrupt:
         print("\n\n⚠️ Démo interrompue par l'utilisateur")
         print("🛡️ En situation réelle, GuardianNav resterait disponible")

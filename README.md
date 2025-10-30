@@ -122,7 +122,7 @@ python -c "import sounddevice as sd; print(sd.query_devices())"
 
 ### 🎭 Mode Démo (Recommandé)
 ```bash
-python demo_camille_voice_real.py
+python demo_live_agent.py
 # Scénario personnalisable: saisissez votre prénom, nom et numéro
 # Démonstration avec vraie reconnaissance vocale et IA Gemini
 # - Interface personnalisée avec votre identité
@@ -303,10 +303,6 @@ const whatsappLink = `https://wa.me/${phoneNumber}?text=${prefilledMessage}`;
 ## �🆘 Urgence & Support
 
 **En cas d'urgence réelle : appelez le 15 (SAMU), 17 (Police), 18 (Pompiers)**
-
-- 🐛 **Issues** : [GitHub Issues](https://github.com/organicanna/GuardianNav/issues)
-- 📖 **Doc complète** : [Wiki](https://github.com/organicanna/GuardianNav/wiki)  
-- 💬 **Discussions** : [GitHub Discussions](https://github.com/organicanna/GuardianNav/discussions)
 
 ---
 
