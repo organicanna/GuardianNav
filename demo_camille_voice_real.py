@@ -11,12 +11,45 @@ import yaml
 import json
 import threading
 import time
+import requests
+import math
 from datetime import datetime
 
-# Ajouter le chemin vers les modules GuardianNav
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Imports pour la reconnaissance vocale
+def calculate_distance(lat1, lon1, lat2, lon2):
+    """Calcule la distance en mètres entre deux points géographiques (formule haversine)"""
+    # Rayon de la Terre en kilomètres
+    R = 6371.0
+    
+    # Conversion en radians
+    lat1_rad = math.radians(lat1)
+    lon1_rad = math.radians(lon1)
+    lat2_rad = math.radians(lat2)
+    lon2_rad = math.radians(lon2)
+    
+    # Différences
+    dlat = lat2_rad - lat1_rad
+    dlon = lon2_rad - lon1_rad
+    
+    # Formule haversine
+    a = math.sin(dlat/2)**2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon/2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+    
+    # Distance en kilomètres, puis conversion en mètres
+    distance_km = R * c
+    distance_m = distance_km * 1000
+    
+    return round(distance_m)
+
+def format_distance(distance_meters):
+    """Formate la distance pour l'affichage"""
+    if distance_meters < 1000:
+        return f"{distance_meters}m"
+    else:
+        distance_km = distance_meters / 1000
+        return f"{distance_km:.1f}km"
+
 try:
     import vosk
     import sounddevice as sd
@@ -26,7 +59,6 @@ except ImportError as e:
     print(f"❌ Erreur import vocal: {e}")
     VOICE_AVAILABLE = False
 
-# Imports pour la synthèse vocale 
 try:
     import pygame
     TTS_AVAILABLE = True
@@ -138,22 +170,18 @@ def load_guardian_agent():
         google_config = config.get('google_cloud', {})
         gemini_config = google_config.get('gemini', {})
         
-        print(f"🔍 Configuration trouvée:")
-        print(f"   - Gemini enabled: {gemini_config.get('enabled', False)}")
-        print(f"   - API key présente: {bool(gemini_config.get('api_key'))}")
-        if gemini_config.get('api_key'):
-            key = gemini_config.get('api_key')
-            print(f"   - API key: {key[:20]}...{key[-4:] if len(key) > 24 else key}")
+        print(f"🔍 Configuration Gemini trouvée")
+        print(f"   - Service: {'✅ Activé' if gemini_config.get('enabled', False) else '❌ Désactivé'}")
+        print(f"   - Authentification: {'✅ Configurée' if bool(gemini_config.get('api_key')) else '❌ Manquante'}")
         print(f"   - Modèle: {gemini_config.get('model', 'non spécifié')}")
         
         # Importer et initialiser l'agent
         from guardian.gemini_agent import VertexAIAgent
         agent = VertexAIAgent(config)
         
-        print(f"🤖 Agent initialisé:")
-        print(f"   - Type API: {agent.api_type}")
-        print(f"   - Disponible: {agent.is_available}")
-        print(f"   - Clé configurée: {bool(agent.api_key and agent.api_key != 'YOUR_VERTEX_AI_API_KEY')}")
+        print(f"🤖 Agent GuardianNav:")
+        print(f"   - IA: {'✅ Disponible' if agent.is_available else '⚠️ Mode simulation'}")
+        print(f"   - Prêt: {'✅ Opérationnel' if agent.api_key and agent.api_key != 'YOUR_VERTEX_AI_API_KEY' else '❌ Non configuré'}")
         
         return agent, True
         
@@ -163,6 +191,232 @@ def load_guardian_agent():
     except Exception as e:
         print(f"⚠️ Erreur chargement agent: {e}")
         return None, False
+
+def get_safe_route_directions(config, origin, destination):
+    """Obtient un itinéraire sécurisé avec l'API Google Directions"""
+    try:
+        # Récupérer la clé API Maps (utilisée aussi pour Directions)
+        services = config.get('google_cloud', {}).get('services', {})
+        maps_key = services.get('maps_api_key')
+        
+        if not maps_key or maps_key.startswith("YOUR_"):
+            return "⚠️ API Maps non configurée - impossible de calculer l'itinéraire"
+        
+        print(f"🔑 Utilisation de la clé Maps API: {maps_key[:20]}...")
+        
+        # URL de l'API Google Directions
+        directions_url = "https://maps.googleapis.com/maps/api/directions/json"
+        
+        # Paramètres pour privilégier la sécurité
+        params = {
+            'origin': origin,
+            'destination': destination,
+            'mode': 'walking',  # Mode piéton
+            'avoid': 'indoor',  # Éviter les passages souterrains
+            'region': 'fr',     # France
+            'language': 'fr',   # Français
+            'key': maps_key
+        }
+        
+        print("🗺️ [Calcul d'itinéraire sécurisé avec Google Directions API...]")
+        response = requests.get(directions_url, params=params, timeout=10)
+        print(f"📡 Réponse API: {response.status_code}")
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            if data['status'] == 'OK' and data['routes']:
+                route = data['routes'][0]
+                leg = route['legs'][0]
+                print("✅ Itinéraire trouvé avec succès")
+                
+                # Extraire les informations importantes
+                duration = leg['duration']['text']
+                distance = leg['distance']['text']
+                start_address = leg['start_address']
+                end_address = leg['end_address']
+                
+                # Extraire les étapes principales
+                steps = []
+                for step in leg['steps'][:5]:  # Premières 5 étapes
+                    instruction = step['html_instructions']
+                    # Nettoyer les balises HTML basiques
+                    instruction = instruction.replace('<b>', '').replace('</b>', '')
+                    instruction = instruction.replace('<div>', ' - ').replace('</div>', '')
+                    steps.append(f"• {instruction}")
+                
+                route_info = {
+                    'duration': duration,
+                    'distance': distance,
+                    'start_address': start_address,
+                    'end_address': end_address,
+                    'steps': steps[:3]  # 3 premières étapes seulement
+                }
+                
+                return route_info
+            else:
+                error_msg = data.get('status', 'Erreur inconnue')
+                if error_msg == 'REQUEST_DENIED':
+                    return "❌ Accès refusé à l'API Directions. Vérifiez que l'API Directions est activée dans Google Cloud Console."
+                elif error_msg == 'OVER_QUERY_LIMIT':
+                    return "❌ Quota API dépassé pour aujourd'hui."
+                else:
+                    return f"❌ Impossible de calculer l'itinéraire: {error_msg}"
+        else:
+            return f"❌ Erreur API Directions: {response.status_code}"
+            
+    except Exception as e:
+        print(f"⚠️ Erreur lors du calcul d'itinéraire: {e}")
+        return "❌ Erreur lors du calcul de l'itinéraire"
+
+def get_nearby_safe_places(config, location, place_types=['hospital', 'police', 'pharmacy', 'gas_station']):
+    """Trouve des lieux sécurisés à proximité avec l'API Google Places"""
+    try:
+        # Récupérer la clé API Places
+        services = config.get('google_cloud', {}).get('services', {})
+        places_key = services.get('places_api_key')
+        
+        if not places_key or places_key.startswith("YOUR_"):
+            return "⚠️ API Places non configurée - impossible de trouver des lieux sécurisés"
+        
+        print(f"🔍 Recherche de lieux sécurisés à proximité...")
+        
+        # URL de l'API Google Places - Nearby Search
+        places_url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
+        
+        safe_places = []
+        
+        # Rechercher différents types de lieux sécurisés
+        for place_type in place_types:
+            params = {
+                'location': location,
+                'radius': 1000,  # 1km de rayon
+                'type': place_type,
+                'language': 'fr',
+                'key': places_key
+            }
+            
+            response = requests.get(places_url, params=params, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                if data['status'] == 'OK':
+                    # Prendre les 2 premiers résultats par type
+                    for place in data.get('results', [])[:2]:
+                        if place.get('business_status') == 'OPERATIONAL':
+                            # Récupérer les coordonnées du lieu
+                            geometry = place.get('geometry', {})
+                            location_coords = geometry.get('location', {})
+                            
+                            place_info = {
+                                'name': place.get('name'),
+                                'type': place_type,
+                                'rating': place.get('rating', 'N/A'),
+                                'vicinity': place.get('vicinity'),
+                                'open_now': place.get('opening_hours', {}).get('open_now', 'Inconnu'),
+                                'lat': location_coords.get('lat'),
+                                'lng': location_coords.get('lng')
+                            }
+                            safe_places.append(place_info)
+        
+        if safe_places:
+            print(f"✅ {len(safe_places)} lieux sécurisés trouvés")
+            return safe_places
+        else:
+            return "ℹ️ Aucun lieu sécurisé trouvé dans un rayon de 1km"
+            
+    except Exception as e:
+        print(f"⚠️ Erreur lors de la recherche de lieux: {e}")
+        return f"❌ Erreur lors de la recherche de lieux sécurisés: {e}"
+
+def format_safe_places_response(places_info, camille_lat=48.8756, camille_lng=2.3264):
+    """Formate la réponse des lieux sécurisés pour l'affichage avec distances"""
+    if isinstance(places_info, str):
+        return places_info
+    
+    if not places_info:
+        return "ℹ️ Aucun lieu sécurisé trouvé à proximité"
+    
+    # Calculer les distances pour chaque lieu
+    for place in places_info:
+        if place.get('lat') and place.get('lng'):
+            distance_m = calculate_distance(camille_lat, camille_lng, place['lat'], place['lng'])
+            place['distance'] = distance_m
+            place['distance_formatted'] = format_distance(distance_m)
+        else:
+            place['distance'] = float('inf')  # Très loin si pas de coordonnées
+            place['distance_formatted'] = "N/A"
+    
+    # Organiser par type de lieu et trier par distance
+    places_by_type = {}
+    for place in places_info:
+        place_type = place['type']
+        if place_type not in places_by_type:
+            places_by_type[place_type] = []
+        places_by_type[place_type].append(place)
+    
+    # Trier chaque type par distance (plus proche d'abord)
+    for place_type in places_by_type:
+        places_by_type[place_type].sort(key=lambda x: x.get('distance', float('inf')))
+    
+    # Traduction des types
+    type_translations = {
+        'hospital': '🏥 **HÔPITAUX/URGENCES**',
+        'police': '🚔 **COMMISSARIATS**', 
+        'pharmacy': '💊 **PHARMACIES**',
+        'gas_station': '⛽ **STATIONS-SERVICE**',
+        'bank': '🏦 **BANQUES/ATM**'
+    }
+    
+    formatted_sections = []
+    
+    for place_type, places in places_by_type.items():
+        type_title = type_translations.get(place_type, f"📍 **{place_type.upper()}**")
+        formatted_sections.append(type_title)
+        
+        for place in places:
+            open_status = ""
+            if place['open_now'] == True:
+                open_status = " 🟢 (Ouvert)"
+            elif place['open_now'] == False:
+                open_status = " 🔴 (Fermé)" 
+                
+            rating_str = f" ⭐{place['rating']}" if place['rating'] != 'N/A' else ""
+            distance_str = f" 📏 {place['distance_formatted']}"
+            
+            formatted_sections.append(f"• **{place['name']}**{rating_str}{open_status}{distance_str}")
+            formatted_sections.append(f"  📍 {place['vicinity']}")
+        
+        formatted_sections.append("")  # Ligne vide entre les sections
+    
+    formatted = f"""🏪 **LIEUX SÉCURISÉS À PROXIMITÉ (triés par distance):**
+
+{chr(10).join(formatted_sections).rstrip()}
+
+💡 **Dirigez-vous vers le lieu LE PLUS PROCHE qui est ouvert. Les hôpitaux et commissariats sont disponibles 24h/24.**
+🚶‍♀️ **Distances calculées à pied depuis votre position actuelle.**"""
+    
+    return formatted
+
+def format_route_response(route_info):
+    """Formate la réponse d'itinéraire pour l'affichage"""
+    if isinstance(route_info, str):
+        return route_info
+    
+    formatted = f"""🗺️ **ITINÉRAIRE SÉCURISÉ CALCULÉ:**
+
+📍 **Départ:** Près de {route_info['start_address']}
+🎯 **Destination:** {route_info['end_address']}
+⏱️ **Durée estimée:** {route_info['duration']}
+📏 **Distance:** {route_info['distance']}
+
+🚶‍♀️ **PREMIÈRES ÉTAPES:**
+{chr(10).join(route_info['steps'])}
+
+💡 **Cet itinéraire privilégie les rues principales et éclairées pour votre sécurité.**"""
+    
+    return formatted
 
 def simulate_tts_response(text):
     """Simule la synthèse vocale"""
@@ -184,8 +438,8 @@ def analyze_situation_with_ai(agent, situation_text):
         print("💡 Vérifiez votre fichier api_keys.yaml")
         return "**ERREUR** : Clé API Gemini non configurée. Vérifiez api_keys.yaml"
     
-    print(f"🧠 [Analyse IA Gemini en cours... API: {agent.api_type}]")
-    print(f"🔑 Clé API configurée: {agent.api_key[:20]}..." if len(agent.api_key) > 20 else "🔑 Clé API très courte")
+    print(f"🧠 [Analyse IA Gemini en cours...]")
+    print(f"🤖 Service: {agent.api_type.upper()}")
     print(f"🎯 Modèle: {agent.model_name}")
     
     try:
@@ -210,23 +464,24 @@ def analyze_situation_with_ai(agent, situation_text):
         print(f"❌ Erreur lors de l'appel à l'API Gemini: {e}")
         return f"**ERREUR API** : Impossible de joindre l'API Gemini - {e}"
 
-# Cette fonction est maintenant supprimée - on utilise SEULEMENT l'API Gemini réelle
-
 def display_scenario_intro():
     """Affiche l'introduction du scénario"""
     print("🎭 DÉMO GUARDIANNAV - SCÉNARIO CAMILLE (RECONNAISSANCE VOCALE)")
     print("="*70)
     print("👤 **PERSONNAGE :** Camille")
-    print("📍 **LOCALISATION :** Près des locaux Google")  
+    print("📍 **LOCALISATION :** 8 rue de Londres, 75009 Paris (bureaux Google France)")  
     print("🕙 **HEURE :** 22h00")
     print("📅 **DATE :** Vendredi 31 octobre 2025")
+    print("⚠️ **SITUATION :** Je me sens en danger")
     print("="*70)
     print()
     
     print("🎯 **CONTEXTE DU SCÉNARIO:**")
     print("Vous êtes Camille, il est tard le soir, vous êtes seule près")
-    print("des bureaux Google dans un quartier que vous ne connaissez pas bien.")
-    print("Vous avez l'impression d'être suivie et vous commencez à avoir peur.")
+    print("des bureaux Google France (8 rue de Londres, 9ème arrondissement).")
+    print("Le quartier Europe/Saint-Lazare se vide après les heures de bureau.")
+    print("Vous devez vous rendre Place de la Concorde, mais vous avez")
+    print("l'impression d'être suivie et vous commencez à avoir peur.")
     print("Vous décidez d'activer GuardianNav pour obtenir de l'aide.")
     print()
     
@@ -273,13 +528,13 @@ def run_voice_camille_demo():
         
         # Test de connectivité API
         if agent.is_available:
-            print("🔧 Test de connectivité à l'API Gemini...")
+            print("🔧 Vérification de la connectivité IA...")
             test_response = analyze_situation_with_ai(agent, "Test de connexion. Répondez juste 'API OK'.")
             if "API OK" in test_response or "ok" in test_response.lower():
-                print("✅ API Gemini fonctionne correctement")
+                print("✅ IA Gemini opérationnelle")
             else:
-                print("⚠️ Test API échoué, vérifiez votre clé API")
-                print(f"Réponse test: {test_response[:100]}...")
+                print("⚠️ Test IA échoué - vérifiez votre configuration")
+                print(f"Réponse: {test_response[:50]}...")
         else:
             print("❌ ATTENTION: L'agent n'est pas disponible")
             print("💡 La démo utilisera des messages d'erreur au lieu de l'IA")
@@ -301,7 +556,8 @@ def run_voice_camille_demo():
     
     # Message d'accueil GuardianNav
     welcome_msg = """Bonjour Camille. Je suis GuardianNav, votre assistant de sécurité personnel. 
-Je détecte que vous m'activez à une heure tardive. Êtes-vous en sécurité ? 
+Je détecte que vous m'activez à une heure tardive près des bureaux Google France. 
+Je vois que vous souhaitez vous rendre Place de la Concorde. Êtes-vous en sécurité ? 
 Décrivez-moi votre situation actuelle en parlant dans votre microphone."""
     
     simulate_tts_response(welcome_msg)
@@ -312,7 +568,7 @@ Décrivez-moi votre situation actuelle en parlant dans votre microphone."""
     
     if not situation_vocale:
         print("⚠️ Aucune parole détectée, utilisation du scénario par défaut")
-        situation_vocale = "Je suis près des bureaux Google, il est 22h, je rentre du travail et j'ai l'impression qu'on me suit. Il y a quelqu'un derrière moi depuis plusieurs rues et ça me fait peur. Je ne sais pas quoi faire."
+        situation_vocale = "Je suis près des bureaux Google France, 8 rue de Londres dans le 9ème. Il est 22h, je dois aller Place de la Concorde mais j'ai l'impression qu'on me suit. Il y a quelqu'un derrière moi depuis plusieurs rues et ça me fait peur. Le quartier se vide, je ne sais pas quoi faire."
     
     print(f"\n📝 **SITUATION RAPPORTÉE:** {situation_vocale}")
     
@@ -322,10 +578,15 @@ Décrivez-moi votre situation actuelle en parlant dans votre microphone."""
 CONTEXTE DE LA SITUATION:
 • Personne: Camille (femme)
 • Moment: 22h00, vendredi 31 octobre 2025 (heure tardive)
-• Lieu: Près des locaux Google dans une zone urbaine
+• Lieu: 8 rue de Londres, 75009 Paris (près des bureaux Google France, quartier Europe/Saint-Lazare)
+• Destination souhaitée: Place de la Concorde
 • Situation: "{situation_vocale}"
 
 MISSION: Analyse cette situation d'urgence et réponds directement à Camille de manière professionnelle, rassurante mais ferme.
+
+CAPACITÉS DISPONIBLES: 
+- Si tu juges qu'un itinéraire sécurisé est nécessaire, inclus "DEMANDE_ITINERAIRE_SECURISE" dans ta réponse
+- Si tu veux proposer des lieux sécurisés à proximité (hôpitaux, commissariats, pharmacies), inclus "DEMANDE_LIEUX_SECURISES" dans ta réponse
 
 FORMAT DE RÉPONSE (en français):
 **NIVEAU D'URGENCE:** [1-10]/10
@@ -340,8 +601,11 @@ FORMAT DE RÉPONSE (en français):
 
 **CONSEILS DE SÉCURITÉ:**
 • [Conseil pratique immédiat]
-• [Conseil de déplacement]
+• [Conseil de déplacement - Métro Saint-Lazare proche, rues principales éclairées]
 • [Conseil de communication]
+
+**LIEUX SÉCURISÉS À PROXIMITÉ:**
+Si la situation l'exige, demande des lieux sécurisés avec DEMANDE_LIEUX_SECURISES
 
 **NUMÉROS D'URGENCE:**
 [Numéro approprié à la situation]
@@ -356,6 +620,42 @@ Réponds uniquement dans ce format. Sois précise, empathique et professionnelle
     print("="*45)
     ai_response = analyze_situation_with_ai(agent, full_prompt)
     
+    # Charger la configuration une seule fois
+    config = yaml.safe_load(open('api_keys.yaml', 'r', encoding='utf-8'))
+    
+    # Vérifier si l'IA demande un itinéraire sécurisé
+    if "DEMANDE_ITINERAIRE_SECURISE" in ai_response:
+        print("🗺️ L'IA recommande un itinéraire sécurisé - calcul en cours...")
+        
+        route_info = get_safe_route_directions(
+            config, 
+            "8 rue de Londres, 75009 Paris", 
+            "Place de la Concorde, Paris"
+        )
+        
+        route_response = format_route_response(route_info)
+        ai_response = ai_response.replace("DEMANDE_ITINERAIRE_SECURISE", route_response)
+    
+    # Vérifier si l'IA demande des lieux sécurisés
+    if "DEMANDE_LIEUX_SECURISES" in ai_response:
+        print("🏪 L'IA recommande des lieux sécurisés - recherche en cours...")
+        
+        # Coordonnées approximatives de 8 rue de Londres, Paris
+        location = "48.8756,2.3264"  # Latitude, Longitude
+        
+        places_info = get_nearby_safe_places(
+            config, 
+            location,
+            ['hospital', 'police', 'pharmacy', 'gas_station']
+        )
+        
+        # Coordonnées de Camille (8 rue de Londres, Paris)
+        camille_coords = location.split(',')
+        camille_lat, camille_lng = float(camille_coords[0]), float(camille_coords[1])
+        
+        places_response = format_safe_places_response(places_info, camille_lat, camille_lng)
+        ai_response = ai_response.replace("DEMANDE_LIEUX_SECURISES", places_response)
+    
     simulate_tts_response(ai_response)
     
     # Suivi de situation avec reconnaissance vocale
@@ -369,7 +669,8 @@ Réponds uniquement dans ce format. Sois précise, empathique et professionnelle
         follow_prompt = f"""Tu es GuardianNav. Camille te donne une mise à jour sur sa situation de sécurité.
 
 RAPPEL DU CONTEXTE:
-• Camille était près des locaux Google à 22h, se sentait suivie
+• Camille était près des bureaux Google France (8 rue de Londres, 75009 Paris) à 22h, se sentait suivie
+• Quartier Europe/Saint-Lazare, zone qui se vide après les heures de bureau
 • Tu lui as déjà donné des conseils de sécurité
 • Elle vient de te répondre par reconnaissance vocale
 
