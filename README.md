@@ -69,7 +69,7 @@ git clone https://github.com/organicanna/GuardianNav.git
 cd GuardianNav
 python3.9 -m venv .venv
 source .venv/bin/activate  # macOS/Linux
-pip install -r requirements_voice.txt
+pip install -r requirements.txt
 ```
 
 ### 2️⃣ Configuration APIs (api_keys.yaml)
