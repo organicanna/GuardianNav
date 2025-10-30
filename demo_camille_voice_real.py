@@ -127,17 +127,39 @@ class VoiceRecognizer:
             return None
 
 def load_guardian_agent():
-    """Charge l'agent GuardianNav avec configuration"""
+    """Charge l'agent GuardianNav avec configuration et diagnostics"""
     try:
         # Charger la configuration
+        print("📁 Chargement de api_keys.yaml...")
         with open('api_keys.yaml', 'r', encoding='utf-8') as f:
             config = yaml.safe_load(f)
+        
+        # Vérifier la configuration Gemini
+        google_config = config.get('google_cloud', {})
+        gemini_config = google_config.get('gemini', {})
+        
+        print(f"🔍 Configuration trouvée:")
+        print(f"   - Gemini enabled: {gemini_config.get('enabled', False)}")
+        print(f"   - API key présente: {bool(gemini_config.get('api_key'))}")
+        if gemini_config.get('api_key'):
+            key = gemini_config.get('api_key')
+            print(f"   - API key: {key[:20]}...{key[-4:] if len(key) > 24 else key}")
+        print(f"   - Modèle: {gemini_config.get('model', 'non spécifié')}")
         
         # Importer et initialiser l'agent
         from guardian.gemini_agent import VertexAIAgent
         agent = VertexAIAgent(config)
         
+        print(f"🤖 Agent initialisé:")
+        print(f"   - Type API: {agent.api_type}")
+        print(f"   - Disponible: {agent.is_available}")
+        print(f"   - Clé configurée: {bool(agent.api_key and agent.api_key != 'YOUR_VERTEX_AI_API_KEY')}")
+        
         return agent, True
+        
+    except FileNotFoundError:
+        print("❌ Fichier api_keys.yaml non trouvé")
+        return None, False
     except Exception as e:
         print(f"⚠️ Erreur chargement agent: {e}")
         return None, False
@@ -151,47 +173,44 @@ def simulate_tts_response(text):
     print()
 
 def analyze_situation_with_ai(agent, situation_text):
-    """Analyse la situation avec l'IA"""
+    """Analyse la situation avec l'IA Gemini - VRAIE API SEULEMENT"""
     if not agent:
-        return simulate_ai_response(situation_text)
+        print("❌ Agent non disponible")
+        return "**ERREUR** : Agent GuardianNav non initialisé correctement"
+    
+    # Vérifier que l'agent est correctement configuré
+    if not hasattr(agent, 'api_key') or not agent.api_key or agent.api_key == "YOUR_VERTEX_AI_API_KEY":
+        print("❌ Clé API Gemini manquante ou invalide")
+        print("💡 Vérifiez votre fichier api_keys.yaml")
+        return "**ERREUR** : Clé API Gemini non configurée. Vérifiez api_keys.yaml"
+    
+    print(f"🧠 [Analyse IA Gemini en cours... API: {agent.api_type}]")
+    print(f"🔑 Clé API configurée: {agent.api_key[:20]}..." if len(agent.api_key) > 20 else "🔑 Clé API très courte")
+    print(f"🎯 Modèle: {agent.model_name}")
     
     try:
-        print("🧠 [Analyse IA Gemini en cours...]")
         response = agent._make_api_request(situation_text)
         
         if response and 'candidates' in response:
             ai_text = response['candidates'][0]['content']['parts'][0]['text']
+            
+            # Vérifier que ce n'est pas une réponse simulée
+            if 'simulation' in ai_text.lower() or '**ANALYSE D\'URGENCE - NIVEAU' in ai_text:
+                print("⚠️ Réponse simulée détectée - problème avec l'API")
+                print("💡 L'API Gemini n'est pas accessible avec cette clé")
+                return f"**ERREUR API** : {ai_text}\n\n**NOTE**: L'API Gemini ne fonctionne pas correctement"
+            
+            print("✅ Réponse RÉELLE de l'IA Gemini reçue")
             return ai_text
         else:
-            return simulate_ai_response(situation_text)
+            print("❌ Pas de réponse valide de l'API Gemini")
+            return "**ERREUR API** : L'API Gemini n'a pas retourné de réponse valide"
             
     except Exception as e:
-        print(f"⚠️ Erreur IA: {e}")
-        return simulate_ai_response(situation_text)
+        print(f"❌ Erreur lors de l'appel à l'API Gemini: {e}")
+        return f"**ERREUR API** : Impossible de joindre l'API Gemini - {e}"
 
-def simulate_ai_response(situation_text):
-    """Génère une réponse IA simulée pour le scénario"""
-    return """**ANALYSE D'URGENCE - NIVEAU 8/10**
-
-**Situation identifiée :** Sécurité personnelle compromise
-**Lieu :** Zone urbaine, proximité bureaux, heure tardive
-**Facteurs de risque :** Isolement, impression d'être suivie, environnement peu familier
-
-**ACTIONS IMMÉDIATES RECOMMANDÉES :**
-
-1. **SÉCURITÉ IMMÉDIATE**
-   • Dirigez-vous vers un lieu sûr et éclairé (magasin ouvert, restaurant, hall d'immeuble sécurisé)
-   • Évitez les ruelles sombres et les zones isolées
-   
-2. **CONTACT D'URGENCE** 
-   • Appelez le 17 (Police) si menace immédiate
-   • Contactez un proche de confiance pour signaler votre position
-   
-3. **TRANSPORT SÉCURISÉ**
-   • Commandez un taxi/VTC avec partage de trajet en temps réel
-   • Évitez les transports en commun seule à cette heure
-
-**Camille, votre sécurité est la priorité absolue. Faites confiance à votre instinct.**"""
+# Cette fonction est maintenant supprimée - on utilise SEULEMENT l'API Gemini réelle
 
 def display_scenario_intro():
     """Affiche l'introduction du scénario"""
@@ -201,7 +220,6 @@ def display_scenario_intro():
     print("📍 **LOCALISATION :** Près des locaux Google")  
     print("🕙 **HEURE :** 22h00")
     print("📅 **DATE :** Vendredi 31 octobre 2025")
-    print("⚠️ **SITUATION :** Je me sens en danger")
     print("="*70)
     print()
     
@@ -252,8 +270,28 @@ def run_voice_camille_demo():
     if agent_loaded:
         print("✅ Agent GuardianNav chargé avec succès")
         print(f"🤖 IA Gemini: {'✅ Disponible' if agent.is_available else '⚠️ Mode simulation'}")
+        
+        # Test de connectivité API
+        if agent.is_available:
+            print("🔧 Test de connectivité à l'API Gemini...")
+            test_response = analyze_situation_with_ai(agent, "Test de connexion. Répondez juste 'API OK'.")
+            if "API OK" in test_response or "ok" in test_response.lower():
+                print("✅ API Gemini fonctionne correctement")
+            else:
+                print("⚠️ Test API échoué, vérifiez votre clé API")
+                print(f"Réponse test: {test_response[:100]}...")
+        else:
+            print("❌ ATTENTION: L'agent n'est pas disponible")
+            print("💡 La démo utilisera des messages d'erreur au lieu de l'IA")
+            
+            choice = input("\n❓ Continuer quand même ? (o/N): ").lower()
+            if choice != 'o':
+                print("🛑 Démo annulée - Configurez d'abord votre API Gemini")
+                return
     else:
         print("⚠️ Agent en mode simulation")
+        print("❌ ERREUR: Impossible de charger l'agent GuardianNav")
+        return
     
     print()
     
@@ -278,25 +316,40 @@ Décrivez-moi votre situation actuelle en parlant dans votre microphone."""
     
     print(f"\n📝 **SITUATION RAPPORTÉE:** {situation_vocale}")
     
-    # Construction du prompt contextualisé
-    full_prompt = f"""
-    SITUATION D'URGENCE - ANALYSE REQUISE
-    
-    Personne: Camille (femme)
-    Heure: 22h00, vendredi 31 octobre 2025
-    Lieu: Près des locaux Google (zone urbaine)
-    
-    Situation rapportée par reconnaissance vocale: "{situation_vocale}"
-    
-    En tant que GuardianNav, assistant IA de sécurité personnelle, analysez cette situation et fournissez:
-    1. Niveau d'urgence (1-10)
-    2. Type de situation
-    3. Conseils immédiats et pratiques
-    4. Actions concrètes à prendre
-    
-    Répondez de manière rassurante mais ferme, en français, comme si vous parliez directement à Camille.
-    Soyez concis mais complet.
-    """
+    # Construction du prompt contextualisé et optimisé pour Gemini
+    full_prompt = f"""Tu es GuardianNav, un assistant IA spécialisé en sécurité personnelle. Une femme nommée Camille t'appelle à l'aide.
+
+CONTEXTE DE LA SITUATION:
+• Personne: Camille (femme)
+• Moment: 22h00, vendredi 31 octobre 2025 (heure tardive)
+• Lieu: Près des locaux Google dans une zone urbaine
+• Situation: "{situation_vocale}"
+
+MISSION: Analyse cette situation d'urgence et réponds directement à Camille de manière professionnelle, rassurante mais ferme.
+
+FORMAT DE RÉPONSE (en français):
+**NIVEAU D'URGENCE:** [1-10]/10
+
+**ANALYSE DE LA SITUATION:**
+[Analyse claire en 2-3 phrases]
+
+**ACTIONS IMMÉDIATES:**
+1. [Action prioritaire n°1]
+2. [Action prioritaire n°2] 
+3. [Action prioritaire n°3]
+
+**CONSEILS DE SÉCURITÉ:**
+• [Conseil pratique immédiat]
+• [Conseil de déplacement]
+• [Conseil de communication]
+
+**NUMÉROS D'URGENCE:**
+[Numéro approprié à la situation]
+
+**MESSAGE PERSONNEL:**
+Camille, [message rassurant et encourageant personnalisé]
+
+Réponds uniquement dans ce format. Sois précise, empathique et professionnelle."""
     
     # Analyse IA
     print("\n🧠 **ANALYSE INTELLIGENTE GUARDIANNAV**")
@@ -313,17 +366,31 @@ Décrivez-moi votre situation actuelle en parlant dans votre microphone."""
     if follow_up_vocal:
         print(f"\n📝 **MISE À JOUR:** {follow_up_vocal}")
         
-        follow_prompt = f"""
-        SUIVI DE SITUATION - Camille répond par reconnaissance vocale: "{follow_up_vocal}"
-        
-        Contexte: Camille était près des locaux Google à 22h, se sentait suivie.
-        Votre analyse précédente lui a donné des conseils de sécurité.
-        
-        Répondez à sa mise à jour de manière bienveillante et donnez des conseils de suivi appropriés.
-        Si elle est en sécurité, félicitez-la et donnez des conseils pour rentrer chez elle.
-        Si elle est encore en danger, renforcez les mesures de sécurité.
-        Soyez concis et rassurant.
-        """
+        follow_prompt = f"""Tu es GuardianNav. Camille te donne une mise à jour sur sa situation de sécurité.
+
+RAPPEL DU CONTEXTE:
+• Camille était près des locaux Google à 22h, se sentait suivie
+• Tu lui as déjà donné des conseils de sécurité
+• Elle vient de te répondre par reconnaissance vocale
+
+MISE À JOUR DE CAMILLE: "{follow_up_vocal}"
+
+MISSION: Réponds à cette mise à jour de manière professionnelle et bienveillante.
+
+FORMAT DE RÉPONSE:
+**ÉVALUATION:** [Sa situation actuelle]
+
+**PROCHAINES ÉTAPES:**
+• [Action immédiate si nécessaire]
+• [Conseil pour la suite]
+• [Recommandation de sécurité]
+
+**MESSAGE:**
+[Message personnel encourageant et rassurant adapté à sa réponse]
+
+Si elle est en sécurité: félicite-la et donne des conseils pour rentrer.
+Si elle est encore en danger: renforce les mesures de sécurité.
+Reste concise, empathique et professionnelle."""
         
         follow_response = analyze_situation_with_ai(agent, follow_prompt)
         simulate_tts_response(follow_response)
