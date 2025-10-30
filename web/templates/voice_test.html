@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎤 Test Reconnaissance Vocale - Guardian</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto Mono', monospace;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #eee;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #4285f4;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+
+        .test-section {
+            background: rgba(255, 255, 255, 0.03);
+            margin: 1rem 0;
+            padding: 1.5rem;
+            border-radius: 10px;
+            border-left: 4px solid #4285f4;
+        }
+
+        .test-section.success {
+            border-left-color: #34a853;
+        }
+
+        .test-section.warning {
+            border-left-color: #fbbc04;
+        }
+
+        .test-section.error {
+            border-left-color: #ea4335;
+        }
+
+        .test-btn {
+            background: linear-gradient(45deg, #4285f4, #1a73e8);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 0.5rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .test-btn:hover {
+            background: linear-gradient(45deg, #1a73e8, #1557b0);
+            transform: translateY(-2px);
+        }
+
+        .test-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .test-btn.listening {
+            background: linear-gradient(45deg, #ea4335, #d33b2c);
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .result-area {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            min-height: 100px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            max-height: 300px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-ok { background: #34a853; }
+        .status-warning { background: #fbbc04; }
+        .status-error { background: #ea4335; }
+
+        .back-btn {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .permission-guide {
+            background: rgba(251, 188, 4, 0.1);
+            border: 1px solid rgba(251, 188, 4, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .permission-guide h4 {
+            color: #fbbc04;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <a href="/demo" class="back-btn">← Retour à Guardian</a>
+
+    <div class="container">
+        <h1>🎤 Test Reconnaissance Vocale Guardian</h1>
+
+        <!-- Section diagnostic -->
+        <div class="test-section" id="diagnosticSection">
+            <h3>🔍 Diagnostic du Navigateur</h3>
+            <div id="diagnosticResults" class="result-area">Diagnostic en cours...</div>
+            <button class="test-btn" onclick="runDiagnostic()">🔄 Relancer le Diagnostic</button>
+        </div>
+
+        <!-- Section test de base -->
+        <div class="test-section">
+            <h3>🎤 Test de Reconnaissance Simple</h3>
+            <p>Cliquez sur "Démarrer" et prononcez une phrase en français.</p>
+            <button class="test-btn" id="basicTestBtn" onclick="basicVoiceTest()">
+                🎤 Démarrer le Test
+            </button>
+            <button class="test-btn" onclick="stopVoiceTest()" style="background: #666;">
+                🛑 Arrêter
+            </button>
+            <div id="basicTestResults" class="result-area">En attente du test...</div>
+        </div>
+
+        <!-- Section test avancé -->
+        <div class="test-section">
+            <h3>🧪 Test avec Guardian API</h3>
+            <p>Test complet avec analyse Guardian de votre message vocal.</p>
+            <button class="test-btn" onclick="advancedVoiceTest()">
+                🤖 Test Guardian Complet
+            </button>
+            <div id="advancedTestResults" class="result-area">Prêt pour le test Guardian...</div>
+        </div>
+
+        <!-- Section permissions -->
+        <div class="test-section">
+            <h3>🔒 Guide des Permissions</h3>
+            <div class="permission-guide">
+                <h4>Si la reconnaissance vocale ne fonctionne pas :</h4>
+                <ol>
+                    <li><strong>Vérifiez les autorisations :</strong> Autorisez l'accès au microphone dans votre navigateur</li>
+                    <li><strong>Utilisez HTTPS :</strong> La reconnaissance vocale nécessite une connexion sécurisée</li>
+                    <li><strong>Navigateur supporté :</strong> Utilisez Chrome, Edge ou Safari</li>
+                    <li><strong>Microphone fonctionnel :</strong> Testez votre micro dans les paramètres système</li>
+                </ol>
+            </div>
+            <button class="test-btn" onclick="requestPermissions()">
+                🔓 Demander les Permissions
+            </button>
+        </div>
+
+        <!-- Section résultats détaillés -->
+        <div class="test-section">
+            <h3>📊 Journal Détaillé</h3>
+            <div id="detailedLog" class="result-area">Journal des tests et erreurs...</div>
+            <button class="test-btn" onclick="clearLog()" style="background: #666;">
+                🗑️ Effacer le Journal
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let recognition = null;
+        let isListening = false;
+        let logEntries = [];
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            runDiagnostic();
+            logMessage('🚀 Test de reconnaissance vocale Guardian initialisé');
+        });
+
+        function logMessage(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = `[${timestamp}] ${message}`;
+            logEntries.push(entry);
+            
+            const logArea = document.getElementById('detailedLog');
+            logArea.textContent = logEntries.join('\n');
+            logArea.scrollTop = logArea.scrollHeight;
+            
+            console.log(entry);
+        }
+
+        function runDiagnostic() {
+            const resultsArea = document.getElementById('diagnosticResults');
+            const diagnosticSection = document.getElementById('diagnosticSection');
+            
+            let results = '';
+            let overallStatus = 'success';
+
+            // Test du protocole
+            const isSecure = location.protocol === 'https:' || location.hostname === 'localhost';
+            if (isSecure) {
+                results += '✅ Protocole: ' + location.protocol + ' (OK)\n';
+                logMessage('✅ Protocole sécurisé détecté');
+            } else {
+                results += '❌ Protocole: ' + location.protocol + ' (HTTPS requis)\n';
+                logMessage('❌ Protocole non sécurisé détecté');
+                overallStatus = 'error';
+            }
+
+            // Test Speech Recognition
+            if ('webkitSpeechRecognition' in window) {
+                results += '✅ WebKit Speech Recognition: Disponible\n';
+                logMessage('✅ WebKit Speech Recognition disponible');
+            } else if ('SpeechRecognition' in window) {
+                results += '✅ Speech Recognition: Disponible\n';
+                logMessage('✅ Speech Recognition standard disponible');
+            } else {
+                results += '❌ Speech Recognition: Non disponible\n';
+                logMessage('❌ Aucune API de reconnaissance vocale disponible');
+                overallStatus = 'error';
+            }
+
+            // Test Speech Synthesis
+            if ('speechSynthesis' in window) {
+                results += '✅ Speech Synthesis: Disponible\n';
+                const voices = speechSynthesis.getVoices();
+                if (voices.length > 0) {
+                    const frenchVoices = voices.filter(v => v.lang.startsWith('fr'));
+                    results += `   └─ Voix disponibles: ${voices.length} (Français: ${frenchVoices.length})\n`;
+                }
+            } else {
+                results += '❌ Speech Synthesis: Non disponible\n';
+                overallStatus = 'warning';
+            }
+
+            // Test navigateur
+            const userAgent = navigator.userAgent;
+            let browserInfo = 'Inconnu';
+            let browserStatus = 'warning';
+
+            if (userAgent.includes('Chrome') && !userAgent.includes('Edge')) {
+                browserInfo = 'Google Chrome (Recommandé)';
+                browserStatus = 'success';
+            } else if (userAgent.includes('Edge')) {
+                browserInfo = 'Microsoft Edge (Compatible)';
+                browserStatus = 'success';
+            } else if (userAgent.includes('Safari')) {
+                browserInfo = 'Safari (Support limité)';
+                browserStatus = 'warning';
+            } else if (userAgent.includes('Firefox')) {
+                browserInfo = 'Firefox (Non supporté)';
+                browserStatus = 'error';
+                overallStatus = 'error';
+            }
+
+            results += `🌐 Navigateur: ${browserInfo}\n`;
+            logMessage(`🌐 Navigateur détecté: ${browserInfo}`);
+
+            // Test des permissions
+            navigator.permissions?.query({name: 'microphone'}).then(function(result) {
+                results += `🎤 Permission micro: ${result.state}\n`;
+                logMessage(`🎤 Permission microphone: ${result.state}`);
+                
+                resultsArea.textContent = results;
+            }).catch(() => {
+                results += '🎤 Permission micro: Indéterminée\n';
+                resultsArea.textContent = results;
+            });
+
+            // Mettre à jour l'apparence de la section
+            diagnosticSection.className = `test-section ${overallStatus}`;
+            resultsArea.textContent = results;
+
+            logMessage(`🔍 Diagnostic terminé - Status: ${overallStatus}`);
+        }
+
+        function basicVoiceTest() {
+            if (isListening) {
+                stopVoiceTest();
+                return;
+            }
+
+            const btn = document.getElementById('basicTestBtn');
+            const results = document.getElementById('basicTestResults');
+            
+            logMessage('🎤 Démarrage du test de base');
+
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                results.textContent = '❌ Reconnaissance vocale non supportée dans ce navigateur';
+                logMessage('❌ Test de base échoué: API non disponible');
+                return;
+            }
+
+            try {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+
+                recognition.continuous = false;
+                recognition.interimResults = true;
+                recognition.lang = 'fr-FR';
+
+                recognition.onstart = function() {
+                    isListening = true;
+                    btn.classList.add('listening');
+                    btn.textContent = '🎤 En écoute... Parlez maintenant';
+                    results.textContent = '🎤 Je vous écoute... Parlez clairement en français';
+                    logMessage('🎤 Écoute démarrée avec succès');
+                };
+
+                recognition.onresult = function(event) {
+                    let transcript = '';
+                    let confidence = 0;
+                    
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        const result = event.results[i];
+                        if (result.isFinal) {
+                            transcript = result[0].transcript;
+                            confidence = result[0].confidence;
+                        } else {
+                            results.textContent = `🔄 En cours: "${result[0].transcript}"`;
+                        }
+                    }
+
+                    if (transcript) {
+                        const confidencePercent = (confidence * 100).toFixed(1);
+                        results.textContent = `✅ Reconnu: "${transcript}"\n📊 Confiance: ${confidencePercent}%`;
+                        logMessage(`✅ Reconnaissance réussie: "${transcript}" (${confidencePercent}%)`);
+                    }
+                };
+
+                recognition.onerror = function(event) {
+                    let errorMsg = `❌ Erreur: ${event.error}`;
+                    switch(event.error) {
+                        case 'no-speech':
+                            errorMsg = '❌ Aucune parole détectée. Réessayez en parlant plus fort.';
+                            break;
+                        case 'not-allowed':
+                            errorMsg = '❌ Permission refusée. Autorisez l\'accès au microphone.';
+                            break;
+                        case 'service-not-allowed':
+                            errorMsg = '❌ Service non autorisé. Utilisez HTTPS.';
+                            break;
+                    }
+                    results.textContent = errorMsg;
+                    logMessage(`❌ Erreur reconnaissance: ${event.error}`);
+                };
+
+                recognition.onend = function() {
+                    stopVoiceTest();
+                    logMessage('🎤 Test de base terminé');
+                };
+
+                recognition.start();
+
+            } catch (error) {
+                results.textContent = `❌ Erreur technique: ${error.message}`;
+                logMessage(`❌ Erreur technique: ${error.message}`);
+            }
+        }
+
+        function stopVoiceTest() {
+            if (recognition && isListening) {
+                recognition.stop();
+            }
+            
+            isListening = false;
+            const btn = document.getElementById('basicTestBtn');
+            btn.classList.remove('listening');
+            btn.textContent = '🎤 Démarrer le Test';
+            logMessage('🛑 Test arrêté');
+        }
+
+        function advancedVoiceTest() {
+            logMessage('🤖 Démarrage du test Guardian avancé');
+            
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                document.getElementById('advancedTestResults').textContent = 
+                    '❌ Reconnaissance vocale non supportée - Test Guardian impossible';
+                return;
+            }
+
+            const results = document.getElementById('advancedTestResults');
+            results.textContent = '🎤 Dites quelque chose comme "Guardian, je me sens fatigué"...';
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const testRecognition = new SpeechRecognition();
+            
+            testRecognition.continuous = false;
+            testRecognition.lang = 'fr-FR';
+
+            testRecognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                results.textContent = `🗣️ Vous avez dit: "${transcript}"\n🤖 Analyse Guardian en cours...`;
+                
+                logMessage(`🗣️ Message capturé pour Guardian: "${transcript}"`);
+
+                // Envoyer à l'API Guardian
+                fetch('/api/guardian/analyze', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        situation: transcript,
+                        location: 'Test de reconnaissance vocale',
+                        user_info: {firstName: 'TestUser'},
+                        conversation_history: []
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    let response = `✅ Analyse Guardian terminée:\n\n`;
+                    response += `📊 Niveau d'urgence: ${data.urgency_level}/10\n`;
+                    if (data.advice) {
+                        response += `💬 Réponse: ${data.advice.join(' ')}\n`;
+                    }
+                    results.textContent = response;
+                    logMessage(`✅ Réponse Guardian reçue (urgence: ${data.urgency_level}/10)`);
+                })
+                .catch(error => {
+                    results.textContent = `❌ Erreur API Guardian: ${error.message}`;
+                    logMessage(`❌ Erreur API Guardian: ${error.message}`);
+                });
+            };
+
+            testRecognition.onerror = function(event) {
+                results.textContent = `❌ Erreur lors du test Guardian: ${event.error}`;
+                logMessage(`❌ Erreur test Guardian: ${event.error}`);
+            };
+
+            testRecognition.start();
+        }
+
+        function requestPermissions() {
+            logMessage('🔓 Demande d\'autorisation microphone');
+            
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(function(stream) {
+                    logMessage('✅ Permission microphone accordée');
+                    alert('✅ Permission microphone accordée ! Vous pouvez maintenant tester la reconnaissance vocale.');
+                    stream.getTracks().forEach(track => track.stop());
+                    runDiagnostic();
+                })
+                .catch(function(error) {
+                    logMessage(`❌ Permission refusée: ${error.message}`);
+                    alert(`❌ Permission refusée: ${error.message}\n\nVeuillez autoriser l'accès au microphone dans les paramètres de votre navigateur.`);
+                });
+        }
+
+        function clearLog() {
+            logEntries = [];
+            document.getElementById('detailedLog').textContent = 'Journal effacé...';
+            logMessage('🗑️ Journal effacé et réinitialisé');
+        }
+    </script>
+</body>
+</html>

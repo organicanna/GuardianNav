@@ -1,0 +1,48 @@
+runtime: python39
+
+env_variables:
+  GOOGLE_CLOUD_PROJECT: "guardian-ai-urgence"
+  GOOGLE_CLOUD_REGION: "europe-west1"
+  
+automatic_scaling:
+  min_instances: 0
+  max_instances: 10
+  target_cpu_utilization: 0.6
+  target_throughput_utilization: 0.6
+
+resources:
+  cpu: 1
+  memory_gb: 0.5
+  disk_size_gb: 10
+
+handlers:
+- url: /health
+  script: main.app
+  secure: always
+
+- url: /emergency
+  script: main.app
+  secure: always
+
+- url: /voice-emergency  
+  script: main.app
+  secure: always
+
+- url: /.*
+  script: main.app
+  secure: always
+
+health_check:
+  enable_health_check: True
+  check_interval_sec: 30
+  timeout_sec: 4
+  healthy_threshold: 2
+  unhealthy_threshold: 2
+  restart_threshold: 60
+
+vpc_access_connector:
+  name: "projects/guardian-ai-urgence/locations/europe-west1/connectors/guardian-vpc"
+
+network:
+  forwarded_ports:
+  - 8080

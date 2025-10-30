@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚨 Guardian - Interface d'Urgence</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 1rem;
+        }
+
+        .emergency-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .header {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .user-info {
+            background: #2c3e50;
+            color: white;
+            padding: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .main-content {
+            padding: 2rem;
+        }
+
+        .situation-input {
+            margin-bottom: 2rem;
+        }
+
+        .situation-input label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #2c3e50;
+        }
+
+        .situation-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 1rem;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1rem;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .situation-textarea:focus {
+            outline: none;
+            border-color: #e74c3c;
+        }
+
+        .voice-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .voice-btn {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .voice-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .voice-btn.listening {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .analyze-btn {
+            background: linear-gradient(45deg, #27ae60, #229954);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 2rem;
+            transition: all 0.3s;
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(39, 174, 96, 0.3);
+        }
+
+        .analyze-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .analysis-result {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .urgency-level {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .urgency-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .urgency-low { background: #d5f4e6; color: #27ae60; }
+        .urgency-medium { background: #fff3cd; color: #856404; }
+        .urgency-high { background: #f8d7da; color: #721c24; }
+
+        .actions-list {
+            background: #e8f5e8;
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+
+        .actions-list h4 {
+            color: #27ae60;
+            margin-bottom: 0.5rem;
+        }
+
+        .actions-list ul {
+            list-style: none;
+        }
+
+        .actions-list li {
+            padding: 0.25rem 0;
+            color: #2c3e50;
+        }
+
+        .actions-list li::before {
+            content: '✓ ';
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .emergency-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .emergency-action-btn {
+            flex: 1;
+            min-width: 200px;
+            padding: 1rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .call-112 {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .alert-contacts {
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        .emergency-action-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .status-indicator {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            z-index: 1000;
+        }
+
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            .emergency-actions {
+                flex-direction: column;
+            }
+            
+            .emergency-action-btn {
+                min-width: auto;
+            }
+            
+            .voice-controls {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="status-indicator" id="statusIndicator">
+        🟢 Système actif
+    </div>
+
+    <div class="emergency-container">
+        <div class="header">
+            <button class="back-btn" onclick="goBack()">← Retour</button>
+            <h1>🚨 Interface d'Urgence</h1>
+            <p>Guardian analyse votre situation en temps réel</p>
+        </div>
+
+        <div class="user-info" id="userInfo">
+            👤 Utilisateur non identifié
+        </div>
+
+        <div class="main-content">
+            <!-- Saisie de la situation -->
+            <div class="situation-input">
+                <label for="situationText">Décrivez votre situation d'urgence :</label>
+                <textarea 
+                    id="situationText" 
+                    class="situation-textarea"
+                    placeholder="Exemple : Je suis perdu dans Paris, il fait nuit et je ne reconnais pas le quartier..."></textarea>
+            </div>
+
+            <!-- Contrôles vocaux -->
+            <div class="voice-controls">
+                <button class="voice-btn" id="voiceBtn" onclick="toggleVoiceRecognition()">
+                    🎤 Parler
+                </button>
+                <button class="voice-btn" onclick="clearText()">
+                    🗑️ Effacer
+                </button>
+                <button class="voice-btn" onclick="useExample()">
+                    💡 Exemple
+                </button>
+            </div>
+
+            <!-- Bouton d'analyse -->
+            <button class="analyze-btn" id="analyzeBtn" onclick="analyzeSituation()">
+                🧠 Analyser la situation
+            </button>
+
+            <!-- Résultat de l'analyse -->
+            <div class="analysis-result" id="analysisResult">
+                <!-- Le contenu sera généré par JavaScript -->
+            </div>
+
+            <!-- Actions d'urgence -->
+            <div class="emergency-actions" id="emergencyActions" style="display: none;">
+                <button class="emergency-action-btn call-112" onclick="call112()">
+                    📞 Appeler le 112
+                </button>
+                <button class="emergency-action-btn alert-contacts" onclick="alertContacts()">
+                    📱 Alerter mes proches
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        let userConfig = {};
+        let isListening = false;
+        let currentAnalysis = null;
+
+        // Initialisation
+        window.addEventListener('load', function() {
+            // Récupérer les informations utilisateur depuis l'URL
+            const urlParams = new URLSearchParams(window.location.search);
+            userConfig = {
+                firstName: urlParams.get('firstName') || 'Utilisateur',
+                lastName: urlParams.get('lastName') || '',
+                phone: urlParams.get('phone') || ''
+            };
+
+            // Afficher les informations utilisateur
+            document.getElementById('userInfo').textContent = 
+                `👤 ${userConfig.firstName} ${userConfig.lastName} - 📞 ${userConfig.phone}`;
+        });
+
+        function toggleVoiceRecognition() {
+            const voiceBtn = document.getElementById('voiceBtn');
+            const statusIndicator = document.getElementById('statusIndicator');
+
+            if (!isListening) {
+                // Démarrer l'écoute
+                isListening = true;
+                voiceBtn.classList.add('listening');
+                voiceBtn.innerHTML = '🔴 Arrêter';
+                statusIndicator.textContent = '🔴 Écoute en cours...';
+                statusIndicator.style.background = '#e74c3c';
+
+                // Simulation de reconnaissance vocale
+                // Dans une vraie implémentation, vous utiliseriez l'API Web Speech ou votre backend
+                setTimeout(() => {
+                    const situationText = document.getElementById('situationText');
+                    situationText.value = "Je suis perdu dans le 9ème arrondissement de Paris, il fait nuit et je ne reconnais pas le quartier. J'ai peur.";
+                    stopVoiceRecognition();
+                }, 3000);
+            } else {
+                stopVoiceRecognition();
+            }
+        }
+
+        function stopVoiceRecognition() {
+            isListening = false;
+            const voiceBtn = document.getElementById('voiceBtn');
+            const statusIndicator = document.getElementById('statusIndicator');
+            
+            voiceBtn.classList.remove('listening');
+            voiceBtn.innerHTML = '🎤 Parler';
+            statusIndicator.textContent = '🟢 Système actif';
+            statusIndicator.style.background = '#27ae60';
+        }
+
+        function clearText() {
+            document.getElementById('situationText').value = '';
+        }
+
+        function useExample() {
+            document.getElementById('situationText').value = 
+                "Je suis perdu dans Paris la nuit, je ne reconnais pas le quartier et j'ai peur. Je suis près de la rue de Londres dans le 9ème.";
+        }
+
+        async function analyzeSituation() {
+            const situationText = document.getElementById('situationText').value.trim();
+            
+            if (!situationText) {
+                alert('⚠️ Veuillez décrire votre situation');
+                return;
+            }
+
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const analysisResult = document.getElementById('analysisResult');
+            
+            // Désactiver le bouton et afficher le chargement
+            analyzeBtn.disabled = true;
+            analyzeBtn.textContent = '🧠 Analyse en cours...';
+            
+            try {
+                // Appel à l'API Guardian
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        situation: situationText,
+                        user_info: userConfig
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success || data.fallback) {
+                    currentAnalysis = data.analysis;
+                    displayAnalysisResult(currentAnalysis);
+                } else {
+                    throw new Error(data.error || 'Erreur inconnue');
+                }
+                
+            } catch (error) {
+                console.error('Erreur analyse:', error);
+                // Afficher une analyse de fallback
+                displayAnalysisResult({
+                    urgency_level: 5,
+                    emergency_type: 'navigation',
+                    immediate_actions: ['Restez calme', 'Cherchez un lieu éclairé', 'Appelez quelqu\'un'],
+                    alert_contacts: false,
+                    message: 'Guardian analyse votre situation... En cas de danger immédiat, appelez le 112.'
+                });
+            } finally {
+                // Réactiver le bouton
+                analyzeBtn.disabled = false;
+                analyzeBtn.textContent = '🧠 Analyser à nouveau';
+            }
+        }
+
+        function displayAnalysisResult(analysis) {
+            const analysisResult = document.getElementById('analysisResult');
+            const emergencyActions = document.getElementById('emergencyActions');
+            
+            // Déterminer la classe CSS selon le niveau d'urgence
+            let urgencyClass = 'urgency-low';
+            let urgencyText = 'Faible';
+            
+            if (analysis.urgency_level >= 7) {
+                urgencyClass = 'urgency-high';
+                urgencyText = 'Élevée';
+            } else if (analysis.urgency_level >= 4) {
+                urgencyClass = 'urgency-medium';
+                urgencyText = 'Modérée';
+            }
+
+            // Générer le HTML du résultat
+            analysisResult.innerHTML = `
+                <h3>📊 Analyse de la situation</h3>
+                
+                <div class="urgency-level">
+                    <span>Niveau d'urgence:</span>
+                    <span class="urgency-badge ${urgencyClass}">
+                        ${analysis.urgency_level}/10 - ${urgencyText}
+                    </span>
+                </div>
+                
+                <p><strong>Type:</strong> ${getEmergencyTypeText(analysis.emergency_type)}</p>
+                <p><strong>Message:</strong> ${analysis.message}</p>
+                
+                <div class="actions-list">
+                    <h4>Actions recommandées:</h4>
+                    <ul>
+                        ${analysis.immediate_actions.map(action => `<li>${action}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+            
+            // Afficher les résultats
+            analysisResult.style.display = 'block';
+            
+            // Afficher les boutons d'action d'urgence si nécessaire
+            if (analysis.urgency_level >= 6 || analysis.alert_contacts) {
+                emergencyActions.style.display = 'flex';
+            }
+        }
+
+        function getEmergencyTypeText(type) {
+            const types = {
+                'medical': '🏥 Médical',
+                'security': '🚨 Sécurite', 
+                'navigation': '🗺️ Navigation',
+                'other': '❓ Autre'
+            };
+            return types[type] || '❓ Non classifié';
+        }
+
+        function call112() {
+            if (confirm('📞 Voulez-vous vraiment appeler le 112 ?')) {
+                // Dans une vraie app, cela ouvrirait l'app téléphone
+                window.location.href = 'tel:112';
+            }
+        }
+
+        function alertContacts() {
+            if (!currentAnalysis) return;
+            
+            alert(`📱 Alerte envoyée aux contacts d'urgence\n\nMessage: ${currentAnalysis.message}\nNiveau: ${currentAnalysis.urgency_level}/10`);
+            
+            // Ici vous feriez un appel API pour envoyer les alertes
+        }
+
+        function goBack() {
+            window.location.href = '/';
+        }
+    </script>
+</body>
+</html>

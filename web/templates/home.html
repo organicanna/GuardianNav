@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛡️ Guardian - Assistant de Sécurité</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #4285f4 0%, #34a853 50%, #1a73e8 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            color: white;
+            overflow-x: hidden;
+            overflow-y: auto;
+            padding: 2rem 0 4rem 0;
+        }
+
+        .main-container {
+            text-align: center;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .guardian-logo {
+            font-size: 15rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ffffff, #f8f9fa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+            position: relative;
+        }
+
+        .guardian-logo:hover {
+            transform: scale(1.05);
+            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.5));
+        }
+
+        .guardian-logo:active {
+            transform: scale(0.95);
+        }
+
+        .guardian-logo::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            right: -20px;
+            bottom: -20px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: pulse 3s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        .title {
+            font-size: 3rem;
+            font-weight: 300;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            opacity: 0.9;
+            margin-bottom: 3rem;
+            font-weight: 300;
+        }
+
+        .demo-button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 1.5rem 3rem;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            text-decoration: none;
+            display: inline-block;
+            margin: 0 1rem;
+        }
+
+        .demo-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        .demo-button.primary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #4285f4;
+            border-color: white;
+        }
+
+        .demo-button.primary:hover {
+            background: white;
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Styles pour le formulaire utilisateur */
+        .user-form {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem auto;
+            max-width: 500px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            color: white;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            box-sizing: border-box;
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: rgba(66, 133, 244, 0.7);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 20px rgba(66, 133, 244, 0.3);
+        }
+
+        .form-title {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 300;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .guardian-logo.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        /* Styles pour le bouton de lancement de la démo */
+        .demo-launch-btn {
+            background: linear-gradient(135deg, #4285f4, #34a853);
+            color: white;
+            border: none;
+            padding: 1.2rem 2.5rem;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(66, 133, 244, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .demo-launch-btn:hover:not(.disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(66, 133, 244, 0.4);
+            background: linear-gradient(135deg, #5a95f5, #4caf50);
+        }
+
+        .demo-launch-btn:active:not(.disabled) {
+            transform: translateY(0);
+        }
+
+        .demo-launch-btn.disabled {
+            background: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.5);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .features {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 3rem;
+            opacity: 0.8;
+        }
+
+        .feature {
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.1;
+                transform: scale(1.1);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .guardian-logo {
+                font-size: 8rem;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .demo-button {
+                padding: 1rem 2rem;
+                font-size: 1.1rem;
+                margin: 0.5rem;
+                display: block;
+                margin-bottom: 1rem;
+            }
+            
+            .features {
+                position: static;
+                transform: none;
+                margin-top: 3rem;
+                flex-wrap: wrap;
+                gap: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .guardian-logo {
+                font-size: 6rem;
+            }
+            
+            .features {
+                gap: 1rem;
+            }
+        }
+
+        /* Bande de navigation */
+        .navigation-band {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            margin: 2rem auto;
+            padding: 1rem;
+            max-width: 900px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            flex: 1;
+            min-width: 180px;
+            text-decoration: none;
+            color: white;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 0.8rem 1.2rem;
+            border-radius: 10px;
+            font-weight: 500;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            font-size: 0.9rem;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Bandeau créateur */
+        .creator-band {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.8);
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+            padding: 0.8rem;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+        }
+
+        /* Responsive pour la navigation */
+        @media (max-width: 768px) {
+            .navigation-band {
+                flex-direction: column;
+                gap: 0.8rem;
+                margin: 2rem 1rem 1rem;
+                padding: 1rem;
+            }
+            
+            .nav-link {
+                min-width: auto;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <h1 class="title">Guardian</h1>
+        <p class="subtitle">Votre Assistant Intelligent de Sécurité</p>
+        
+        <!-- Bande de navigation en haut -->
+        <div class="navigation-band">
+            <a href="/demo" class="nav-link">
+                🗺️ Démo Complète
+            </a>
+            <a href="/conversation" class="nav-link">
+                💬 Conversation Seulement
+            </a>
+            <a href="/debug" class="nav-link">
+                🔧 Mode Test
+            </a>
+            <a href="/voice-test" class="nav-link">
+                🎤 Test Vocal
+            </a>
+        </div>
+        
+        <!-- Formulaire d'informations utilisateur -->
+        <div class="user-form">
+            <div class="form-title">Informations utilisateur</div>
+            <div class="form-group">
+                <label for="firstName">Prénom *</label>
+                <input type="text" id="firstName" name="firstName" placeholder="Votre prénom" required>
+            </div>
+            <div class="form-group">
+                <label for="lastName">Nom *</label>
+                <input type="text" id="lastName" name="lastName" placeholder="Votre nom" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Numéro de téléphone *</label>
+                <input type="tel" id="phone" name="phone" placeholder="Ex: 06 12 34 56 78" required>
+            </div>
+            
+            <!-- Bouton pour lancer la démo -->
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="demo-launch-btn disabled" id="launchBtn" onclick="startDemo()">
+                    🚀 Lancer la Démonstration Guardian
+                </button>
+            </div>
+        </div>
+        
+        <div class="guardian-logo" id="guardianLogo">
+            G
+        </div>
+        
+        <!-- Bandeau créateur en bas -->
+        <div class="creator-band">
+            Fait par InvadHers
+        </div>
+    </div>
+
+    <script>
+        function startDemo() {
+            // Vérifier si le bouton est désactivé
+            const launchBtn = document.getElementById('launchBtn');
+            if (launchBtn.classList.contains('disabled')) {
+                alert('⚠️ Veuillez remplir tous les champs obligatoires');
+                return;
+            }
+            
+            // Récupérer et valider les informations du formulaire
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            
+            // Validation des champs obligatoires
+            if (!firstName) {
+                alert('⚠️ Veuillez saisir votre prénom');
+                document.getElementById('firstName').focus();
+                return;
+            }
+            
+            if (!lastName) {
+                alert('⚠️ Veuillez saisir votre nom');
+                document.getElementById('lastName').focus();
+                return;
+            }
+            
+            if (!phone) {
+                alert('⚠️ Veuillez saisir votre numéro de téléphone');
+                document.getElementById('phone').focus();
+                return;
+            }
+            
+            // Validation format téléphone français
+            const phoneRegex = /^(?:(?:\+|00)33[\s\-\.]*(?:\(0\)[\s\-\.]*)?|0)[1-9](?:[\s\-\.]?\d{2}){4}$/;
+            if (!phoneRegex.test(phone)) {
+                alert('⚠️ Format de téléphone invalide\nExemple: 06 12 34 56 78');
+                document.getElementById('phone').focus();
+                return;
+            }
+            
+            // Stocker les informations utilisateur
+            const userInfo = {
+                firstName: firstName,
+                lastName: lastName,
+                fullName: `${firstName} ${lastName}`,
+                phone: phone
+            };
+            
+            sessionStorage.setItem('guardianUserInfo', JSON.stringify(userInfo));
+            
+            // Animation du bouton et logo avant redirection
+            launchBtn.style.transform = 'scale(0.95)';
+            launchBtn.innerHTML = '🚀 Lancement en cours...';
+            launchBtn.disabled = true;
+            
+            const logo = document.getElementById('guardianLogo');
+            logo.style.transform = 'scale(1.2) rotate(360deg)';
+            logo.style.transition = 'all 0.8s ease';
+            
+            // Redirection vers la page de démonstration (trajet + conversation)
+            setTimeout(() => {
+                window.location.href = '/demo';
+            }, 800);
+        }
+        
+        // Fonction de validation en temps réel
+        function validateForm() {
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const launchBtn = document.getElementById('launchBtn');
+            
+            if (firstName && lastName && phone) {
+                launchBtn.classList.remove('disabled');
+                launchBtn.style.cursor = 'pointer';
+            } else {
+                launchBtn.classList.add('disabled');
+                launchBtn.style.cursor = 'not-allowed';
+            }
+        }
+
+        // Animation d'entrée progressive des éléments
+        document.addEventListener('DOMContentLoaded', function() {
+            const elements = document.querySelectorAll('.demo-button, .feature');
+            elements.forEach((el, index) => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    el.style.transition = 'all 0.6s ease';
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, 1000 + (index * 100));
+            });
+            
+            // Validation en temps réel du formulaire
+            const formInputs = ['firstName', 'lastName', 'phone'];
+            formInputs.forEach(inputId => {
+                const input = document.getElementById(inputId);
+                if (input) {
+                    input.addEventListener('input', validateForm);
+                    input.addEventListener('blur', validateForm);
+                }
+            });
+            
+            // Validation initiale
+            validateForm();
+        });
+    </script>
+</body>
+</html>

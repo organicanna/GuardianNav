@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛡️ Guardian - Configuration Utilisateur</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        .setup-container {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem 2.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #4285f4;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #5f6368;
+            margin-bottom: 2.5rem;
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e8eaed;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        .form-group input:focus {
+            border-color: #4285f4;
+            box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+        }
+
+        .form-group input:valid {
+            border-color: #34a853;
+        }
+
+        .required {
+            color: #ea4335;
+        }
+
+        .setup-btn {
+            background: linear-gradient(45deg, #4285f4, #1a73e8);
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .setup-btn:hover {
+            background: linear-gradient(45deg, #1a73e8, #1557b0);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(66, 133, 244, 0.3);
+        }
+
+        .setup-btn:disabled {
+            background: #dadce0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            border: 1px solid #e8eaed;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            text-align: left;
+        }
+
+        .info-box h4 {
+            color: #4285f4;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-box p {
+            color: #5f6368;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .skip-link {
+            display: inline-block;
+            margin-top: 1rem;
+            color: #5f6368;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        .skip-link:hover {
+            color: #4285f4;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .setup-container {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .setup-container {
+                padding: 2rem 1.5rem;
+            }
+
+            .title {
+                font-size: 1.6rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="setup-container">
+        <div class="logo">🛡️</div>
+        <h1 class="title">Configuration Guardian</h1>
+        <p class="subtitle">Personnalisez votre expérience d'assistance intelligente</p>
+        
+        <form id="setupForm">
+            <div class="form-group">
+                <label for="firstName">Prénom <span class="required">*</span></label>
+                <input type="text" id="firstName" name="firstName" required 
+                       placeholder="Votre prénom" autocomplete="given-name">
+            </div>
+            
+            <div class="form-group">
+                <label for="lastName">Nom de famille</label>
+                <input type="text" id="lastName" name="lastName" 
+                       placeholder="Votre nom" autocomplete="family-name">
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Numéro de téléphone</label>
+                <input type="tel" id="phone" name="phone" 
+                       placeholder="06 12 34 56 78" autocomplete="tel">
+            </div>
+            
+            <div class="info-box">
+                <h4>🔒 Confidentialité</h4>
+                <p>Vos informations sont utilisées uniquement pour personnaliser Guardian et ne sont jamais partagées avec des tiers.</p>
+            </div>
+            
+            <button type="submit" class="setup-btn" id="setupBtn">
+                Lancer Guardian Agent
+            </button>
+        </form>
+        
+        <a href="/map" class="skip-link">Passer la configuration et accéder à la carte</a>
+    </div>
+
+    <script>
+        const form = document.getElementById('setupForm');
+        const setupBtn = document.getElementById('setupBtn');
+        
+        // Validation en temps réel
+        form.addEventListener('input', function() {
+            const firstName = document.getElementById('firstName').value.trim();
+            setupBtn.disabled = firstName.length < 2;
+        });
+        
+        // Formatage du numéro de téléphone
+        document.getElementById('phone').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            
+            if (value.length >= 10) {
+                value = value.replace(/(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4 $5');
+            } else if (value.length >= 8) {
+                value = value.replace(/(\d{2})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4');
+            } else if (value.length >= 6) {
+                value = value.replace(/(\d{2})(\d{2})(\d{2})/, '$1 $2 $3');
+            } else if (value.length >= 4) {
+                value = value.replace(/(\d{2})(\d{2})/, '$1 $2');
+            }
+            
+            e.target.value = value;
+        });
+        
+        // Soumission du formulaire
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(form);
+            const firstName = formData.get('firstName').trim();
+            const lastName = formData.get('lastName').trim();
+            const phone = formData.get('phone').trim();
+            
+            if (firstName.length < 2) {
+                alert('Veuillez entrer un prénom valide (au moins 2 caractères)');
+                return;
+            }
+            
+            // Animation du bouton
+            setupBtn.innerHTML = '🚀 Lancement de Guardian...';
+            setupBtn.disabled = true;
+            
+            // Sauvegarder les informations utilisateur
+            const userConfig = {
+                firstName: firstName,
+                lastName: lastName,
+                phone: phone,
+                setupDate: new Date().toISOString()
+            };
+            
+            localStorage.setItem('guardianUserConfig', JSON.stringify(userConfig));
+            
+            // Rediriger vers Guardian agent avec les paramètres
+            setTimeout(() => {
+                const params = new URLSearchParams({
+                    firstName: firstName,
+                    lastName: lastName,
+                    phone: phone
+                });
+                
+                window.location.href = `/guardian?${params.toString()}`;
+            }, 1500);
+        });
+        
+        // Pré-remplir le formulaire si les données existent déjà
+        window.addEventListener('load', function() {
+            const savedConfig = localStorage.getItem('guardianUserConfig');
+            if (savedConfig) {
+                try {
+                    const config = JSON.parse(savedConfig);
+                    document.getElementById('firstName').value = config.firstName || '';
+                    document.getElementById('lastName').value = config.lastName || '';
+                    document.getElementById('phone').value = config.phone || '';
+                    
+                    // Déclencher la validation
+                    form.dispatchEvent(new Event('input'));
+                } catch (error) {
+                    console.warn('Erreur lors du chargement de la configuration utilisateur:', error);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

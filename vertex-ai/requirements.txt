@@ -1,0 +1,36 @@
+# ===============================================================================
+# GUARDIAN VERTEX AI - DÉPENDANCES CLOUD
+# Installation: pip install -r requirements.txt
+# ===============================================================================
+
+# === VERTEX AI & GOOGLE CLOUD ===
+google-cloud-aiplatform>=1.38.1    # Vertex AI SDK
+google-cloud-functions-framework>=3.5.0  # Cloud Functions runtime
+google-cloud-storage>=2.10.0       # Storage pour modèles
+google-cloud-monitoring>=2.15.0    # Observabilité
+google-cloud-logging>=3.8.0        # Logs centralisés
+
+# === API GOOGLE CLOUD SERVICES ===
+google-cloud-texttospeech>=2.16.3  # Synthèse vocale
+google-cloud-speech>=2.21.0        # Reconnaissance vocale cloud
+googlemaps>=4.10.0                 # Maps API
+
+# === FRAMEWORK WEB ===
+flask>=2.3.0                       # API REST
+gunicorn>=21.2.0                   # WSGI server pour production
+flask-cors>=4.0.0                  # CORS pour API
+
+# === DONNÉES ET SÉCURITÉ ===
+pyyaml>=6.0.1                      # Configuration
+cryptography>=41.0.0               # Chiffrement données sensibles
+python-jose>=3.3.0                 # JWT tokens
+
+# === RÉSEAU ET REQUÊTES ===
+requests>=2.31.0                   # Requêtes HTTP
+urllib3>=2.0.0                     # Gestion URLs
+httpx>=0.24.0                      # Client HTTP async
+
+# === DÉVELOPPEMENT ET TESTS ===
+pytest>=7.0.0                      # Framework de tests
+pytest-asyncio>=0.21.0             # Tests asynchrones
+pytest-cov>=4.0.0                  # Couverture de code

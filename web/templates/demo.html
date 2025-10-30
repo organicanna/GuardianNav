@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛡️ Guardian Demo - Trajet Interactif</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f8f9fa;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Conteneur principal avec deux colonnes */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Colonne gauche - Trajet */
+        .left-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #e0e0e0;
+        }
+
+        /* Colonne droite - Conversation */
+        .right-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* En-tête avec info trajet */
+        .header {
+            background: linear-gradient(90deg, #4285f4, #34a853);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .route-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .route-details {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex: 1;
+        }
+
+        .route-point {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+        }
+
+        .route-arrow {
+            font-size: 1.5rem;
+            opacity: 0.8;
+        }
+
+        .guardian-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .guardian-status:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Zone carte/trajet */
+                .map-section {
+            flex: 1;
+            background: white;
+            margin: 1rem;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .map-placeholder {
+            text-align: center;
+            color: #5f6368;
+            padding: 2rem;
+        }
+
+        .map-placeholder h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #4285f4;
+        }
+
+        .route-progress {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e8eaed;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4285f4, #34a853);
+            width: 25%;
+            transition: width 0.3s ease;
+            animation: progressPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes progressPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        /* Zone conversation */
+        .conversation-section {
+            flex: 1;
+            background: white;
+            margin: 1rem;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .conversation-header {
+            background: #f8f9fa;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #e8eaed;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .conversation-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            color: #202124;
+        }
+
+        .voice-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .voice-btn {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .voice-btn:hover {
+            background: #1a73e8;
+            transform: translateY(-1px);
+        }
+
+        .voice-btn:disabled {
+            background: #dadce0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .voice-btn.listening {
+            background: #ea4335;
+            animation: listening 1s ease-in-out infinite;
+        }
+
+        @keyframes listening {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Messages de conversation */
+        .messages-container {
+            flex: 1;
+            padding: 1rem 2rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            max-width: 80%;
+            animation: fadeInUp 0.3s ease-out;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message.guardian {
+            align-self: flex-start;
+        }
+
+        .message.system {
+            align-self: center;
+            max-width: 100%;
+            justify-content: center;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: #4285f4;
+            color: white;
+        }
+
+        .message.guardian .message-avatar {
+            background: #34a853;
+            color: white;
+        }
+
+        .message.system .message-avatar {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .message-content {
+            background: #f1f3f4;
+            padding: 0.75rem 1rem;
+            border-radius: 18px;
+            color: #202124;
+            line-height: 1.4;
+            position: relative;
+        }
+
+        .message.user .message-content {
+            background: #4285f4;
+            color: white;
+        }
+
+        .message.guardian .message-content {
+            background: #e8f5e8;
+            color: #137333;
+            border: 1px solid #c8e6c9;
+        }
+
+        .message.system .message-content {
+            background: #fef7e0;
+            color: #b06000;
+            border: 1px solid #fdd663;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        /* Indicateur de frappe */
+        .typing-indicator {
+            display: none;
+            padding: 1rem;
+            font-style: italic;
+            color: #5f6368;
+        }
+
+        .typing-dots::after {
+            content: '●●●';
+            animation: typingDots 1.5s infinite;
+        }
+
+        @keyframes typingDots {
+            0%, 20% { content: '●○○'; }
+            40% { content: '●●○'; }
+            60%, 100% { content: '●●●'; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .route-details {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .route-info {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .map-section {
+                min-height: 30vh;
+            }
+
+            .conversation-section {
+                min-height: 60vh;
+            }
+
+            .message {
+                max-width: 90%;
+            }
+
+            .messages-container {
+                padding: 0.5rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- En-tête avec informations trajet -->
+    <div class="header">
+        <div class="route-info">
+            <div class="route-details">
+                <div class="route-point">
+                    <span>📍</span>
+                    <span>Google France, Paris</span>
+                </div>
+                <div class="route-arrow">→</div>
+                <div class="route-point">
+                    <span>🎯</span>
+                    <span>Place de la Concorde</span>
+                </div>
+            </div>
+            <div class="guardian-status" onclick="toggleGuardianInfo()">
+                <div class="status-indicator"></div>
+                <span>🛡️ Guardian Actif</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenu principal avec deux colonnes -->
+    <div class="main-content">
+        <!-- Colonne gauche - Trajet -->
+        <div class="left-column">
+            <div class="map-section">
+                <div class="map-placeholder">
+                    <h3>🗺️ Trajet en Cours</h3>
+                    <p>Paris - Google France vers Place de la Concorde</p>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem;">Guardian surveille votre parcours en temps réel</p>
+                </div>
+                
+                <div class="route-progress">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: #5f6368;">
+                        <span>📍 Départ: Google France</span>
+                        <span>⏱️ 15 min restantes</span>
+                        <span>🎯 Arrivée: Place de la Concorde</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <div style="font-size: 0.8rem; color: #5f6368; text-align: center;">
+                        25% du trajet effectué - Guardian surveille activement
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Colonne droite - Conversation -->
+        <div class="right-column">
+            <div class="conversation-section">
+        <div class="conversation-header">
+            <div class="conversation-title">
+                <span>🤖</span>
+                <span>Conversation avec Guardian</span>
+            </div>
+            
+            <div class="voice-controls">
+                <button class="voice-btn" id="listenBtn" onclick="startVoskListening()">
+                    <span>🎤</span>
+                    <span>Parler</span>
+                </button>
+                <button class="voice-btn" id="testBtn" onclick="runTest()">
+                    <span>🧪</span>
+                    <span>Test Auto</span>
+                </button>
+                <button class="voice-btn" onclick="runManualTest()" style="background: #34a853;">
+                    <span>🎯</span>
+                    <span>Test Manuel</span>
+                </button>
+                <button class="voice-btn" id="ttsBtn" onclick="toggleTTS()" style="background: #f59e0b;">
+                    <span>🔊</span>
+                    <span>Audio ON</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="messages-container" id="messagesContainer">
+            <!-- Les messages apparaitront ici -->
+        </div>
+        
+        <div class="typing-indicator" id="typingIndicator">
+            <div class="message guardian">
+                <div class="message-avatar">🤖</div>
+                <div class="message-content">
+                    Guardian réfléchit<span class="typing-dots"></span>
+                </div>
+            </div>
+        </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isListening = false;
+        let recognition = null;
+        let ttsEnabled = true;
+        let conversationHistory = [];
+        let userInfo = {
+            firstName: 'Utilisateur',
+            lastName: '',
+            phone: ''
+        };
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Récupérer les informations utilisateur du sessionStorage
+            const savedUserInfo = sessionStorage.getItem('guardianUserInfo');
+            if (savedUserInfo) {
+                try {
+                    userInfo = JSON.parse(savedUserInfo);
+                    console.log('✅ Informations utilisateur récupérées:', userInfo);
+                } catch (e) {
+                    console.error('❌ Erreur parsing userInfo:', e);
+                }
+            } else {
+                console.warn('⚠️ Aucune information utilisateur trouvée - redirection vers l\'accueil recommandée');
+            }
+            
+            runCompatibilityCheck();
+            initializeDemo();
+        });
+
+        function runCompatibilityCheck() {
+            addMessage('system', '🔍 Diagnostic des capacités du navigateur...', '🔧');
+            
+            // Vérifier le protocole
+            const isSecure = window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            if (isSecure) {
+                addMessage('system', '✅ Protocole sécurisé détecté', '🔒');
+            } else {
+                addMessage('system', '⚠️ HTTPS recommandé pour la reconnaissance vocale', '🔒');
+            }
+            
+            // Vérifier Speech Recognition
+            if ('webkitSpeechRecognition' in window) {
+                addMessage('system', '✅ WebKit Speech Recognition disponible', '🎤');
+            } else if ('SpeechRecognition' in window) {
+                addMessage('system', '✅ Speech Recognition standard disponible', '🎤');
+            } else {
+                addMessage('system', '❌ Reconnaissance vocale non supportée', '🎤');
+                addMessage('system', '💡 Recommandé: Chrome, Edge ou Safari', 'ℹ️');
+            }
+            
+            // Vérifier Speech Synthesis
+            if ('speechSynthesis' in window) {
+                addMessage('system', '✅ Synthèse vocale disponible', '🔊');
+            } else {
+                addMessage('system', '❌ Synthèse vocale non supportée', '🔊');
+            }
+            
+            // Vérifier le navigateur
+            const userAgent = navigator.userAgent;
+            let browserInfo = 'Navigateur inconnu';
+            
+            if (userAgent.includes('Chrome') && !userAgent.includes('Edge')) {
+                browserInfo = '✅ Google Chrome (Optimal)';
+            } else if (userAgent.includes('Edge')) {
+                browserInfo = '✅ Microsoft Edge (Bon)';
+            } else if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) {
+                browserInfo = '⚠️ Safari (Support limité)';
+            } else if (userAgent.includes('Firefox')) {
+                browserInfo = '❌ Firefox (Non supporté)';
+            }
+            
+            addMessage('system', browserInfo, '🌐');
+            
+            setTimeout(() => {
+                addMessage('system', '🏁 Diagnostic terminé - Guardian prêt', '✅');
+            }, 2000);
+        }
+
+        function initializeDemo() {
+            // Message de bienvenue
+            addMessage('system', '🚀 Initialisation de Guardian Demo', '🔧');
+            
+            setTimeout(() => {
+                addMessage('system', '✅ Connexion serveur établie - Surveillance active', '✅');
+            }, 1000);
+
+            setTimeout(() => {
+                const welcomeMsg = `Bonjour ${userInfo.firstName} ! Je suis Guardian, votre assistant de sécurité personnel. J'ai vos informations (${userInfo.fullName}, ${userInfo.phone}) et je surveille votre trajet vers la Place de la Concorde. Vous pouvez me parler via le microphone ou utiliser les boutons de test si la reconnaissance vocale ne fonctionne pas.`;
+                addMessage('guardian', welcomeMsg, '🛡️');
+                
+                if (ttsEnabled) {
+                    setTimeout(() => speakText(welcomeMsg), 1000);
+                }
+            }, 2500);
+
+            setTimeout(() => {
+                addMessage('system', '💡 Astuce: Si la reconnaissance vocale ne fonctionne pas (problème réseau), utilisez les boutons "Test Auto" ou "Test Manuel" pour interagir avec Guardian.', 'ℹ️');
+            }, 4000);
+        }
+
+        function addMessage(type, content, avatar) {
+            const container = document.getElementById('messagesContainer');
+            const message = document.createElement('div');
+            message.className = `message ${type}`;
+            
+            message.innerHTML = `
+                <div class="message-avatar">${avatar}</div>
+                <div class="message-content">${content}</div>
+            `;
+            
+            container.appendChild(message);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function showTyping() {
+            document.getElementById('typingIndicator').style.display = 'block';
+            document.getElementById('messagesContainer').scrollTop = document.getElementById('messagesContainer').scrollHeight;
+        }
+
+        function hideTyping() {
+            document.getElementById('typingIndicator').style.display = 'none';
+        }
+
+        // Nouvelle fonction de reconnaissance vocale avec Vosk
+        async function startVoskListening() {
+            const btn = document.getElementById('listenBtn');
+            
+            if (isListening) {
+                stopListening();
+                return;
+            }
+
+            try {
+                // Vérifier d'abord si Vosk est disponible
+                addMessage('system', '🔍 Vérification de la reconnaissance vocale Vosk...', '🔧');
+                
+                const statusResponse = await fetch('/api/vosk/status');
+                const statusData = await statusResponse.json();
+                
+                if (!statusData.available) {
+                    addMessage('system', '❌ Vosk non disponible - Mode test activé', '⚠️');
+                    addMessage('system', '💡 ' + statusData.message, 'ℹ️');
+                    setTimeout(() => runTest(), 1000);
+                    return;
+                }
+                
+                // Vosk est disponible, démarrer l'écoute
+                addMessage('system', '✅ Vosk prêt - Démarrage écoute locale', '🎤');
+                
+                isListening = true;
+                btn.classList.add('listening');
+                btn.innerHTML = '<span>🛑</span><span>Arrêter</span>';
+                addMessage('system', '🎤 Écoute active avec Vosk - Parlez maintenant !', '🎤');
+                
+                // Appeler l'API Vosk pour démarrer l'écoute
+                const listenResponse = await fetch('/api/vosk/listen', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        timeout: 30
+                    })
+                });
+                
+                const result = await listenResponse.json();
+                
+                if (result.success && result.text) {
+                    addMessage('system', '✅ Texte reconnu par Vosk', '📊');
+                    addMessage('user', result.text, '👤');
+                    
+                    // Traiter le message reconnu
+                    setTimeout(() => {
+                        processMessage(result.text);
+                    }, 500);
+                    
+                } else {
+                    addMessage('system', '⚠️ ' + (result.message || 'Aucun texte reconnu'), '❓');
+                }
+                
+                stopListening();
+                
+            } catch (error) {
+                console.error('❌ Erreur Vosk:', error);
+                addMessage('system', `❌ Erreur Vosk: ${error.message}`, '🚨');
+                addMessage('system', '🔄 Activation du mode test automatique...', '🔧');
+                stopListening();
+                setTimeout(() => runTest(), 1000);
+            }
+        }
+
+        function startListening() {
+            const btn = document.getElementById('listenBtn');
+            
+            if (isListening) {
+                stopListening();
+                return;
+            }
+
+            // Vérification détaillée de la compatibilité
+            addMessage('system', '🔍 Vérification de la reconnaissance vocale...', '🔧');
+            
+            if (!window.location.protocol.includes('https') && !window.location.hostname.includes('localhost')) {
+                addMessage('system', '⚠️ HTTPS requis pour la reconnaissance vocale - Mode test activé', '🔒');
+                setTimeout(() => runTest(), 1000);
+                return;
+            }
+
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                addMessage('system', '❌ Navigateur non compatible - Mode test activé', '⚠️');
+                addMessage('system', '💡 Utilisez Chrome, Edge ou Safari pour la reconnaissance vocale', 'ℹ️');
+                setTimeout(() => runTest(), 1000);
+                return;
+            }
+
+            try {
+                // Initialisation robuste avec configuration réseau
+                let SpeechRecognition = null;
+                if ('webkitSpeechRecognition' in window) {
+                    SpeechRecognition = window.webkitSpeechRecognition;
+                    addMessage('system', '✅ WebKit Speech Recognition détecté', '✅');
+                } else if ('SpeechRecognition' in window) {
+                    SpeechRecognition = window.SpeechRecognition;
+                    addMessage('system', '✅ Speech Recognition standard détecté', '✅');
+                }
+
+                recognition = new SpeechRecognition();
+                
+                // Configuration optimisée pour éviter les problèmes réseau
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'fr-FR';
+                recognition.maxAlternatives = 1;
+                
+                // Configuration réseau robuste
+                if (recognition.serviceURI) {
+                    // Utiliser un service local si disponible
+                    recognition.serviceURI = window.location.origin;
+                }
+                
+                // Timeout personnalisé pour éviter les blocages réseau
+                let speechTimeout = null;
+                
+                // Gestion des événements améliorée
+                recognition.onstart = function() {
+                    console.log('🎤 Reconnaissance vocale démarrée');
+                    isListening = true;
+                    btn.classList.add('listening');
+                    btn.innerHTML = '<span>🛑</span><span>Arrêter</span>';
+                    addMessage('system', '🎤 Écoute active - Parlez clairement !', '🎤');
+                    
+                    // Timeout de sécurité pour éviter les blocages réseau
+                    speechTimeout = setTimeout(() => {
+                        if (isListening) {
+                            addMessage('system', '⏰ Timeout atteint - Arrêt automatique', '⚠️');
+                            addMessage('system', '🔧 Problème réseau détecté - Mode test activé', '🔄');
+                            stopListening();
+                            setTimeout(() => runTest(), 1000);
+                        }
+                    }, 10000); // 10 secondes maximum
+                };
+                
+                recognition.onresult = function(event) {
+                    console.log('🗣️ Résultat reçu:', event);
+                    
+                    if (event.results && event.results.length > 0) {
+                        const result = event.results[0][0];
+                        const transcript = result.transcript.trim();
+                        const confidence = (result.confidence * 100).toFixed(1);
+                        
+                        addMessage('system', `✅ Reconnu (${confidence}% confiance)`, '📊');
+                        addMessage('user', transcript, '👤');
+                        
+                        // Traiter le message
+                        setTimeout(() => {
+                            processMessage(transcript);
+                        }, 500);
+                    } else {
+                        addMessage('system', '⚠️ Aucun résultat - Réessayez', '❓');
+                    }
+                };
+                
+                recognition.onerror = function(event) {
+                    console.error('❌ Erreur reconnaissance vocale:', event);
+                    
+                    // Nettoyer le timeout
+                    if (speechTimeout) {
+                        clearTimeout(speechTimeout);
+                        speechTimeout = null;
+                    }
+                    
+                    let errorMsg = 'Erreur inconnue';
+                    let shouldFallback = false;
+                    
+                    switch(event.error) {
+                        case 'no-speech':
+                            errorMsg = 'Aucune parole détectée - Parlez plus fort ou réessayez';
+                            break;
+                        case 'audio-capture':
+                            errorMsg = 'Microphone inaccessible - Vérifiez les autorisations';
+                            shouldFallback = true;
+                            break;
+                        case 'not-allowed':
+                            errorMsg = 'Permission microphone refusée - Autorisez l\'accès dans les paramètres';
+                            shouldFallback = true;
+                            break;
+                        case 'network':
+                            errorMsg = 'Problème réseau - Service de reconnaissance indisponible';
+                            shouldFallback = true;
+                            addMessage('system', '📡 La reconnaissance vocale nécessite une connexion internet', 'ℹ️');
+                            addMessage('system', '🔧 Solution: Utilisez le mode test pour simuler les commandes', '💡');
+                            break;
+                        case 'service-not-allowed':
+                            errorMsg = 'Service non autorisé - HTTPS requis ou service bloqué';
+                            shouldFallback = true;
+                            break;
+                        case 'bad-grammar':
+                            errorMsg = 'Langue non reconnue - Vérifiez la configuration française';
+                            break;
+                        case 'language-not-supported':
+                            errorMsg = 'Français non supporté - Le navigateur ne supporte pas le français';
+                            shouldFallback = true;
+                            break;
+                        default:
+                            errorMsg = `Erreur technique: ${event.error}`;
+                            if (event.error.includes('network') || event.error.includes('service')) {
+                                shouldFallback = true;
+                            }
+                    }
+                    
+                    addMessage('system', `❌ ${errorMsg}`, '⚠️');
+                    
+                    // Auto-fallback intelligent vers le test
+                    if (shouldFallback) {
+                        addMessage('system', '🤖 Activation du mode test Guardian automatique', '🔄');
+                        addMessage('system', '� Vous pouvez simuler des commandes vocales', '�');
+                        setTimeout(() => {
+                            runTest();
+                        }, 2000);
+                    }
+                    
+                    stopListening();
+                };
+                
+                recognition.onend = function() {
+                    console.log('🎤 Reconnaissance vocale terminée');
+                    stopListening();
+                };
+                
+                // Démarrer la reconnaissance
+                addMessage('system', '🚀 Démarrage de la reconnaissance vocale...', '⚡');
+                recognition.start();
+                
+            } catch (error) {
+                console.error('❌ Erreur lors de l\'initialisation:', error);
+                addMessage('system', `❌ Erreur technique: ${error.message}`, '🚨');
+                addMessage('system', '🔄 Activation du mode test automatique...', '🔧');
+                setTimeout(() => runTest(), 1000);
+            }
+        }
+
+        function stopListening() {
+            try {
+                if (recognition && isListening) {
+                    recognition.stop();
+                    recognition = null;
+                }
+            } catch (error) {
+                console.warn('Erreur lors de l\'arrêt de la reconnaissance:', error);
+            }
+            
+            isListening = false;
+            const btn = document.getElementById('listenBtn');
+            btn.classList.remove('listening');
+            btn.innerHTML = '<span>🎤</span><span>Parler</span>';
+            
+            if (document.getElementById('messagesContainer').lastElementChild?.textContent?.includes('Écoute active')) {
+                addMessage('system', '⏹️ Écoute interrompue', '✅');
+            }
+        }
+
+        function runTest() {
+            const testMessages = [
+                {
+                    text: "Guardian, tout va bien pour l'instant",
+                    description: "Situation normale"
+                },
+                {
+                    text: "Guardian, je me sens un peu fatigué",
+                    description: "Fatigue légère"
+                },
+                {
+                    text: "Guardian, il y a beaucoup de monde ici, que dois-je faire ?",
+                    description: "Situation de foule"
+                },
+                {
+                    text: "Guardian, je ne me sens pas très bien",
+                    description: "Malaise général"
+                },
+                {
+                    text: "Guardian, j'ai l'impression de m'être égaré",
+                    description: "Problème d'orientation"
+                },
+                {
+                    text: "Guardian, j'ai des douleurs dans le dos",
+                    description: "Douleur physique"
+                },
+                {
+                    text: "Guardian, je suis stressé et angoissé",
+                    description: "Stress psychologique"
+                },
+                {
+                    text: "Guardian, je viens de tomber et j'ai mal",
+                    description: "Urgence médicale"
+                }
+            ];
+            
+            const randomTest = testMessages[Math.floor(Math.random() * testMessages.length)];
+            
+            addMessage('system', `🧪 Test automatique: ${randomTest.description}`, '🔧');
+            addMessage('system', '💬 Simulation de commande vocale...', '🎭');
+            addMessage('user', randomTest.text, '👤');
+            
+            // Simulation d'un délai de traitement réaliste
+            showTyping();
+            setTimeout(() => {
+                processMessage(randomTest.text);
+            }, 1500);
+        }
+
+        // Fonction pour permettre un test manuel depuis l'interface
+        function runManualTest() {
+            const manualTests = [
+                "Guardian, tout va bien",
+                "Guardian, je me sens fatigué", 
+                "Guardian, j'ai mal à la tête",
+                "Guardian, je suis perdu",
+                "Guardian, il y a trop de monde"
+            ];
+
+            let testChoice = '';
+            const testButtons = manualTests.map((test, index) => 
+                `<button onclick="simulateVoiceCommand('${test}')" style="margin: 5px; padding: 8px 12px; background: #4285f4; color: white; border: none; border-radius: 15px; cursor: pointer; font-size: 0.9rem;">${index + 1}. ${test}</button>`
+            ).join('');
+
+            addMessage('system', `🎯 Choisissez un test manuel:\n${testButtons}`, '🧪');
+        }
+
+        function simulateVoiceCommand(command) {
+            addMessage('system', '🎭 Commande simulée sélectionnée', '✅');
+            addMessage('user', command, '👤');
+            
+            showTyping();
+            setTimeout(() => {
+                processMessage(command);
+            }, 1000);
+        }
+
+        function processMessage(message) {
+            showTyping();
+            
+            // Ajouter à l'historique
+            conversationHistory.push({
+                type: 'user',
+                message: message,
+                timestamp: new Date().toISOString()
+            });
+
+            // Envoyer à l'API Guardian
+            fetch('/api/guardian/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    situation: message,
+                    location: 'Trajet Paris - Google France vers Place de la Concorde',
+                    user_info: userInfo,
+                    conversation_history: conversationHistory,
+                    timestamp: new Date().toISOString()
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                hideTyping();
+                
+                // Nouvelle logique pour les réponses Guardian
+                console.log('🤖 Réponse Guardian:', data);
+                
+                // Afficher le niveau d'urgence
+                const urgencyLevel = data.urgency_level || 3;
+                let urgencyText = urgencyLevel >= 7 ? '🚨 ÉLEVÉ' : 
+                                 urgencyLevel >= 5 ? '⚠️ MODÉRÉ' : '✅ NORMAL';
+                
+                addMessage('system', `Niveau d'urgence: ${urgencyLevel}/10 ${urgencyText}`, '📊');
+                
+                // Réponse de Guardian (nouvelle logique)
+                let response = "Situation analysée avec succès.";
+                if (data.response && data.response.trim()) {
+                    // Utiliser la réponse complète de l'IA Guardian
+                    response = data.response;
+                } else if (data.advice && data.advice.length > 0) {
+                    // Fallback vers advice si pas de response
+                    response = data.advice.join(' ');
+                }
+                
+                // Indication si email envoyé
+                if (data.email_sent) {
+                    addMessage('system', '📧 Email d\'urgence envoyé aux contacts d\'urgence', '✅');
+                }
+                
+                // Indication du statut Guardian
+                if (data.guardian_active) {
+                    addMessage('system', '🧠 Analyse IA Guardian complète', '✅');
+                } else {
+                    addMessage('system', '⚠️ Mode fallback activé', '�');
+                }
+                
+                addMessage('guardian', response, '🛡️');
+                
+                // Synthèse vocale
+                if (ttsEnabled) {
+                    setTimeout(() => {
+                        speakText(response);
+                    }, 500);
+                }
+                
+                // Ajouter à l'historique
+                conversationHistory.push({
+                    type: 'guardian',
+                    message: response,
+                    urgency_level: urgencyLevel,
+                    guardian_active: data.guardian_active || false,
+                    email_sent: data.email_sent || false,
+                    timestamp: new Date().toISOString()
+                });
+            })
+            .catch(error => {
+                hideTyping();
+                addMessage('system', `Erreur: ${error.message}`, '❌');
+                
+                // Réponse d'urgence
+                const emergencyResponse = "J'ai un problème technique mais je reste avec vous. En cas d'urgence, appelez le 15 (SAMU) ou le 112.";
+                addMessage('guardian', emergencyResponse, '🚨');
+                
+                if (ttsEnabled) {
+                    setTimeout(() => speakText(emergencyResponse), 500);
+                }
+            });
+        }
+
+        function toggleTTS() {
+            const btn = document.getElementById('ttsBtn');
+            ttsEnabled = !ttsEnabled;
+            
+            if (ttsEnabled) {
+                btn.innerHTML = '<span>🔊</span><span>Audio ON</span>';
+                btn.style.background = '#f59e0b';
+                addMessage('system', '🔊 Synthèse vocale activée', '✅');
+                speakText("Audio Guardian activé");
+            } else {
+                btn.innerHTML = '<span>🔇</span><span>Audio OFF</span>';
+                btn.style.background = '#9aa0a6';
+                addMessage('system', '🔇 Synthèse vocale désactivée', '⚠️');
+                if (window.speechSynthesis) {
+                    window.speechSynthesis.cancel();
+                }
+            }
+        }
+
+        function speakText(text) {
+            if (!ttsEnabled || !window.speechSynthesis) return;
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'fr-FR';
+            utterance.rate = 0.9;
+            utterance.pitch = 1.0;
+            utterance.volume = 0.8;
+            
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function toggleGuardianInfo() {
+            addMessage('system', '🛡️ Guardian surveille: Reconnaissance vocale active, IA d\'urgence opérationnelle, GPS de sécurité activé', 'ℹ️');
+        }
+
+        // Animation de la barre de progression
+        setInterval(() => {
+            const progressBar = document.querySelector('.progress-fill');
+            let currentWidth = parseInt(progressBar.style.width) || 25;
+            if (currentWidth < 100) {
+                progressBar.style.width = (currentWidth + 0.5) + '%';
+            }
+        }, 10000);
+    </script>
+</body>
+</html>

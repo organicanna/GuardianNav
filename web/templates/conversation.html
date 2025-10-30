@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guardian - Conversation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* En-tête simplifié */
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 300;
+        }
+
+        .user-info {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-top: 0.5rem;
+        }
+
+        /* Zone conversation principale */
+        .conversation-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            margin: 1rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .conversation-header {
+            background: #f8f9fa;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .conversation-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            color: #202124;
+        }
+
+        .conversation-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: #5f6368;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #34a853;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            background: #fafafa;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 1rem;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-content {
+            max-width: 80%;
+            padding: 1rem 1.5rem;
+            border-radius: 18px;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+
+        .message.guardian .message-content {
+            background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+            color: #1565c0;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #4285f4, #34a853);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.system .message-content {
+            background: #fff3e0;
+            color: #e65100;
+            max-width: 100%;
+            text-align: center;
+            font-size: 0.9rem;
+            border-radius: 12px;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .message.guardian .message-avatar {
+            background: linear-gradient(135deg, #4285f4, #34a853);
+            color: white;
+        }
+
+        .message.user .message-avatar {
+            background: #f0f0f0;
+            margin-right: 0;
+            margin-left: 0.5rem;
+            order: 2;
+        }
+
+        /* Zone de contrôles */
+        .controls-section {
+            background: white;
+            padding: 1.5rem 2rem;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .voice-btn {
+            background: linear-gradient(135deg, #4285f4, #34a853);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(66, 133, 244, 0.3);
+        }
+
+        .voice-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(66, 133, 244, 0.4);
+        }
+
+        .voice-btn.listening {
+            background: linear-gradient(135deg, #ea4335, #fbbc04);
+            animation: pulse 1.5s infinite;
+        }
+
+        .test-btn {
+            background: rgba(66, 133, 244, 0.1);
+            color: #4285f4;
+            border: 2px solid rgba(66, 133, 244, 0.3);
+            padding: 0.8rem 1.5rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .test-btn:hover {
+            background: rgba(66, 133, 244, 0.2);
+            border-color: rgba(66, 133, 244, 0.5);
+        }
+
+        /* Indicateur de frappe */
+        .typing-indicator {
+            display: none;
+            padding: 1rem 1.5rem;
+            background: #f0f0f0;
+            border-radius: 18px;
+            margin-bottom: 1rem;
+            max-width: 80%;
+        }
+
+        .typing-indicator .dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-indicator .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #666;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-indicator .dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .conversation-container {
+                margin: 0.5rem;
+            }
+            
+            .controls-section {
+                padding: 1rem;
+                gap: 0.5rem;
+            }
+            
+            .voice-btn {
+                padding: 0.8rem 1.5rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- En-tête avec informations utilisateur -->
+    <div class="header">
+        <h1>🛡️ Guardian - Assistant de Sécurité</h1>
+        <div class="user-info" id="userInfo">
+            Chargement des informations...
+        </div>
+    </div>
+
+    <!-- Zone de conversation principale -->
+    <div class="conversation-container">
+        <div class="conversation-header">
+            <div class="conversation-title">
+                <span>🤖</span>
+                <span>Conversation Guardian</span>
+            </div>
+            <div class="conversation-status">
+                <div class="status-dot"></div>
+                <span>En ligne</span>
+            </div>
+        </div>
+
+        <div class="messages-container" id="messagesContainer">
+            <!-- Indicateur de frappe -->
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="dots">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls-section">
+            <button class="voice-btn" id="listenBtn" onclick="startVoskListening()">
+                <span>🎤</span>
+                <span>Parler à Guardian</span>
+            </button>
+            
+            <button class="test-btn" onclick="runTest()">
+                🤖 Test Auto
+            </button>
+            
+            <button class="test-btn" onclick="runManualTest()">
+                ✏️ Test Manuel
+            </button>
+            
+            <button class="test-btn" onclick="toggleTTS()">
+                <span id="ttsIcon">🔊</span> <span id="ttsText">Audio</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let isListening = false;
+        let recognition = null;
+        let userInfo = {};
+        let conversationHistory = [];
+        let ttsEnabled = true;
+
+        // Récupération des informations utilisateur
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedUserInfo = sessionStorage.getItem('guardianUserInfo');
+            if (savedUserInfo) {
+                try {
+                    userInfo = JSON.parse(savedUserInfo);
+                    document.getElementById('userInfo').innerHTML = 
+                        `👤 ${userInfo.fullName} | 📞 ${userInfo.phone}`;
+                } catch (e) {
+                    console.error('Erreur parsing userInfo:', e);
+                    document.getElementById('userInfo').innerHTML = 
+                        '⚠️ Informations utilisateur non disponibles';
+                }
+            } else {
+                document.getElementById('userInfo').innerHTML = 
+                    '⚠️ <a href="/" style="color: white;">Retour à l\'accueil</a> pour saisir vos informations';
+            }
+            
+            initializeConversation();
+        });
+
+        function initializeConversation() {
+            addMessage('system', '🚀 Connexion à Guardian établie', '🔧');
+            
+            setTimeout(() => {
+                const welcomeMsg = `Bonjour ${userInfo.firstName || 'cher utilisateur'} ! Je suis Guardian, votre assistant de sécurité personnel. Comment puis-je vous aider aujourd'hui ?`;
+                addMessage('guardian', welcomeMsg, '🛡️');
+                
+                if (ttsEnabled) {
+                    setTimeout(() => speakText(welcomeMsg), 500);
+                }
+            }, 1000);
+        }
+
+        function addMessage(type, message, icon = '') {
+            const container = document.getElementById('messagesContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+
+            let avatarContent = '';
+            if (type === 'guardian') {
+                avatarContent = '<div class="message-avatar">🤖</div>';
+            } else if (type === 'user') {
+                avatarContent = '<div class="message-avatar">👤</div>';
+            }
+
+            messageDiv.innerHTML = `
+                ${avatarContent}
+                <div class="message-content">
+                    ${icon ? icon + ' ' : ''}${message}
+                </div>
+            `;
+
+            container.appendChild(messageDiv);
+            container.scrollTop = container.scrollHeight;
+
+            // Garder seulement les 50 derniers messages
+            const messages = container.querySelectorAll('.message');
+            if (messages.length > 50) {
+                messages[0].remove();
+            }
+        }
+
+        function showTyping() {
+            document.getElementById('typingIndicator').style.display = 'block';
+            const container = document.getElementById('messagesContainer');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function hideTyping() {
+            document.getElementById('typingIndicator').style.display = 'none';
+        }
+
+        // Reconnaissance vocale Vosk
+        async function startVoskListening() {
+            const btn = document.getElementById('listenBtn');
+            
+            if (isListening) {
+                stopListening();
+                return;
+            }
+
+            try {
+                addMessage('system', '🔍 Vérification reconnaissance vocale Vosk...', '🔧');
+                
+                const statusResponse = await fetch('/api/vosk/status');
+                const statusData = await statusResponse.json();
+                
+                if (!statusData.available) {
+                    addMessage('system', '❌ Vosk non disponible - Tests disponibles', '⚠️');
+                    return;
+                }
+                
+                addMessage('system', '✅ Vosk prêt - Parlez maintenant !', '🎤');
+                
+                isListening = true;
+                btn.classList.add('listening');
+                btn.innerHTML = '<span>🛑</span><span>Arrêter</span>';
+                
+                const listenResponse = await fetch('/api/vosk/listen', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ timeout: 30 })
+                });
+                
+                const result = await listenResponse.json();
+                
+                if (result.success && result.text) {
+                    addMessage('system', '✅ Texte reconnu', '📊');
+                    addMessage('user', result.text, '👤');
+                    setTimeout(() => processMessage(result.text), 500);
+                } else {
+                    addMessage('system', '⚠️ ' + (result.message || 'Aucun texte reconnu'), '❓');
+                }
+                
+                stopListening();
+                
+            } catch (error) {
+                console.error('Erreur Vosk:', error);
+                addMessage('system', `❌ Erreur: ${error.message}`, '🚨');
+                stopListening();
+            }
+        }
+
+        function stopListening() {
+            isListening = false;
+            const btn = document.getElementById('listenBtn');
+            btn.classList.remove('listening');
+            btn.innerHTML = '<span>🎤</span><span>Parler à Guardian</span>';
+        }
+
+        function processMessage(message) {
+            showTyping();
+            
+            conversationHistory.push({
+                type: 'user',
+                message: message,
+                timestamp: new Date().toISOString()
+            });
+
+            fetch('/api/guardian/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    situation: message,
+                    location: 'Conversation Guardian',
+                    user_info: userInfo,
+                    conversation_history: conversationHistory,
+                    timestamp: new Date().toISOString()
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideTyping();
+                
+                const urgencyLevel = data.urgency_level || 3;
+                let urgencyText = urgencyLevel >= 7 ? '🚨 ÉLEVÉ' : 
+                                 urgencyLevel >= 5 ? '⚠️ MODÉRÉ' : '✅ NORMAL';
+                
+                addMessage('system', `Niveau d'urgence: ${urgencyLevel}/10 ${urgencyText}`, '📊');
+                
+                let response = data.response || (data.advice && data.advice.join(' ')) || "Situation analysée.";
+                
+                if (data.email_sent) {
+                    addMessage('system', '📧 Email d\'urgence envoyé', '✅');
+                }
+                
+                if (data.guardian_active) {
+                    addMessage('system', '🧠 Analyse IA Guardian', '✅');
+                }
+                
+                addMessage('guardian', response, '🛡️');
+                
+                if (ttsEnabled) {
+                    setTimeout(() => speakText(response), 500);
+                }
+                
+                conversationHistory.push({
+                    type: 'guardian',
+                    message: response,
+                    urgency_level: urgencyLevel,
+                    timestamp: new Date().toISOString()
+                });
+            })
+            .catch(error => {
+                hideTyping();
+                addMessage('system', `Erreur: ${error.message}`, '❌');
+            });
+        }
+
+        // Tests
+        function runTest() {
+            const testMessages = [
+                "Je suis perdu dans Paris",
+                "Je ne me sens pas en sécurité", 
+                "Il y a quelqu'un qui me suit",
+                "J'ai mal à la tête",
+                "Je suis tombé et j'ai mal au dos"
+            ];
+            const randomMessage = testMessages[Math.floor(Math.random() * testMessages.length)];
+            
+            addMessage('user', randomMessage, '👤');
+            setTimeout(() => processMessage(randomMessage), 500);
+        }
+
+        function runManualTest() {
+            const message = prompt('💬 Tapez votre message pour Guardian:');
+            if (message && message.trim()) {
+                addMessage('user', message.trim(), '👤');
+                setTimeout(() => processMessage(message.trim()), 500);
+            }
+        }
+
+        // Synthèse vocale
+        function speakText(text) {
+            if (!ttsEnabled || !('speechSynthesis' in window)) return;
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'fr-FR';
+            utterance.rate = 0.9;
+            utterance.pitch = 1;
+            speechSynthesis.speak(utterance);
+        }
+
+        function toggleTTS() {
+            ttsEnabled = !ttsEnabled;
+            const icon = document.getElementById('ttsIcon');
+            const text = document.getElementById('ttsText');
+            
+            if (ttsEnabled) {
+                icon.textContent = '🔊';
+                text.textContent = 'Audio';
+                addMessage('system', '🔊 Audio activé', 'ℹ️');
+            } else {
+                icon.textContent = '🔇';
+                text.textContent = 'Muet';
+                addMessage('system', '🔇 Audio désactivé', 'ℹ️');
+            }
+        }
+    </script>
+</body>
+</html>

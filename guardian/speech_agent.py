@@ -161,10 +161,10 @@ class SpeechAgent:
         
         return result
     
-    def _get_audio_config_for_priority(self, priority: str) -> texttospeech.AudioConfig:
+    def _get_audio_config_for_priority(self, priority: str):
         """Retourne une configuration audio adaptée à la priorité"""
         
-        if not self.audio_config:
+        if not self.audio_config or not GOOGLE_TTS_AVAILABLE:
             return None
         
         # Configuration selon la priorité
@@ -185,9 +185,12 @@ class SpeechAgent:
         else:  # normal
             return self.audio_config
     
-    def _speak_with_google_tts(self, text: str, audio_config: texttospeech.AudioConfig) -> bool:
+    def _speak_with_google_tts(self, text: str, audio_config) -> bool:
         """Utilise Google TTS pour la synthèse vocale"""
         
+        if not GOOGLE_TTS_AVAILABLE:
+            return False
+            
         try:
             # Préparer la requête
             synthesis_input = texttospeech.SynthesisInput(text=text)
