@@ -18,6 +18,10 @@
 - 📱 **Notifications intelligentes** : SMS/Email personnalisés selon urgence
 - 📍 **Géolocalisation précise** : GPS + What3Words + services d'urgence
 - 🤸 **Détection automatique** : Chutes, immobilité, déviations GPS
+- 👤 **Personnalisation complète** : Prénom, nom et numéro personnalisables
+- 📧 **Emails d'urgence enrichis** : Localisation exacte et situation rapportée
+- 💬 **Intégration WhatsApp** : Liens directs pour contacter la personne en danger
+- 🧠 **Décision IA autonome** : L'agent décide intelligemment quand alerter les proches
 
 ---
 
@@ -46,7 +50,13 @@ guardian/
 ├── speech_agent.py               # TTS contextuel
 ├── guardian_agent.py             # Orchestrateur urgences
 ├── sms_agent.py                  # Notifications Twilio
-└── emergency_response.py         # Emails + cartes
+├── gmail_emergency_agent.py      # Emails d'urgence enrichis
+├── emergency_response.py         # Emails + cartes
+tests/                            # Tests organisés par catégorie
+├── test_whatsapp.py             # Tests intégration WhatsApp
+├── test_email_content.py        # Tests contenu emails
+└── README.md                    # Documentation tests
+run_tests.py                     # Runner de tests catégorisé
 ```
 
 ---
@@ -82,13 +92,19 @@ notification_services:
     auth_token: "VOTRE_TOKEN"
     phone_number: "+33123456789"
 
-# Contacts urgence
+# Contacts urgence (avec WhatsApp)
 emergency_contacts:
   - name: "Marie Dupont" 
     phone: "+33612345678"
     email: "marie@gmail.com"
     relation: "fille"
     priority: 1
+
+# Configuration Gmail pour emails d'urgence
+gmail:
+  enabled: true
+  email: "votre.email@gmail.com"
+  app_password: "VOTRE_MOT_DE_PASSE_APP"
 ```
 
 ### 3️⃣ Test Installation
@@ -107,7 +123,12 @@ python -c "import sounddevice as sd; print(sd.query_devices())"
 ### 🎭 Mode Démo (Recommandé)
 ```bash
 python demo_camille_voice_real.py
-# Scénario: Urgence bureaux Google, 22h
+# Scénario personnalisable: saisissez votre prénom, nom et numéro
+# Démonstration avec vraie reconnaissance vocale et IA Gemini
+# - Interface personnalisée avec votre identité
+# - Emails d'urgence avec vos informations réelles
+# - Liens WhatsApp directs vers votre numéro
+# - Décision intelligente d'alerte par l'IA
 ```
 
 ### 🛡️ Mode Production  
@@ -122,7 +143,8 @@ python main.py
 ```
 👤 "J'ai mal à la poitrine, ça serre fort"
 🤖 "URGENCE CARDIAQUE ! Asseyez-vous ! J'appelle le SAMU."
-📱 Actions: SAMU contacté + SMS famille + Email avec carte
+🧠 IA évalue: Niveau 9/10 → Alerte automatique des proches
+📱 Actions: SAMU contacté + Email d'urgence avec localisation exacte + Liens WhatsApp
 ```
 
 #### Navigation
@@ -136,8 +158,9 @@ python main.py
 #### Sécurité
 ```
 👤 "Quelqu'un me suit depuis 10 minutes"  
-🤖 "Dirigez-vous vers le commissariat à 200m. Je guide vos proches."
-📍 Actions: Localisation temps réel + Refuges sûrs + Contacts alertés
+🤖 "Dirigez-vous vers le commissariat à 200m. J'alerte vos proches."
+🧠 IA évalue: Danger réel détecté → Envoi automatique d'email d'urgence
+📍 Actions: Localisation exacte partagée + Refuges sûrs + WhatsApp pour contact direct
 ```
 
 ### 🎤 Commandes Vocales
@@ -145,6 +168,35 @@ python main.py
 - **Info** : "Où suis-je ?", "Hôpital le plus proche"
 - **Navigation** : "Comment rentrer ?", "Je suis perdu"
 - **Test** : "Test du système", "Ma position"
+
+---
+
+## 🧪 Tests & Validation
+
+### 🏃‍♂️ Runner de Tests Catégorisé
+```bash
+# Tests par catégorie
+python run_tests.py email      # Tests emails et WhatsApp
+python run_tests.py ai         # Tests IA et analyse
+python run_tests.py voice      # Tests reconnaissance vocale  
+python run_tests.py security   # Tests sécurité
+python run_tests.py config     # Tests configuration
+
+# Tous les tests
+python run_tests.py all
+```
+
+### 📧 Fonctionnalités Testées
+- ✅ **Intégration WhatsApp** : Génération liens, messages pré-remplis
+- ✅ **Contenu emails** : Localisation réelle, situation rapportée  
+- ✅ **Décision IA** : Évaluation automatique du niveau d'urgence
+- ✅ **Personnalisation** : Noms, numéros, contacts personnalisés
+
+### 📖 Documentation Tests
+```bash
+# Voir la documentation complète
+cat tests/README.md
+```
 
 ---
 
@@ -161,7 +213,13 @@ vosk_config = {
 
 ### 🤖 IA Gemini Personnalisée
 ```yaml
-# Mots-clés urgence personnalisés
+# Décision intelligente d'alerte automatique
+ai_decision_config:
+  auto_alert_threshold: 7      # Seuil auto-envoi emails (sur 10)
+  danger_keywords: ["suivie", "menacée", "agressée", "blessée"]
+  emergency_contexts: ["nuit", "isolé", "danger immédiat"]
+
+# Mots-clés urgence personnalisés  
 emergency_keywords:
   critical: ["au secours", "samu", "infarctus"]     # Niveau 9-10  
   high: ["j'ai très mal", "je suis tombé"]          # Niveau 7-8
@@ -178,6 +236,24 @@ emergency_voice = {
 }
 ```
 
+### 📧 Emails d'Urgence Enrichis
+```html
+<!-- Contenu automatique des emails -->
+✅ Localisation exacte : "8 rue de Londres, 75009 Paris (bureaux Google France)"
+✅ Situation rapportée : Texte exact de reconnaissance vocale
+✅ Liens WhatsApp : "Appeler [Nom] via WhatsApp" → Clic direct
+✅ Actions immédiates : Boutons d'aide et instructions
+✅ Carte interactive : Localisation précise sur Google Maps
+```
+
+### 💬 Intégration WhatsApp
+```javascript
+// Génération automatique de liens WhatsApp
+const whatsappLink = `https://wa.me/${phoneNumber}?text=${prefilledMessage}`;
+// Message pré-rempli en français rassurant
+// Un clic depuis l'email = appel direct gratuit
+```
+
 ---
 
 ## 📊 Performance
@@ -185,14 +261,46 @@ emergency_voice = {
 | Métrique | Temps | Technologie |
 |----------|-------|-------------|
 | 🎤 Reconnaissance | < 0.5s | Vosk offline français |
-| 🤖 Analyse IA | < 2s | Gemini 2.5 Flash |
+| 🤖 Analyse IA + Décision | < 2s | Gemini 2.5 Flash |
 | 🔊 Synthèse vocale | < 1s | Google TTS Neural |
-| 📱 Notifications | < 3s | Twilio + Gmail |
+| 📱 Notifications + WhatsApp | < 3s | Gmail + Twilio |
+| 📧 Email enrichi + Carte | < 2s | Gmail API + Maps |
 | **🎯 Total** | **< 7s** | **Bout en bout** |
+
+### 🆕 Nouvelles Capacités
+- ✅ **Personnalisation temps réel** : Prénom/nom saisis → Interface adaptée
+- ✅ **Décision IA autonome** : Évaluation 1-10 → Alerte automatique si > 7
+- ✅ **WhatsApp instantané** : Email → Clic → Appel gratuit en 1 seconde
+- ✅ **Localisation exacte** : GPS + adresse lisible dans tous les emails
 
 ---
 
-## 🆘 Urgence & Support
+## � Dernières Améliorations (v2.0)
+
+### 👤 **Personnalisation Complète**
+- Interface s'adapte au prénom/nom saisi en temps réel
+- Messages d'accueil personnalisés : "Bonjour [Prénom]"
+- Emails d'urgence avec l'identité réelle de l'utilisateur
+
+### 🧠 **IA Décisionnelle Autonome**  
+- L'agent évalue automatiquement la gravité (1-10/10)
+- Envoi automatique d'emails pour situations dangereuses (≥ 7/10)
+- Analyse contextuelle : nuit + isolé + mots-clés danger = alerte immédiate
+
+### 📧 **Emails d'Urgence Nouvelle Génération**
+- Localisation exacte : "8 rue de Londres, 75009 Paris (Google France)"
+- Situation rapportée mot pour mot depuis la reconnaissance vocale
+- Boutons WhatsApp : 1 clic = appel direct gratuit
+- Interface HTML responsive avec cartes interactives
+
+### 🧪 **Infrastructure de Tests Robuste**
+- Tests organisés par catégorie (email, IA, vocal, sécurité)
+- Runner automatisé avec rapports détaillés
+- Validation continue de l'intégration WhatsApp et emails
+
+---
+
+## �🆘 Urgence & Support
 
 **En cas d'urgence réelle : appelez le 15 (SAMU), 17 (Police), 18 (Pompiers)**
 
