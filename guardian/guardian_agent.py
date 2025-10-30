@@ -8,6 +8,7 @@ from guardian.voice_agent import VoiceAgent
 from guardian.speech_agent import SpeechAgent
 from guardian.gemini_agent import VertexAIAgent
 from guardian.sms_agent import SMSAgent
+from guardian.gmail_emergency_agent import GmailEmergencyAgent
 from guardian.emergency_response import EmergencyResponse
 from guardian.intelligent_advisor import IntelligentAdvisor, SmartResponseSystem
 from guardian.emergency_locations import EmergencyLocationService
@@ -37,6 +38,9 @@ class GuardianOrchestrator:
         
         # Agent Vertex AI pour l'analyse avancée
         self.vertex_ai_agent = VertexAIAgent(api_keys_config)
+        
+        # Agent Gmail pour emails d'urgence
+        self.gmail_agent = GmailEmergencyAgent(api_keys_config)
         
         # Système d'IA et de conseils (fallback si Vertex AI indisponible)
         self.intelligent_advisor = IntelligentAdvisor()
@@ -315,6 +319,14 @@ class GuardianOrchestrator:
             
             self.emergency_response.send_immediate_danger_alert(self.current_position, enhanced_reason)
             
+            # Envoyer emails d'urgence aux proches pour urgence critique
+            self.send_emergency_email_alert(
+                user_name="Utilisateur GuardianNav",
+                location=f"Position GPS: {self.current_position}",
+                situation=enhanced_reason,
+                urgency_level=analysis['urgency_level']
+            )
+            
             # Envoyer aussi le SMS d'urgence
             emergency_context = {
                 'emergency_type': 'URGENCE CRITIQUE',
@@ -357,6 +369,14 @@ class GuardianOrchestrator:
             enhanced_reason += f"\n{refuges_message}"
             
             self.emergency_response.send_location_with_refuges_info(self.current_position, refuges_message, enhanced_reason)
+            
+            # Envoyer emails d'urgence aux proches pour urgence élevée
+            self.send_emergency_email_alert(
+                user_name="Utilisateur GuardianNav",
+                location=f"Position GPS: {self.current_position}",
+                situation=enhanced_reason,
+                urgency_level=analysis['urgency_level']
+            )
             
             # Envoyer aussi le SMS d'urgence
             emergency_context = {
@@ -862,6 +882,50 @@ def voice_monitor(orchestrator, voice_agent):
                 orchestrator.agents_lock.release()
         
         time.sleep(1)
+
+    def send_emergency_email_alert(self, user_name: str, location: str, situation: str, urgency_level: int = 8):
+        """Envoie des emails d'urgence aux contacts configurés quand Gemini détecte un danger élevé"""
+        
+        # Seuil pour envoyer des emails (niveau 7 et plus sur 10)
+        if urgency_level < 7:
+            self.logger.info(f"Niveau d'urgence {urgency_level}/10 - Pas d'envoi d'email")
+            return
+        
+        if not self.gmail_agent or not self.gmail_agent.is_available:
+            self.logger.warning("Agent Gmail non disponible - emails d'urgence désactivés")
+            return
+        
+        try:
+            self.logger.critical(f"ENVOI D'EMAILS D'URGENCE - Niveau {urgency_level}/10")
+            print(f"\n📧 **ENVOI D'ALERTES EMAIL AUX PROCHES** (Urgence: {urgency_level}/10)")
+            
+            result = self.gmail_agent.send_to_emergency_contacts(
+                user_name=user_name,
+                location=location, 
+                situation=situation
+            )
+            
+            if result['success']:
+                self.logger.info(f"Emails d'urgence envoyés: {result['successful_sends']}/{result['total_contacts']}")
+                print(f"✅ {result['successful_sends']}/{result['total_contacts']} emails d'urgence envoyés")
+                print("📨 Vos proches ont été alertés de votre situation")
+                
+                # Notification vocale
+                try:
+                    self.speech_agent.speak_alert(
+                        "info", 
+                        f"Vos proches ont été alertés par email de votre situation d'urgence"
+                    )
+                except:
+                    pass
+                    
+            else:
+                self.logger.error(f"Erreur envoi emails: {result.get('error', 'Inconnu')}")
+                print(f"❌ Erreur envoi emails: {result.get('error', 'Inconnu')}")
+                
+        except Exception as e:
+            self.logger.error(f"Exception lors de l'envoi d'emails: {e}")
+            print(f"❌ Exception emails d'urgence: {e}")
 
 def console_input_monitor(orchestrator):
     """Surveille les entrées console en arrière-plan"""

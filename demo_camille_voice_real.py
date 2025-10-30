@@ -9,7 +9,6 @@ import sys
 import os
 import yaml
 import json
-import threading
 import time
 import requests
 import math
@@ -177,13 +176,65 @@ def load_guardian_agent():
         
         # Importer et initialiser l'agent
         from guardian.gemini_agent import VertexAIAgent
+        from guardian.gmail_emergency_agent import GmailEmergencyAgent
+        
         agent = VertexAIAgent(config)
+        gmail_agent = GmailEmergencyAgent(config)
+        
+        # Ajouter l'agent Gmail à l'agent principal pour la démo
+        agent.gmail_agent = gmail_agent
+        
+        # Ajouter méthode d'envoi d'email pour la démo
+        def send_emergency_email_alert():
+            """Méthode d'envoi d'email d'urgence pour la démo"""
+            if not gmail_agent.is_available:
+                return False
+            
+            try:
+                # Coordonnées de Paris pour la démo
+                demo_location = (48.8566, 2.3522)
+                
+                # Obtenir les contacts d'urgence de la config
+                emergency_contacts = config.get('emergency_contacts', [
+                    {"email": "demo@example.com", "name": "Contact Demo"}
+                ])
+                
+                # Envoyer aux contacts d'urgence
+                success_count = 0
+                for contact in emergency_contacts:
+                    try:
+                        subject, html_body, text_body = gmail_agent.create_emergency_email(
+                            recipient_email=contact.get("email"),
+                            user_name="Camille (Démo)",
+                            location="Paris, France (démonstration)",
+                            situation="Situation d'urgence détectée par l'IA GuardianNav lors de la démonstration vocale",
+                            location_coords=demo_location,
+                            emergency_type="🚨 Alerte démo GuardianNav",
+                            urgency_level="élevée"
+                        )
+                        
+                        result = gmail_agent.send_email(contact.get("email"), subject, html_body, text_body)
+                        if result.get("success"):
+                            success_count += 1
+                            
+                    except Exception as e:
+                        print(f"❌ Erreur envoi à {contact.get('name')}: {e}")
+                        
+                return success_count > 0
+                
+            except Exception as e:
+                print(f"❌ Erreur générale envoi email: {e}")
+                return False
+        
+        # Attacher la méthode à l'agent
+        agent.send_emergency_email_alert = send_emergency_email_alert
         
         print(f"🤖 Agent GuardianNav:")
         print(f"   - IA: {'✅ Disponible' if agent.is_available else '⚠️ Mode simulation'}")
+        print(f"   - Gmail: {'✅ Configuré' if gmail_agent.is_available else '❌ Non configuré'}")
         print(f"   - Prêt: {'✅ Opérationnel' if agent.api_key and agent.api_key != 'YOUR_VERTEX_AI_API_KEY' else '❌ Non configuré'}")
         
-        return agent, True
+        return agent, gmail_agent, True
         
     except FileNotFoundError:
         print("❌ Fichier api_keys.yaml non trouvé")
@@ -520,7 +571,7 @@ def run_voice_camille_demo():
     # Chargement de l'agent
     print("\n🔧 **INITIALISATION DE GUARDIANNAV**")
     print("="*40)
-    agent, agent_loaded = load_guardian_agent()
+    agent, gmail_agent, agent_loaded = load_guardian_agent()
     
     if agent_loaded:
         print("✅ Agent GuardianNav chargé avec succès")
@@ -587,6 +638,7 @@ MISSION: Analyse cette situation d'urgence et réponds directement à Camille de
 CAPACITÉS DISPONIBLES: 
 - Si tu juges qu'un itinéraire sécurisé est nécessaire, inclus "DEMANDE_ITINERAIRE_SECURISE" dans ta réponse
 - Si tu veux proposer des lieux sécurisés à proximité (hôpitaux, commissariats, pharmacies), inclus "DEMANDE_LIEUX_SECURISES" dans ta réponse
+- Si la situation est grave (niveau 7+/10) et nécessite d'alerter les proches, inclus "DEMANDE_ENVOI_EMAIL_URGENCE" dans ta réponse
 
 FORMAT DE RÉPONSE (en français):
 **NIVEAU D'URGENCE:** [1-10]/10
@@ -655,6 +707,21 @@ Réponds uniquement dans ce format. Sois précise, empathique et professionnelle
         
         places_response = format_safe_places_response(places_info, camille_lat, camille_lng)
         ai_response = ai_response.replace("DEMANDE_LIEUX_SECURISES", places_response)
+    
+    # Traitement de la demande d'envoi d'email d'urgence
+    if "DEMANDE_ENVOI_EMAIL_URGENCE" in ai_response:
+        if agent.gmail_agent and agent.gmail_agent.is_available:
+            print("🚨 **ENVOI D'EMAIL D'URGENCE EN COURS...**")
+            success = agent.send_emergency_email_alert()
+            if success:
+                email_response = "✅ Email d'urgence envoyé avec succès aux contacts d'urgence."
+            else:
+                email_response = "❌ Erreur lors de l'envoi de l'email d'urgence. Veuillez contacter manuellement vos proches."
+        else:
+            email_response = "⚠️ Service d'email d'urgence non configuré. Veuillez contacter manuellement vos proches."
+        
+        ai_response = ai_response.replace("DEMANDE_ENVOI_EMAIL_URGENCE", email_response)
+
     
     simulate_tts_response(ai_response)
     
