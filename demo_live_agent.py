@@ -670,10 +670,9 @@ def run_live_agent_demo():
     print("="*45)
     
     # Message d'accueil Guardian
-    welcome_msg = f"""Bonjour {user_firstname}. Je suis Guardian, votre assistant de sécurité personnel. 
-Je détecte que vous m'activez à une heure tardive près des bureaux Google France. 
-Je vois que vous souhaitez vous rendre Place de la Concorde. Êtes-vous en sécurité ? 
-Décrivez-moi votre situation actuelle en parlant dans votre microphone."""
+    welcome_msg = f"""Bonjour {user_firstname}. Je suis Guardian. 
+Êtes-vous en sécurité ? 
+Parlez maintenant."""
     
     simulate_tts_response(welcome_msg)
     
@@ -697,46 +696,38 @@ CONTEXTE DE LA SITUATION:
 • Destination souhaitée: Place de la Concorde
 • Situation: "{situation_vocale}"
 
-MISSION: Analyse cette situation d'urgence et réponds directement à {user_firstname} de manière professionnelle, rassurante mais ferme.
+MISSION: La personne est en état de choc. Réponds de manière TRÈS COURTE, SIMPLE et DIRECTE à {user_firstname}.
+
+CONTRAINTES CRITIQUES:
+- Phrases COURTES (maximum 10 mots chacune)
+- Instructions SIMPLES à comprendre 
+- Pas de détails techniques ou longs développements
+- Mots RASSURANTS mais FERMES
+- Priorité à l'ACTION immédiate
 
 CAPACITÉS DISPONIBLES: 
-- Si tu juges qu'un itinéraire sécurisé est nécessaire, inclus "DEMANDE_ITINERAIRE_SECURISE" dans ta réponse
-- Si tu veux proposer des lieux sécurisés à proximité (hôpitaux, commissariats, pharmacies), inclus "DEMANDE_LIEUX_SECURISES" dans ta réponse
-- Si tu estimes que la situation présente un DANGER RÉEL qui nécessite d'alerter immédiatement les proches (ex: poursuivie, harcelée, menacée, blessée, perdue, agression, accident), inclus "DEMANDE_ENVOI_EMAIL_URGENCE" dans ta réponse
+- Si itinéraire nécessaire: inclus "DEMANDE_ITINERAIRE_SECURISE" 
+- Si lieux sûrs nécessaires: inclus "DEMANDE_LIEUX_SECURISES"
+- Si danger réel: inclus "DEMANDE_ENVOI_EMAIL_URGENCE"
 
-DÉCISION D'ALERTE AUX PROCHES: Tu dois décider intelligemment d'alerter les proches quand:
-• La personne est en danger immédiat (suivie, menacée, agressée)
-• Elle est dans une situation potentiellement grave (perdue la nuit, blessée, harcelée)
-• Sa sécurité physique est compromise
-• Elle a besoin d'aide urgente et pourrait ne plus pouvoir communiquer
-NE PAS alerter pour: stress léger, demande d'informations, situations non dangereuses
+DÉCISION D'ALERTE: Alerter si danger immédiat (suivie, menacée, agressée, blessée, perdue la nuit)
 
-FORMAT DE RÉPONSE (en français):
-**NIVEAU D'URGENCE:** [1-10]/10
+FORMAT DE RÉPONSE COURT (en français):
+**URGENCE:** [1-10]/10
 
-**ANALYSE DE LA SITUATION:**
-[Analyse claire en 2-3 phrases]
+**QUE FAIRE:**
+1. [Action simple - 5 mots max]
+2. [Action simple - 5 mots max]
 
-**ACTIONS IMMÉDIATES:**
-1. [Action prioritaire n°1]
-2. [Action prioritaire n°2] 
-3. [Action prioritaire n°3]
+**OÙ ALLER:**
+[Si nécessaire: DEMANDE_LIEUX_SECURISES]
 
-**CONSEILS DE SÉCURITÉ:**
-• [Conseil pratique immédiat]
-• [Conseil de déplacement - Métro Saint-Lazare proche, rues principales éclairées]
-• [Conseil de communication]
+**APPELER:**
+17 (Police) ou 112 (Urgences)
 
-**LIEUX SÉCURISÉS À PROXIMITÉ:**
-Si la situation l'exige, demande des lieux sécurisés avec DEMANDE_LIEUX_SECURISES
+**{user_firstname}:** [Message court rassurant - 1 phrase max]
 
-**NUMÉROS D'URGENCE:**
-[Numéro approprié à la situation]
-
-**MESSAGE PERSONNEL:**
-{user_firstname}, [message rassurant et encourageant personnalisé]
-
-Réponds uniquement dans ce format. Sois précise, empathique et professionnelle."""
+GARDE TA RÉPONSE TRÈS COURTE. La personne est en état de choc et ne peut pas traiter de longs textes."""
     
     # Analyse IA
     print("\n🧠 **ANALYSE INTELLIGENTE GUARDIAN**")
@@ -840,22 +831,16 @@ RAPPEL DU CONTEXTE:
 
 MISE À JOUR DE {user_firstname.upper()}: "{follow_up_vocal}"
 
-MISSION: Réponds à cette mise à jour de manière professionnelle et bienveillante.
+MISSION: Réponse TRÈS COURTE. La personne est stressée.
 
-FORMAT DE RÉPONSE:
-**ÉVALUATION:** [Sa situation actuelle]
+FORMAT COURT:
+**MAINTENANT:** [État en 3 mots]
 
-**PROCHAINES ÉTAPES:**
-• [Action immédiate si nécessaire]
-• [Conseil pour la suite]
-• [Recommandation de sécurité]
+**FAIRE:** [1 action simple]
 
-**MESSAGE:**
-[Message personnel encourageant et rassurant adapté à sa réponse]
+**{user_firstname}:** [Message court - 1 phrase]
 
-Si elle est en sécurité: félicite-la et donne des conseils pour rentrer.
-Si elle est encore en danger: renforce les mesures de sécurité.
-Reste concise, empathique et professionnelle."""
+RESTE TRÈS BREF. Évite les longs développements."""
         
         follow_response = analyze_situation_with_ai(agent, follow_prompt)
         simulate_tts_response(follow_response)
