@@ -8,7 +8,7 @@ import time
 from typing import List, Dict, Any
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from guardian.emergency_email_generator import EmergencyEmailGenerator
+# from guardian.emergency_email_generator import EmergencyEmailGenerator  # Désactivé - utilise ses propres templates
 
 class EmergencyResponse:
     """Système de réponse d'urgence avec notifications et escalade"""
@@ -19,8 +19,8 @@ class EmergencyResponse:
         self.emergency_contacts = config.get('emergency_contacts', [])
         self.email_config = config.get('email', {})
         
-        # Initialiser le générateur d'emails visuels
-        self.email_generator = EmergencyEmailGenerator(api_keys_config)
+        # Générateur d'emails visuels désactivé - utilise ses propres templates
+        # self.email_generator = EmergencyEmailGenerator(api_keys_config)
         
     def send_immediate_danger_alert(self, location: tuple, situation: str = ""):
         """Envoie une alerte de danger immédiat aux contacts proches"""
@@ -262,15 +262,21 @@ Tout semble normal.
             return
         
         try:
-            # Générer l'email HTML
-            html_content = self.email_generator.generate_emergency_email_html(
-                location=location,
-                emergency_type=emergency_type,
-                urgency_level=urgency_level,
-                situation_details=situation_details,
-                person_name=person_name,
-                additional_info=additional_info
-            )
+            # Utiliser un template simple au lieu du générateur complexe
+            html_content = f"""
+            <html>
+            <body style="font-family: Arial, sans-serif;">
+                <h2 style="color: #d32f2f;">🚨 ALERTE D'URGENCE</h2>
+                <p><strong>Personne:</strong> {person_name}</p>
+                <p><strong>Type:</strong> {emergency_type}</p>
+                <p><strong>Niveau:</strong> {urgency_level.upper()}</p>
+                <p><strong>Localisation:</strong> {location}</p>
+                <p><strong>Détails:</strong> {situation_details}</p>
+                {f"<p><strong>Info:</strong> {additional_info}</p>" if additional_info else ""}
+                <p><a href="https://www.google.com/maps?q={location[0]},{location[1]}">Voir sur Google Maps</a></p>
+            </body>
+            </html>
+            """
             
             # Préparer l'email
             subject = f"🚨 URGENCE {urgency_level.upper()} - {person_name} a besoin d'aide"
@@ -359,7 +365,8 @@ Tout semble normal.
     def generate_preview_email(self) -> str:
         """Génère un aperçu d'email pour tests et prévisualisation"""
         
-        return self.email_generator.generate_test_email()
+        # Générateur désactivé - retourner un message simple
+        return "<html><body><h2>Test Email - EmergencyResponse</h2><p>Système opérationnel</p></body></html>"
     
     def send_fall_emergency_alert(self, location: tuple, fall_info: Dict[str, Any]):
         """Envoie une alerte spécialisée pour les chutes"""
