@@ -241,7 +241,7 @@
         }
 
         .voice-btn {
-            background: #4285f4;
+            background: #6b7280; /* Gris doux par défaut */
             color: white;
             border: none;
             padding: 0.5rem 1rem;
@@ -252,22 +252,71 @@
             display: flex;
             align-items: center;
             gap: 0.3rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .voice-btn:hover {
-            background: #1a73e8;
+            background: #4b5563;
             transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .voice-btn:disabled {
-            background: #dadce0;
+            background: #e5e7eb;
+            color: #9ca3af;
             cursor: not-allowed;
             transform: none;
+            box-shadow: none;
         }
 
         .voice-btn.listening {
-            background: #ea4335;
+            background: #f87171; /* Rouge doux pour l'état actif */
             animation: listening 1s ease-in-out infinite;
+        }
+
+        /* Bouton Parler - Bleu doux */
+        #listenBtn {
+            background: #60a5fa; /* Bleu ciel */
+        }
+
+        #listenBtn:hover {
+            background: #3b82f6;
+        }
+
+        /* Bouton Test Auto - Violet doux */
+        #testBtn {
+            background: #a78bfa; /* Violet pastel */
+        }
+
+        #testBtn:hover {
+            background: #8b5cf6;
+        }
+
+        /* Bouton Test Manuel - Vert doux */
+        .voice-btn[onclick="runManualTest()"] {
+            background: #4ade80 !important; /* Vert menthe */
+        }
+
+        .voice-btn[onclick="runManualTest()"]:hover {
+            background: #22c55e !important;
+        }
+
+        /* Bouton Audio - Gris élégant */
+        #ttsBtn {
+            background: #94a3b8 !important; /* Gris bleuté */
+        }
+
+        #ttsBtn:hover {
+            background: #64748b !important;
+        }
+
+        /* Variante pour Audio ON */
+        #ttsBtn.tts-enabled {
+            background: #34d399 !important; /* Vert émeraude doux */
+        }
+
+        #ttsBtn.tts-enabled:hover {
+            background: #10b981 !important;
         }
 
         @keyframes listening {
@@ -734,11 +783,11 @@
                     <span>🧪</span>
                     <span>Test Auto</span>
                 </button>
-                <button class="voice-btn" onclick="runManualTest()" style="background: #34a853;">
+                <button class="voice-btn" onclick="runManualTest()">
                     <span>🎯</span>
                     <span>Test Manuel</span>
                 </button>
-                <button class="voice-btn" id="ttsBtn" onclick="toggleTTS()" style="background: #9aa0a6;">
+                <button class="voice-btn" id="ttsBtn" onclick="toggleTTS()">
                     <span>�</span>
                     <span>Audio OFF</span>
                 </button>
@@ -1245,7 +1294,7 @@
 
             let testChoice = '';
             const testButtons = manualTests.map((test, index) => 
-                `<button onclick="simulateVoiceCommand('${test}')" style="margin: 5px; padding: 8px 12px; background: #4285f4; color: white; border: none; border-radius: 15px; cursor: pointer; font-size: 0.9rem;">${index + 1}. ${test}</button>`
+                `<button onclick="simulateVoiceCommand('${test}')" style="margin: 5px; padding: 8px 12px; background: #a78bfa; color: white; border: none; border-radius: 15px; cursor: pointer; font-size: 0.9rem; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); transition: all 0.3s;" onmouseover="this.style.background='#8b5cf6'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='#a78bfa'; this.style.transform='translateY(0)'">${index + 1}. ${test}</button>`
             ).join('');
 
             addMessage('system', `🎯 Choisissez un test manuel:\n${testButtons}`, '🧪');
@@ -1390,10 +1439,12 @@
             if (btn) {
                 if (ttsEnabled) {
                     btn.innerHTML = '<span>🔊</span><span>Audio ON</span>';
-                    btn.style.background = '#f59e0b';
+                    btn.classList.add('tts-enabled');
+                    btn.style.background = ''; // Laisser le CSS gérer la couleur
                 } else {
                     btn.innerHTML = '<span>🔇</span><span>Audio OFF</span>';
-                    btn.style.background = '#9aa0a6';
+                    btn.classList.remove('tts-enabled');
+                    btn.style.background = ''; // Laisser le CSS gérer la couleur
                 }
             }
         }
