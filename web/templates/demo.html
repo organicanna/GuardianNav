@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <meta name="cache-buster" content="v2025-10-31-14-20-TTS-FIXED-VOSK-INTEGRATED">
+    <meta name="cache-buster" content="v2025-10-31-14-40-GOOGLE-TTS-API-INTEGRATED">
     <title>Guardian - Démonstration Navigation</title>
     
     <!-- Leaflet CSS -->
@@ -445,7 +445,7 @@
         /* Messages de conversation */
         .messages-container {
             flex: 1;
-            padding: 1rem 2rem 5rem 2rem; /* Plus d'espace pour la zone de saisie */
+            padding: 1rem 2rem; /* Padding normal sans zone de saisie */
             overflow-y: auto;
             overflow-x: hidden;
             display: flex;
@@ -717,78 +717,7 @@
             60%, 100% { content: '●●●'; }
         }
 
-        /* Zone de saisie de texte en bas - limitée à la conversation */
-        .text-input-section {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #f8f9fa; /* Fond gris clair */
-            border-top: 1px solid #e8eaed;
-            padding: 12px 16px;
-            z-index: 10;
-            /* Reste dans les limites de la section conversation */
-            width: 100%;
-            box-sizing: border-box;
-            /* Respect des bords arrondis de la conversation */
-            border-bottom-left-radius: 15px;
-            border-bottom-right-radius: 15px;
-        }
 
-        .text-input-container {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            max-width: 100%;
-        }
-
-        #quickTextInput {
-            flex: 1;
-            padding: 10px 14px;
-            border: 1px solid #dadce0; /* Bordure grise */
-            border-radius: 20px;
-            font-size: 14px;
-            font-family: inherit;
-            background: #ffffff;
-            color: #5f6368; /* Texte gris */
-            outline: none;
-            transition: all 0.2s ease;
-        }
-
-        #quickTextInput:focus {
-            border-color: #9aa0a6; /* Bordure gris foncé au focus */
-            box-shadow: 0 1px 6px rgba(154, 160, 166, 0.2);
-        }
-
-        #quickTextInput::placeholder {
-            color: #9aa0a6; /* Placeholder gris */
-        }
-
-        .send-text-btn {
-            background: #6c757d; /* Bouton gris */
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 16px;
-            box-shadow: 0 1px 3px rgba(108, 117, 125, 0.2);
-        }
-
-        .send-text-btn:hover {
-            background: #5a6268; /* Gris plus foncé au survol */
-            transform: translateY(-1px);
-            box-shadow: 0 2px 6px rgba(108, 117, 125, 0.3);
-        }
-
-        .send-text-btn:active {
-            transform: translateY(0);
-            box-shadow: 0 1px 2px rgba(108, 117, 125, 0.2);
-        }
 
         /* Responsive */
         @media (max-width: 768px) {
@@ -816,15 +745,7 @@
             }
 
             .messages-container {
-                padding: 0.5rem 1rem 4rem 1rem; /* Ajout padding-bottom pour la zone de saisie */
-            }
-            
-            .text-input-section {
-                padding: 10px 12px;
-            }
-            
-            #quickTextInput {
-                font-size: 16px; /* Éviter le zoom sur iOS */
+                padding: 0.5rem 1rem; /* Padding normal sans zone de saisie */
             }
         }
     </style>
@@ -923,16 +844,6 @@
                 </div>
             </div>
         </div>
-            </div>
-            
-            <!-- Zone de saisie de texte en bas de conversation -->
-            <div class="text-input-section">
-                <div class="text-input-container">
-                    <input type="text" id="quickTextInput" placeholder="Tapez votre message pour Guardian..." maxlength="300" />
-                    <button onclick="sendQuickText()" class="send-text-btn">
-                        <span>📤</span>
-                    </button>
-                </div>
             </div>
         </div>
     </div>
@@ -1045,9 +956,9 @@
 
         function initializeDemo() {
             // Message d'initialisation avec version et timestamp
-            const version = "v2.1-TTS-FIXED";
+            const version = "v2.3-GOOGLE-TTS-API";
             const timestamp = new Date().toISOString().slice(0, 16);
-            addMessage('system', `Guardian Demo ${version} | ${timestamp} • Vosk + TTS + Saisie Intégrée • Prêt`, '⚡', true);
+            addMessage('system', `� Guardian ${version} | ${timestamp} • API Google TTS • Interface vocale pure • Vosk local`, '🎤', true);
             
             // Debug: Vérification des fonctionnalités
             console.log('🛡️ Guardian Demo v2.1 chargé:', {
@@ -1558,46 +1469,7 @@
             }, 500);
         }
 
-        // Fonction pour la zone de saisie rapide en bas
-        function sendQuickText() {
-            const input = document.getElementById('quickTextInput');
-            const text = input ? input.value.trim() : '';
-            
-            if (text.length === 0) {
-                input.focus();
-                return;
-            }
-            
-            if (text.length < 3) {
-                addMessage('system', '⚠️ Message trop court - Soyez plus précis', '⚠️');
-                input.focus();
-                return;
-            }
-            
-            // Vider l'input
-            input.value = '';
-            
-            // Afficher le message utilisateur
-            addMessage('user', text, '👤');
-            
-            // Traiter avec Guardian
-            showTyping();
-            setTimeout(() => {
-                processMessage(text);
-            }, 300);
-        }
 
-        // Gestion de l'appui sur Entrée dans la zone de saisie
-        document.addEventListener('DOMContentLoaded', function() {
-            const quickInput = document.getElementById('quickTextInput');
-            if (quickInput) {
-                quickInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        sendQuickText();
-                    }
-                });
-            }
-        });
 
         function processMessage(message) {
             showTyping();
@@ -1699,38 +1571,66 @@
 
         function toggleTTS() {
             const btn = document.getElementById('ttsBtn');
-            ttsEnabled = !ttsEnabled;
             
-            if (ttsEnabled) {
-                // Activer automatiquement les permissions vocales pour TTS
+            if (!ttsEnabled) {
+                // Activation TTS
+                ttsEnabled = true;
                 voicePermissionGranted = true;
                 
                 btn.innerHTML = '<span>🔊</span><span>Audio ON</span>';
                 btn.classList.add('tts-enabled');
-                addMessage('system', '🔊 Synthèse vocale activée', '✅');
+                addMessage('system', '🔊 Audio activé - Guardian vous parlera maintenant', '✅');
                 
-                // Test immédiat du TTS
-                if (window.speechSynthesis) {
-                    const testUtterance = new SpeechSynthesisUtterance("Audio Guardian activé");
-                    testUtterance.lang = 'fr-FR';
-                    testUtterance.rate = 0.9;
-                    testUtterance.pitch = 1.0;
-                    testUtterance.volume = 0.8;
-                    window.speechSynthesis.cancel();
-                    window.speechSynthesis.speak(testUtterance);
-                } else {
-                    addMessage('system', '⚠️ Synthèse vocale non disponible sur ce navigateur', '⚠️');
-                }
+                // Test immédiat et fiable du TTS
+                setTimeout(() => {
+                    if (window.speechSynthesis && ttsEnabled) {
+                        try {
+                            // Annuler toutes les synthèses précédentes
+                            window.speechSynthesis.cancel();
+                            
+                            // Attendre que la synthèse soit prête
+                            setTimeout(() => {
+                                const testMessage = "Guardian audio activé avec succès";
+                                const testUtterance = new SpeechSynthesisUtterance(testMessage);
+                                
+                                // Configuration française optimale
+                                testUtterance.lang = 'fr-FR';
+                                testUtterance.rate = 1.0;
+                                testUtterance.pitch = 1.0;
+                                testUtterance.volume = 1.0;
+                                
+                                // Callbacks pour debug
+                                testUtterance.onstart = () => console.log('🔊 TTS démarré');
+                                testUtterance.onend = () => console.log('🔊 TTS terminé');
+                                testUtterance.onerror = (e) => {
+                                    console.error('❌ Erreur TTS:', e);
+                                    addMessage('system', '⚠️ Problème audio - Vérifiez le volume', '⚠️');
+                                };
+                                
+                                window.speechSynthesis.speak(testUtterance);
+                                addMessage('system', '🎵 Test audio en cours...', '🔊');
+                            }, 200);
+                        } catch (error) {
+                            console.error('❌ Erreur activation TTS:', error);
+                            addMessage('system', `❌ Erreur audio: ${error.message}`, '⚠️');
+                        }
+                    } else {
+                        addMessage('system', '❌ Synthèse vocale non supportée par ce navigateur', '⚠️');
+                    }
+                }, 300);
+                
             } else {
+                // Désactivation TTS
+                ttsEnabled = false;
                 btn.innerHTML = '<span>🔇</span><span>Audio OFF</span>';
                 btn.classList.remove('tts-enabled');
-                addMessage('system', '🔇 Synthèse vocale désactivée', '⚠️');
+                addMessage('system', '🔇 Audio désactivé', '⚠️');
+                
+                // Arrêter toute synthèse en cours
                 if (window.speechSynthesis) {
                     window.speechSynthesis.cancel();
                 }
             }
-            
-            updateTTSButton();
         }
 
         function updateTTSButton() {
@@ -1831,26 +1731,89 @@
             }
         }
 
-        function speakText(text) {
-            // Vérifier que le TTS soit activé et disponible
-            if (!ttsEnabled || !window.speechSynthesis) return;
+        async function speakText(text) {
+            // Vérifications strictes
+            if (!ttsEnabled || !text || text.trim().length === 0) {
+                return;
+            }
             
             try {
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'fr-FR';
-                utterance.rate = 0.9;
-                utterance.pitch = 1.0;
-                utterance.volume = 0.8;
+                // Nettoyer le texte (retirer balises HTML et markdown)
+                let cleanText = text
+                    .replace(/<[^>]*>/g, '') // Supprimer HTML
+                    .replace(/\*\*([^*]+)\*\*/g, '$1') // Supprimer markdown gras
+                    .replace(/\n/g, ' ') // Remplacer sauts de ligne par espaces
+                    .trim();
                 
-                // Gestion d'erreur pour TTS
-                utterance.onerror = function(event) {
-                    console.warn('Erreur TTS:', event.error);
-                };
+                if (cleanText.length === 0) return;
                 
-                window.speechSynthesis.cancel();
-                window.speechSynthesis.speak(utterance);
+                // Limiter la longueur pour éviter les timeouts
+                if (cleanText.length > 300) {
+                    cleanText = cleanText.substring(0, 297) + '...';
+                }
+                
+                console.log('🔊 Tentative TTS API pour:', cleanText.substring(0, 50));
+                
+                // Essayer d'abord l'API Google TTS
+                try {
+                    const response = await fetch('/api/tts/speak', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            text: cleanText,
+                            voice: 'fr-FR-Neural2-A'
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        console.log('✅ TTS API Google réussi');
+                        return;
+                    } else if (result.fallback) {
+                        console.log('⚠️ TTS API indisponible - Fallback navigateur');
+                        // Continuer vers le fallback
+                    } else {
+                        console.warn('❌ TTS API échoué:', result.error);
+                    }
+                } catch (apiError) {
+                    console.warn('❌ Erreur TTS API:', apiError);
+                }
+                
+                // Fallback vers la synthèse vocale du navigateur
+                if (window.speechSynthesis) {
+                    console.log('🔄 Utilisation TTS navigateur en fallback');
+                    
+                    // Arrêter toute synthèse précédente
+                    window.speechSynthesis.cancel();
+                    
+                    setTimeout(() => {
+                        const utterance = new SpeechSynthesisUtterance(cleanText);
+                        
+                        // Configuration française optimisée
+                        utterance.lang = 'fr-FR';
+                        utterance.rate = 0.95;
+                        utterance.pitch = 1.0;
+                        utterance.volume = 1.0;
+                        
+                        // Callbacks de debug
+                        utterance.onstart = () => console.log('🎤 Lecture navigateur:', cleanText.substring(0, 50));
+                        utterance.onend = () => console.log('✅ Lecture terminée');
+                        utterance.onerror = (event) => {
+                            console.error('❌ Erreur TTS navigateur:', event.error);
+                        };
+                        
+                        // Lancer la synthèse
+                        window.speechSynthesis.speak(utterance);
+                    }, 100);
+                } else {
+                    console.error('❌ Aucune synthèse vocale disponible');
+                }
+                
             } catch (error) {
-                console.warn('Erreur lors de la synthèse vocale:', error);
+                console.error('❌ Exception TTS:', error);
             }
         }
 

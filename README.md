@@ -13,9 +13,9 @@
 
 **Guardian** transforme votre voix en interface d'urgence intelligente. Dites simplement *"Au secours, j'ai mal au cœur"* et l'IA Gemini analyse votre situation, évalue l'urgence (1-10), et déclenche automatiquement l'assistance appropriée.
 
-🔊 **Synthèse vocale corrigée** - Activation simplifiée en un clic  
-⌨️ **Saisie de texte intégrée** - Zone grise en bas de conversation  
-🎤 **Vosk optimisé** - Reconnaissance française hors ligne
+🔊 **Synthèse vocale (TTS)** - Guardian vous parle avec sa voix  
+🎤 **Interface vocale pure** - Interaction 100% par la voix  
+🗣️ **Vosk hors ligne** - Reconnaissance française locale et fiable
 
 ### ✨ Fonctionnalités Principales
 
@@ -186,7 +186,15 @@ python main.py
 📍 Actions: Localisation exacte partagée + Refuges sûrs + WhatsApp pour contact direct
 ```
 
-### 🎤 Commandes Vocales
+### � Interface Vocale
+
+**Contrôles principaux :**
+- 🎤 **Bouton "Parler"** - Reconnaissance vocale (vous parlez à Guardian)
+- 🔊 **Bouton "Audio ON/OFF"** - Synthèse vocale TTS (Guardian vous répond avec sa voix)
+- 🧪 **Boutons Test** - Simulation de situations d'urgence
+- 🗺️ **Carte interactive** - Localisation et navigation temps réel
+
+### �🎤 Commandes Vocales
 - **Urgences** : "Au secours", "J'ai mal à...", "Je suis en danger"  
 - **Info** : "Où suis-je ?", "Hôpital le plus proche"
 - **Navigation** : "Comment rentrer ?", "Je suis perdu"
@@ -249,9 +257,18 @@ emergency_keywords:
   medium: ["je ne me sens pas bien", "j'ai peur"]   # Niveau 4-6
 ```
 
-### 🔊 Synthèse Vocale Adaptative
+### 🔊 Synthèse Vocale (Text-to-Speech)
 ```python
-# TTS selon urgence
+# Configuration TTS pour les réponses de Guardian
+tts_config = {
+    "enabled": False,        # Désactivé par défaut - Activation via bouton "Audio ON"
+    "language": "fr-FR",     # Français de France
+    "rate": 0.95,           # Vitesse de parole (0.5 à 2.0)
+    "pitch": 1.0,           # Tonalité (0.0 à 2.0)
+    "volume": 1.0           # Volume (0.0 à 1.0)
+}
+
+# TTS adaptatif selon urgence
 emergency_voice = {
     "speaking_rate": 1.2,    # +20% rapide
     "pitch": "+3st",         # Aigu attention

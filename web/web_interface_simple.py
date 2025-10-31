@@ -45,6 +45,7 @@ try:
     
     from guardian.gemini_agent import VertexAIAgent
     from guardian.gmail_emergency_agent import GmailEmergencyAgent
+    from guardian.google_apis_service import GoogleAPIsService
     
     # Import des fonctions depuis demo_live_agent.py
     import sys
@@ -61,17 +62,20 @@ try:
     
     guardian_agent = VertexAIAgent(guardian_config)
     gmail_agent = GmailEmergencyAgent(guardian_config)
+    google_service = GoogleAPIsService(guardian_config)
     
     # Ajouter l'agent Gmail à l'agent principal
     guardian_agent.gmail_agent = gmail_agent
     
     print(f"🤖 Guardian Agent: {'✅ Disponible' if guardian_agent.is_available else '⚠️ Mode simulation'}")
     print(f"📧 Gmail Agent: {'✅ Configuré' if gmail_agent.is_available else '❌ Non configuré'}")
+    print(f"🔊 Google TTS: {'✅ Configuré' if google_service else '❌ Non configuré'}")
     
 except Exception as e:
     print(f"⚠️ Erreur chargement Guardian: {e}")
     guardian_agent = None
     gmail_agent = None
+    google_service = None
 
 # Configuration du logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -466,6 +470,54 @@ def start_guardian_agent():
     except Exception as e:
         logger.error(f"Erreur lors du démarrage Guardian: {e}")
         return jsonify({'error': 'Erreur lors du démarrage de Guardian'}), 500
+
+@app.route('/api/tts/speak', methods=['POST'])
+def tts_speak():
+    """API pour la synthèse vocale Google Text-to-Speech"""
+    try:
+        data = request.json
+        text = data.get('text', '')
+        voice_name = data.get('voice', 'fr-FR-Neural2-A')  # Voix française par défaut
+        
+        if not text or len(text.strip()) == 0:
+            return jsonify({'success': False, 'error': 'Texte requis'}), 400
+        
+        logger.info(f"🔊 TTS demandé pour: '{text[:50]}...'")
+        
+        # Utiliser l'API Google TTS via google_apis_service
+        if google_service:
+            success = google_service.google_text_to_speech_emergency(text, voice_name)
+            
+            if success:
+                logger.info("✅ TTS Google réussi")
+                return jsonify({
+                    'success': True,
+                    'message': 'Synthèse vocale réalisée',
+                    'text': text,
+                    'voice': voice_name
+                })
+            else:
+                logger.warning("⚠️ TTS Google échoué - Mode simulation")
+                return jsonify({
+                    'success': False,
+                    'error': 'API TTS non disponible - Utiliser le TTS du navigateur',
+                    'fallback': True
+                })
+        else:
+            logger.warning("⚠️ Service Google non disponible")
+            return jsonify({
+                'success': False,
+                'error': 'Service Google non configuré',
+                'fallback': True
+            })
+    
+    except Exception as e:
+        logger.error(f"❌ Erreur TTS: {e}")
+        return jsonify({
+            'success': False,
+            'error': f'Erreur TTS: {str(e)}',
+            'fallback': True
+        }), 500
 
 @app.route('/api/guardian/analyze', methods=['POST'])
 def guardian_analyze():
