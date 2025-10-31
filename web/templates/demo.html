@@ -274,49 +274,67 @@
             animation: listening 1s ease-in-out infinite;
         }
 
-        /* Bouton Parler - Bleu doux */
+        /* Palette Google Pastel */
+        
+        /* Bouton Parler - Bleu Google Pastel */
         #listenBtn {
-            background: #60a5fa; /* Bleu ciel */
+            background: #93c5fd; /* Bleu Google pastel (#4285F4 → pastel) */
+            border: 2px solid #dbeafe;
         }
 
         #listenBtn:hover {
-            background: #3b82f6;
+            background: #60a5fa;
+            border-color: #bfdbfe;
+            transform: translateY(-2px);
         }
 
-        /* Bouton Test Auto - Violet doux */
+        /* Bouton Test Auto - Rouge Google Pastel */
         #testBtn {
-            background: #a78bfa; /* Violet pastel */
+            background: #fca5a5; /* Rouge Google pastel (#EA4335 → pastel) */
+            border: 2px solid #fecaca;
         }
 
         #testBtn:hover {
-            background: #8b5cf6;
+            background: #f87171;
+            border-color: #fca5a5;
+            transform: translateY(-2px);
         }
 
-        /* Bouton Test Manuel - Vert doux */
+        /* Bouton Test Manuel - Vert Google Pastel */
         .voice-btn[onclick="runManualTest()"] {
-            background: #4ade80 !important; /* Vert menthe */
+            background: #86efac !important; /* Vert Google pastel (#34A853 → pastel) */
+            border: 2px solid #bbf7d0 !important;
         }
 
         .voice-btn[onclick="runManualTest()"]:hover {
-            background: #22c55e !important;
+            background: #4ade80 !important;
+            border-color: #86efac !important;
+            transform: translateY(-2px) !important;
         }
 
-        /* Bouton Audio - Gris élégant */
+        /* Bouton Audio OFF - Jaune Google Pastel */
         #ttsBtn {
-            background: #94a3b8 !important; /* Gris bleuté */
+            background: #fde047 !important; /* Jaune Google pastel (#FBBC05 → pastel) */
+            border: 2px solid #fef08a !important;
+            color: #92400e !important; /* Texte sombre pour contraste */
         }
 
         #ttsBtn:hover {
-            background: #64748b !important;
+            background: #facc15 !important;
+            border-color: #fde047 !important;
+            transform: translateY(-2px) !important;
         }
 
-        /* Variante pour Audio ON */
+        /* Audio ON - Garde le vert Google mais plus foncé */
         #ttsBtn.tts-enabled {
-            background: #34d399 !important; /* Vert émeraude doux */
+            background: #4ade80 !important; /* Vert Google standard */
+            border-color: #86efac !important;
+            color: white !important;
         }
 
         #ttsBtn.tts-enabled:hover {
-            background: #10b981 !important;
+            background: #22c55e !important;
+            border-color: #4ade80 !important;
         }
 
         @keyframes listening {
@@ -1294,7 +1312,7 @@
 
             let testChoice = '';
             const testButtons = manualTests.map((test, index) => 
-                `<button onclick="simulateVoiceCommand('${test}')" style="margin: 5px; padding: 8px 12px; background: #a78bfa; color: white; border: none; border-radius: 15px; cursor: pointer; font-size: 0.9rem; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); transition: all 0.3s;" onmouseover="this.style.background='#8b5cf6'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='#a78bfa'; this.style.transform='translateY(0)'">${index + 1}. ${test}</button>`
+                `<button onclick="simulateVoiceCommand('${test}')" style="margin: 5px; padding: 8px 12px; background: #fca5a5; color: white; border: 2px solid #fecaca; border-radius: 15px; cursor: pointer; font-size: 0.9rem; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); transition: all 0.3s;" onmouseover="this.style.background='#f87171'; this.style.borderColor='#fca5a5'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#fca5a5'; this.style.borderColor='#fecaca'; this.style.transform='translateY(0)'">${index + 1}. ${test}</button>`
             ).join('');
 
             addMessage('system', `🎯 Choisissez un test manuel:\n${testButtons}`, '🧪');
