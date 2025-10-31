@@ -440,7 +440,7 @@
                 </div>
                 <div class="output-line">
                     <div class="prompt">📞 PHONE:</div>
-                    <div>${userConfig.phone}</div>
+                    <div>${userConfig.phone} | <a href="#" onclick="openWhatsApp('${userConfig.phone}')" title="Contacter via WhatsApp" style="color: #25d366; text-decoration: none;">💬 WhatsApp</a></div>
                 </div>
             `;
 
@@ -716,6 +716,25 @@
                 // Test de la synthèse vocale
                 speakText("Synthèse vocale Guardian réactivée");
             }
+        }
+
+        function openWhatsApp(phone) {
+            const cleanPhone = phone.replace(/[\s\-\(\)]/g, '');
+            let whatsappPhone = cleanPhone;
+            
+            // Convertir au format international si nécessaire
+            if (cleanPhone.startsWith('0')) {
+                whatsappPhone = '33' + cleanPhone.substring(1);
+            } else if (cleanPhone.startsWith('+33')) {
+                whatsappPhone = cleanPhone.substring(1);
+            } else if (cleanPhone.startsWith('33')) {
+                whatsappPhone = cleanPhone;
+            }
+            
+            const whatsappMessage = encodeURIComponent(`Bonjour ! Je souhaite vous contacter via Guardian.`);
+            const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${whatsappMessage}`;
+            
+            window.open(whatsappUrl, '_blank');
         }
     </script>
 </body>

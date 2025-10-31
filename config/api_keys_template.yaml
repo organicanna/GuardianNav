@@ -1,0 +1,32 @@
+# Configuration API pour Guardian
+# Remplacez les valeurs par vos vraies clés API
+
+# Google AI API (Gemini)
+GOOGLE_AI_API_KEY: "your-google-ai-api-key-here"
+
+# Gmail API (pour les alertes d'urgence)
+GMAIL_CREDENTIALS_PATH: "path/to/gmail/credentials.json"
+GMAIL_TOKEN_PATH: "path/to/gmail/token.json"
+
+# Google Maps API (géolocalisation)
+GOOGLE_MAPS_API_KEY: "your-google-maps-api-key-here"
+
+# Configuration email d'urgence
+EMERGENCY_EMAIL:
+  sender: "guardian.alert@example.com"
+  recipients:
+    - "contact1@example.com"
+    - "contact2@example.com"
+
+# Configuration SMS (optionnel)
+SMS_CONFIG:
+  service: "twilio"  # ou autre service SMS
+  api_key: "your-sms-api-key"
+  phone_numbers:
+    - "+33123456789"
+    - "+33987654321"
+
+# Configuration Vertex AI (optionnel)
+VERTEX_AI:
+  project_id: "your-gcp-project-id"
+  location: "europe-west1"

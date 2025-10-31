@@ -207,11 +207,17 @@ marimo/_lsp/
 __marimo__/
 
 # GuardianNav specific
-api_keys.yaml
+config/api_keys.yaml
 *.key
 secrets/
-guardiannav.log
+logs/
+models/
+temp/
 
 # Aperçus emails HTML générés par les tests
 preview_*.html
 demo_*.html
+
+# Dossiers temporaires
+*.tmp
+.DS_Store

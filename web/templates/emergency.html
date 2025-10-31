@@ -337,9 +337,24 @@
                 phone: urlParams.get('phone') || ''
             };
 
-            // Afficher les informations utilisateur
-            document.getElementById('userInfo').textContent = 
-                `👤 ${userConfig.firstName} ${userConfig.lastName} - 📞 ${userConfig.phone}`;
+            // Afficher les informations utilisateur avec lien WhatsApp
+            const cleanPhone = userConfig.phone.replace(/[\s\-\(\)]/g, '');
+            let whatsappPhone = cleanPhone;
+            
+            // Convertir au format international si nécessaire
+            if (cleanPhone.startsWith('0')) {
+                whatsappPhone = '33' + cleanPhone.substring(1);
+            } else if (cleanPhone.startsWith('+33')) {
+                whatsappPhone = cleanPhone.substring(1);
+            } else if (cleanPhone.startsWith('33')) {
+                whatsappPhone = cleanPhone;
+            }
+            
+            const whatsappMessage = encodeURIComponent(`Bonjour ! Je souhaite vous contacter via Guardian.`);
+            const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${whatsappMessage}`;
+            
+            document.getElementById('userInfo').innerHTML = 
+                `👤 ${userConfig.firstName} ${userConfig.lastName} - 📞 ${userConfig.phone} | <a href="${whatsappUrl}" target="_blank" title="Contacter via WhatsApp" style="color: #25d366; text-decoration: none;">💬 WhatsApp</a>`;
         });
 
         function toggleVoiceRecognition() {

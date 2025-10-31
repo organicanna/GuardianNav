@@ -203,7 +203,11 @@ class GmailEmergencyAgent:
             if clean_phone.startswith('++'):
                 clean_phone = clean_phone[1:]  # Retirer le + en double
             elif not clean_phone.startswith('+'):
-                clean_phone = '+' + clean_phone
+                # Si le numéro commence par 0 (format français), le convertir au format international
+                if clean_phone.startswith('0'):
+                    clean_phone = '+33' + clean_phone[1:]  # Remplacer 0 par +33
+                else:
+                    clean_phone = '+' + clean_phone
             
             # Message WhatsApp pré-rempli pour appeler la personne
             message = f"Je viens de recevoir une alerte Guardian concernant {user_name}. Je t'appelle immédiatement pour m'assurer que tout va bien !"

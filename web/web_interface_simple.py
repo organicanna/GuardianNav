@@ -39,7 +39,7 @@ sys.path.insert(0, parent_dir)
 
 try:
     print("📁 Chargement de api_keys.yaml...")
-    config_path = os.path.join(parent_dir, 'api_keys.yaml')
+    config_path = os.path.join(parent_dir, 'config', 'api_keys.yaml')
     with open(config_path, 'r', encoding='utf-8') as f:
         guardian_config = yaml.safe_load(f)
     
@@ -49,7 +49,7 @@ try:
     # Import des fonctions depuis demo_live_agent.py
     import sys
     import importlib.util
-    demo_path = os.path.join(parent_dir, 'demo_live_agent.py')
+    demo_path = os.path.join(parent_dir, 'scripts', 'demo_live_agent.py')
     spec = importlib.util.spec_from_file_location("demo_live_agent", demo_path)
     demo_module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(demo_module)
@@ -85,7 +85,7 @@ class VoiceRecognizer:
         if model_path is None:
             # Chemin relatif vers le modèle depuis le dossier web
             parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            model_path = os.path.join(parent_dir, "vosk-model-small-fr-0.22")
+            model_path = os.path.join(parent_dir, "models", "vosk-model-small-fr-0.22")
         self.model_path = model_path
         self.model = None
         self.rec = None
@@ -356,6 +356,19 @@ def send_emergency_email_guardian(user_phone, real_location, real_situation, use
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'guardian_secret_key_2024'
 socketio = SocketIO(app, cors_allowed_origins="*")
+
+# Middleware pour désactiver le cache (développement)
+@app.after_request
+def add_no_cache_headers(response):
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, private, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    response.headers['Last-Modified'] = 'Thu, 01 Jan 1970 00:00:00 GMT'
+    response.headers['ETag'] = ''
+    # Ajouter timestamp pour forcer refresh
+    import time
+    response.headers['X-Timestamp'] = str(int(time.time()))
+    return response
 
 # Initialisation du système de reconnaissance vocale Vosk
 voice_recognizer = None

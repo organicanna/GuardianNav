@@ -3,7 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🛡️ Guardian Demo - Trajet Interactif</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="cache-buster" content="v2025-10-31-11-10-CLEANUP">
+    <title>Guardian - Démonstration Navigation</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""/>
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+    
     <style>
         * {
             margin: 0;
@@ -14,17 +29,18 @@
         body {
             font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
             background: #f8f9fa;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            overflow-x: hidden; /* Permettre le scroll vertical */
         }
 
         /* Conteneur principal avec deux colonnes */
         .main-content {
             display: flex;
             flex: 1;
-            overflow: hidden;
+            min-height: calc(100vh - 80px); /* Ajuster selon la hauteur du header */
+            overflow: visible;
         }
 
         /* Colonne gauche - Trajet */
@@ -110,7 +126,7 @@
         }
 
         /* Zone carte/trajet */
-                .map-section {
+        .map-section {
             flex: 1;
             background: white;
             margin: 1rem;
@@ -119,18 +135,40 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            position: relative; /* Assurer que la barre de progression soit positionnée par rapport à cette section */
         }
 
-        .map-placeholder {
-            text-align: center;
-            color: #5f6368;
-            padding: 2rem;
+        .map-container {
+            flex: 1;
+            position: relative;
+            background: #e8f5e8;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        .map-placeholder h3 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
+        .map-overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .map-overlay h3 {
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
             color: #4285f4;
+        }
+
+        .map-overlay p {
+            font-size: 0.8rem;
+            color: #5f6368;
+            margin: 0;
         }
 
         .route-progress {
@@ -138,36 +176,37 @@
             bottom: 1rem;
             left: 1rem;
             right: 1rem;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 1rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 0.75rem; /* Réduction du padding */
+            border-radius: 8px; /* Plus petit rayon */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             backdrop-filter: blur(10px);
+            z-index: 100;
+            font-size: 0.85rem; /* Police plus petite */
         }
 
         .progress-bar {
             width: 100%;
-            height: 8px;
+            height: 6px; /* Barre plus fine */
             background: #e8eaed;
-            border-radius: 4px;
-            overflow: hidden;
-            margin: 0.5rem 0;
+            border-radius: 3px;
+            overflow: visible;
+            margin: 0.5rem 0; /* Marges réduites */
+            position: relative;
         }
 
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #4285f4, #34a853);
-            width: 25%;
-            transition: width 0.3s ease;
-            animation: progressPulse 3s ease-in-out infinite;
-        }
+        /* CSS pour progress-fill et walking-person supprimés - animation retirée */
 
-        @keyframes progressPulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
-        }
+        /* Animations progressPulse et walkBounce supprimées - plus utilisées */
 
-        /* Zone conversation */
+        @keyframes pulse {
+            0%, 100% { 
+                box-shadow: 0 0 0 0 rgba(66, 133, 244, 0.4);
+            }
+            50% { 
+                box-shadow: 0 0 0 10px rgba(66, 133, 244, 0);
+            }
+        }        /* Zone conversation */
         .conversation-section {
             flex: 1;
             background: white;
@@ -236,11 +275,104 @@
             50% { transform: scale(1.05); }
         }
 
+        /* Notification vocale en haut à droite */
+        .voice-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: 1px solid #e8eaed;
+            border-radius: 12px;
+            padding: 16px 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            display: none;
+            max-width: 300px;
+            animation: slideInFromRight 0.3s ease-out;
+        }
+
+        .voice-notification.show {
+            display: block;
+        }
+
+        .notification-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            background: #4285f4;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: white;
+        }
+
+        .notification-text {
+            flex: 1;
+            font-size: 14px;
+            color: #202124;
+            line-height: 1.4;
+        }
+
+        .notification-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .notification-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .notification-btn.primary {
+            background: #4285f4;
+            color: white;
+        }
+
+        .notification-btn.primary:hover {
+            background: #3367d6;
+        }
+
+        .notification-btn.secondary {
+            background: #f8f9fa;
+            color: #5f6368;
+            border: 1px solid #e8eaed;
+        }
+
+        .notification-btn.secondary:hover {
+            background: #f1f3f4;
+        }
+
+        @keyframes slideInFromRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
         /* Messages de conversation */
         .messages-container {
             flex: 1;
-            padding: 1rem 2rem;
+            padding: 1rem 2rem 6rem 2rem; /* Ajout de padding-bottom pour éviter la superposition */
             overflow-y: auto;
+            overflow-x: hidden;
             display: flex;
             flex-direction: column;
             gap: 1rem;
@@ -265,8 +397,9 @@
 
         .message.system {
             align-self: center;
-            max-width: 100%;
+            max-width: 85%; /* Largeur réduite */
             justify-content: center;
+            margin: 0.3rem 0; /* Espacement vertical réduit */
         }
 
         .message-avatar {
@@ -281,18 +414,21 @@
         }
 
         .message.user .message-avatar {
-            background: #4285f4;
+            background: #4285f4; /* Bleu pour l'utilisateur */
             color: white;
         }
 
         .message.guardian .message-avatar {
-            background: #34a853;
+            background: #6c757d; /* Gris pour l'agent */
             color: white;
         }
 
         .message.system .message-avatar {
-            background: #f59e0b;
-            color: white;
+            background: #6c7b7f !important; /* Gris-bleu doux */
+            color: white !important;
+            width: 28px !important; /* Plus petit que les messages normaux */
+            height: 28px !important;
+            font-size: 1rem !important;
         }
 
         .message-content {
@@ -302,25 +438,54 @@
             color: #202124;
             line-height: 1.4;
             position: relative;
+            word-wrap: break-word;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
         }
 
         .message.user .message-content {
-            background: #4285f4;
+            background: #4285f4; /* Bulle bleue pour l'utilisateur */
             color: white;
         }
 
         .message.guardian .message-content {
-            background: #e8f5e8;
-            color: #137333;
-            border: 1px solid #c8e6c9;
+            background: #f8f9fa; /* Bulle grise claire pour l'agent */
+            color: #495057;
+            border: 1px solid #dee2e6;
         }
 
         .message.system .message-content {
-            background: #fef7e0;
-            color: #b06000;
-            border: 1px solid #fdd663;
+            background: #f0f4f7 !important; /* Bleu très doux - forcer avec !important */
+            color: #546e7a !important; /* Gris-bleu foncé pour le texte */
+            border: 1px solid #e1ebf0 !important; /* Bordure subtile */
             text-align: center;
-            font-size: 0.9rem;
+            font-size: 0.8rem !important; /* Plus petit */
+            padding: 0.5rem 0.75rem !important; /* Padding réduit */
+            border-radius: 12px !important; /* Coins moins arrondis */
+            opacity: 0.9; /* Légèrement transparent */
+        }
+
+        .message.system.init .message-content {
+            background: transparent !important;
+            border: none !important;
+            color: #999 !important;
+            font-size: 11px !important;
+            font-style: italic;
+            padding: 0.3rem 0 !important;
+            text-align: center !important;
+            border-radius: 0 !important;
+            font-weight: 300;
+            opacity: 0.7 !important;
+        }
+
+        .message.system.init {
+            margin-bottom: 0.5rem !important;
+            margin-top: 0.5rem !important;
+        }
+
+        .message.system.init .message-avatar {
+            display: none;
         }
 
         /* Indicateur de frappe */
@@ -380,7 +545,7 @@
             <div class="route-details">
                 <div class="route-point">
                     <span>📍</span>
-                    <span>Google France, Paris</span>
+                    <span>Gare Saint-Lazare</span>
                 </div>
                 <div class="route-arrow">→</div>
                 <div class="route-point">
@@ -400,23 +565,26 @@
         <!-- Colonne gauche - Trajet -->
         <div class="left-column">
             <div class="map-section">
-                <div class="map-placeholder">
-                    <h3>🗺️ Trajet en Cours</h3>
-                    <p>Paris - Google France vers Place de la Concorde</p>
-                    <p style="margin-top: 0.5rem; font-size: 0.9rem;">Guardian surveille votre parcours en temps réel</p>
+                <div class="map-container">
+                    <div id="map" style="height: 100%; width: 100%;"></div>
+                    <div class="map-overlay">
+                        <h3>🗺️ Trajet Guardian</h3>
+                        <p>Paris - Gare Saint-Lazare → Place de la Concorde</p>
+                        <p>Surveillance temps réel</p>
+                    </div>
                 </div>
                 
                 <div class="route-progress">
-                    <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: #5f6368;">
-                        <span>📍 Départ: Google France</span>
-                        <span>⏱️ 15 min restantes</span>
-                        <span>🎯 Arrivée: Place de la Concorde</span>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #5f6368;">
+                        <span>� Position: Google France</span>
+                        <span>⏱️ 18 min</span>
+                        <span>🎯 Place Concorde</span>
                     </div>
                     <div class="progress-bar">
-                        <div class="progress-fill"></div>
+                        <!-- Animation supprimée - individu en position fixe -->
                     </div>
-                    <div style="font-size: 0.8rem; color: #5f6368; text-align: center;">
-                        25% du trajet effectué - Guardian surveille activement
+                    <div style="font-size: 0.75rem; color: #5f6368; text-align: center;">
+                        Individu situé près des locaux Google France
                     </div>
                 </div>
             </div>
@@ -444,9 +612,9 @@
                     <span>🎯</span>
                     <span>Test Manuel</span>
                 </button>
-                <button class="voice-btn" id="ttsBtn" onclick="toggleTTS()" style="background: #f59e0b;">
-                    <span>🔊</span>
-                    <span>Audio ON</span>
+                <button class="voice-btn" id="ttsBtn" onclick="toggleTTS()" style="background: #9aa0a6;">
+                    <span>�</span>
+                    <span>Audio OFF</span>
                 </button>
             </div>
         </div>
@@ -470,13 +638,18 @@
     <script>
         let isListening = false;
         let recognition = null;
-        let ttsEnabled = true;
+        let ttsEnabled = false; // Désactivé par défaut
+        let voicePermissionGranted = false; // Track l'acceptation de la notification vocale
         let conversationHistory = [];
         let userInfo = {
             firstName: 'Utilisateur',
             lastName: '',
             phone: ''
         };
+
+        let map = null;
+        let currentMarker = null;
+        let routeLine = null;
 
         // Initialisation
         document.addEventListener('DOMContentLoaded', function() {
@@ -493,88 +666,107 @@
                 console.warn('⚠️ Aucune information utilisateur trouvée - redirection vers l\'accueil recommandée');
             }
             
-            runCompatibilityCheck();
+            initializeMap();
             initializeDemo();
         });
 
-        function runCompatibilityCheck() {
-            addMessage('system', '🔍 Diagnostic des capacités du navigateur...', '🔧');
+        function initializeMap() {
+            // Debug: Version timestamp pour forcer refresh
+            console.log('🗺️ Demo map initialized at:', new Date().toISOString());
+            console.log('🧹 Version: Code nettoyé - éléments orphelins supprimés - v11.10 -', new Date().toISOString());
             
-            // Vérifier le protocole
-            const isSecure = window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-            if (isSecure) {
-                addMessage('system', '✅ Protocole sécurisé détecté', '🔒');
-            } else {
-                addMessage('system', '⚠️ HTTPS recommandé pour la reconnaissance vocale', '🔒');
-            }
+            // Initialiser la carte centrée sur Paris
+            map = L.map('map').setView([48.8566, 2.3522], 13);
+
+            // Ajouter les tuiles OpenStreetMap
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 18
+            }).addTo(map);
+
+            // Coordonnées du trajet réel
+            const gareSaintLazare = [48.8758, 2.3250]; // Gare Saint-Lazare - Départ
+            const placeConcorde = [48.8656, 2.3212]; // Place de la Concorde - Arrivée
+            const googleFrance = [48.8738, 2.3263]; // Google France - Position actuelle de l'individu
+
+            // Marqueurs de départ et d'arrivée
+            const startIcon = L.divIcon({
+                html: '<div style="background: #34a853; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold;">📍</div>',
+                className: 'start-marker',
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
+            });
+
+            const endIcon = L.divIcon({
+                html: '<div style="background: #ea4335; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold;">🎯</div>',
+                className: 'end-marker',
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
+            });
+
+            // Ajouter les marqueurs
+            L.marker(gareSaintLazare, { icon: startIcon }).addTo(map)
+                .bindPopup('<b>📍 Départ</b><br>Gare Saint-Lazare<br>Paris 8e');
             
-            // Vérifier Speech Recognition
-            if ('webkitSpeechRecognition' in window) {
-                addMessage('system', '✅ WebKit Speech Recognition disponible', '🎤');
-            } else if ('SpeechRecognition' in window) {
-                addMessage('system', '✅ Speech Recognition standard disponible', '🎤');
-            } else {
-                addMessage('system', '❌ Reconnaissance vocale non supportée', '🎤');
-                addMessage('system', '💡 Recommandé: Chrome, Edge ou Safari', 'ℹ️');
-            }
+            L.marker(placeConcorde, { icon: endIcon }).addTo(map)
+                .bindPopup('<b>🎯 Arrivée</b><br>Place de la Concorde<br>Paris 1er');
+
+            // Tracer la route (ligne simple entre les deux points)
+            routeLine = L.polyline([gareSaintLazare, placeConcorde], {
+                color: '#4285f4',
+                weight: 4,
+                opacity: 0.8,
+                smoothFactor: 1
+            }).addTo(map);
+
+            // Marqueur de position actuelle (mobile)
+            const currentIcon = L.divIcon({
+                html: '<div style="background: #4285f4; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; animation: pulse 2s infinite;">👤</div>',
+                className: 'current-marker',
+                iconSize: [20, 20],
+                iconAnchor: [10, 10]
+            });
+
+            // Position initiale de l'individu : aux locaux Google France
+            const initialLat = googleFrance[0];
+            const initialLng = googleFrance[1];
             
-            // Vérifier Speech Synthesis
-            if ('speechSynthesis' in window) {
-                addMessage('system', '✅ Synthèse vocale disponible', '🔊');
-            } else {
-                addMessage('system', '❌ Synthèse vocale non supportée', '🔊');
-            }
+            currentMarker = L.marker([initialLat, initialLng], { icon: currentIcon }).addTo(map)
+                .bindPopup('<b>👤 Votre position</b><br>Locaux Google France<br>Guardian vous surveille');
+
+            // Ajuster la vue pour inclure tous les marqueurs
+            const group = new L.featureGroup([currentMarker]);
+            map.fitBounds(routeLine.getBounds().pad(0.1));
+        }
+
+        // Fonction runCompatibilityCheck() supprimée - plus utilisée
+
+        function initializeDemo() {
+            // Message d'initialisation unique et discret
+            addMessage('system', 'Guardian Demo | Initialisation • Connexion serveur • Surveillance active • Prêt', '⚡', true);
             
-            // Vérifier le navigateur
-            const userAgent = navigator.userAgent;
-            let browserInfo = 'Navigateur inconnu';
-            
-            if (userAgent.includes('Chrome') && !userAgent.includes('Edge')) {
-                browserInfo = '✅ Google Chrome (Optimal)';
-            } else if (userAgent.includes('Edge')) {
-                browserInfo = '✅ Microsoft Edge (Bon)';
-            } else if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) {
-                browserInfo = '⚠️ Safari (Support limité)';
-            } else if (userAgent.includes('Firefox')) {
-                browserInfo = '❌ Firefox (Non supporté)';
-            }
-            
-            addMessage('system', browserInfo, '🌐');
-            
+            // Afficher la notification vocale 
             setTimeout(() => {
-                addMessage('system', '🏁 Diagnostic terminé - Guardian prêt', '✅');
+                showVoiceNotification();
             }, 2000);
         }
 
-        function initializeDemo() {
-            // Message de bienvenue
-            addMessage('system', '🚀 Initialisation de Guardian Demo', '🔧');
-            
-            setTimeout(() => {
-                addMessage('system', '✅ Connexion serveur établie - Surveillance active', '✅');
-            }, 1000);
-
-            setTimeout(() => {
-                const welcomeMsg = `Bonjour ${userInfo.firstName} ! Je suis Guardian, votre assistant de sécurité personnel. J'ai vos informations (${userInfo.fullName}, ${userInfo.phone}) et je surveille votre trajet vers la Place de la Concorde. Vous pouvez me parler via le microphone ou utiliser les boutons de test si la reconnaissance vocale ne fonctionne pas.`;
-                addMessage('guardian', welcomeMsg, '🛡️');
-                
-                if (ttsEnabled) {
-                    setTimeout(() => speakText(welcomeMsg), 1000);
-                }
-            }, 2500);
-
-            setTimeout(() => {
-                addMessage('system', '💡 Astuce: Si la reconnaissance vocale ne fonctionne pas (problème réseau), utilisez les boutons "Test Auto" ou "Test Manuel" pour interagir avec Guardian.', 'ℹ️');
-            }, 4000);
-        }
-
-        function addMessage(type, content, avatar) {
+        function addMessage(type, content, avatar, isInit = false) {
             const container = document.getElementById('messagesContainer');
             const message = document.createElement('div');
-            message.className = `message ${type}`;
+            
+            // Ajouter la classe 'init' pour les messages d'initialisation système
+            const classNames = ['message', type];
+            if (isInit && type === 'system') {
+                classNames.push('init');
+            }
+            message.className = classNames.join(' ');
+            
+            // Pas d'avatar pour les messages d'initialisation
+            const avatarHtml = (!isInit || type !== 'system') ? `<div class="message-avatar">${avatar}</div>` : '';
             
             message.innerHTML = `
-                <div class="message-avatar">${avatar}</div>
+                ${avatarHtml}
                 <div class="message-content">${content}</div>
             `;
             
@@ -602,7 +794,7 @@
 
             try {
                 // Vérifier d'abord si Vosk est disponible
-                addMessage('system', '🔍 Vérification de la reconnaissance vocale Vosk...', '🔧');
+                addMessage('system', 'Vérification de la reconnaissance vocale Vosk...', '🔧', true);
                 
                 const statusResponse = await fetch('/api/vosk/status');
                 const statusData = await statusResponse.json();
@@ -615,12 +807,12 @@
                 }
                 
                 // Vosk est disponible, démarrer l'écoute
-                addMessage('system', '✅ Vosk prêt - Démarrage écoute locale', '🎤');
+                addMessage('system', 'Vosk prêt - Démarrage écoute locale', '🎤', true);
                 
                 isListening = true;
                 btn.classList.add('listening');
                 btn.innerHTML = '<span>🛑</span><span>Arrêter</span>';
-                addMessage('system', '🎤 Écoute active avec Vosk - Parlez maintenant !', '🎤');
+                addMessage('system', 'Écoute active avec Vosk - Parlez maintenant !', '🎤', true);
                 
                 // Appeler l'API Vosk pour démarrer l'écoute
                 const listenResponse = await fetch('/api/vosk/listen', {
@@ -944,7 +1136,7 @@
                 },
                 body: JSON.stringify({
                     situation: message,
-                    location: 'Trajet Paris - Google France vers Place de la Concorde',
+                    location: 'Trajet Paris - Gare Saint-Lazare vers Place de la Concorde (individu près de Google France)',
                     user_info: userInfo,
                     conversation_history: conversationHistory,
                     timestamp: new Date().toISOString()
@@ -1025,6 +1217,13 @@
         }
 
         function toggleTTS() {
+            // Vérifier si l'utilisateur a accepté la notification vocale
+            if (!voicePermissionGranted) {
+                addMessage('system', '⚠️ Veuillez d\'abord accepter l\'activation vocale via la notification', '🔔');
+                showVoiceNotification(); // Ré-afficher la notification
+                return;
+            }
+            
             const btn = document.getElementById('ttsBtn');
             ttsEnabled = !ttsEnabled;
             
@@ -1043,8 +1242,91 @@
             }
         }
 
+        function updateTTSButton() {
+            const btn = document.getElementById('ttsBtn');
+            if (btn) {
+                if (ttsEnabled) {
+                    btn.innerHTML = '<span>🔊</span><span>Audio ON</span>';
+                    btn.style.background = '#f59e0b';
+                } else {
+                    btn.innerHTML = '<span>🔇</span><span>Audio OFF</span>';
+                    btn.style.background = '#9aa0a6';
+                }
+            }
+        }
+
+        // Fonctions pour la notification vocale
+        function showVoiceNotification() {
+            const notification = document.getElementById('voiceNotification');
+            if (notification) {
+                notification.classList.add('show');
+                
+                // Auto-masquer après 10 secondes si pas d'interaction
+                setTimeout(() => {
+                    if (notification.classList.contains('show')) {
+                        dismissVoiceNotification();
+                    }
+                }, 10000);
+            }
+        }
+
+        function dismissVoiceNotification() {
+            const notification = document.getElementById('voiceNotification');
+            if (notification) {
+                notification.classList.remove('show');
+                // Informer que les fonctions vocales restent désactivées
+                addMessage('system', 'ℹ️ Fonctions vocales désactivées - Vous pouvez utiliser les boutons de test pour interagir', 'ℹ️');
+                
+                // Envoyer le message de bienvenue de l'agent même sans vocal
+                setTimeout(() => {
+                    const welcomeMsg = `Bonjour ${userInfo.firstName} ! Je suis Guardian, votre assistant de sécurité. Je surveille votre position près des locaux Google France. Vous pouvez utiliser les boutons de test pour interagir avec moi.`;
+                    addMessage('guardian', welcomeMsg, '🛡️');
+                    
+                    // Scroll vers le bas pour voir les messages
+                    const messagesContainer = document.querySelector('.messages-container');
+                    if (messagesContainer) {
+                        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                    }
+                }, 1000);
+            }
+        }
+
+        function enableVoiceCommand() {
+            dismissVoiceNotification();
+            
+            // Marquer que l'utilisateur a accepté les fonctions vocales
+            voicePermissionGranted = true;
+            
+            // Activer la synthèse vocale maintenant que l'utilisateur a accepté
+            ttsEnabled = true;
+            updateTTSButton();
+            
+            // Activer la reconnaissance vocale
+            const voiceBtn = document.getElementById('voiceBtn');
+            if (voiceBtn && !isListening) {
+                toggleVoiceRecording();
+            }
+            
+            // Afficher message de confirmation
+            addMessage('system', '🎤 Commande vocale et synthèse audio activées', '✅');
+            
+            // Parler le message de bienvenue avec fonctions vocales activées
+            setTimeout(() => {
+                const welcomeMsg = `Bonjour ${userInfo.firstName} ! Je suis Guardian, votre assistant de sécurité. Fonctions vocales activées - Je surveille votre position et vous pouvez maintenant me parler directement.`;
+                addMessage('guardian', welcomeMsg, '🛡️');
+                speakText(welcomeMsg);
+            }, 1000);
+            
+            // Scroll vers le bas pour voir les messages
+            const messagesContainer = document.querySelector('.messages-container');
+            if (messagesContainer) {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        }
+
         function speakText(text) {
-            if (!ttsEnabled || !window.speechSynthesis) return;
+            // Vérifier les autorisations vocales ET que le TTS soit activé
+            if (!voicePermissionGranted || !ttsEnabled || !window.speechSynthesis) return;
             
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'fr-FR';
@@ -1060,14 +1342,29 @@
             addMessage('system', '🛡️ Guardian surveille: Reconnaissance vocale active, IA d\'urgence opérationnelle, GPS de sécurité activé', 'ℹ️');
         }
 
-        // Animation de la barre de progression
-        setInterval(() => {
-            const progressBar = document.querySelector('.progress-fill');
-            let currentWidth = parseInt(progressBar.style.width) || 25;
-            if (currentWidth < 100) {
-                progressBar.style.width = (currentWidth + 0.5) + '%';
-            }
-        }, 10000);
+        // Supprimer l'ancienne animation de progression remplacée par la nouvelle
+
+        // Animation de marche supprimée - individu en position fixe aux locaux Google France
+
     </script>
+
+    <!-- Notification vocale -->
+    <div id="voiceNotification" class="voice-notification">
+        <div class="notification-content">
+            <div class="notification-icon">🎤</div>
+            <div class="notification-text">
+                <strong>Commande vocale disponible</strong><br>
+                Souhaitez-vous activer la reconnaissance vocale pour interagir avec Guardian ?
+            </div>
+        </div>
+        <div class="notification-buttons">
+            <button class="notification-btn secondary" onclick="dismissVoiceNotification()">
+                Plus tard
+            </button>
+            <button class="notification-btn primary" onclick="enableVoiceCommand()">
+                Activer
+            </button>
+        </div>
+    </div>
 </body>
 </html>

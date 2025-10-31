@@ -1,0 +1,29 @@
+# GUARDIAN - INTERFACES UTILISATEUR
+# Dépendances pour les différentes interfaces
+
+# Interface Web (Flask)
+flask==2.3.3
+flask-socketio==5.3.6
+python-socketio==5.8.0
+python-engineio==4.7.1
+
+# Interface Desktop (Tkinter - inclus avec Python)
+# Pas de dépendances supplémentaires nécessaires
+
+# Interface Mobile (Kivy - optionnel)
+kivy==2.2.0
+kivymd==1.1.1
+
+# Dépendances Guardian existantes
+pyyaml>=6.0
+requests>=2.31.0
+google-generativeai>=0.3.0
+google-cloud-aiplatform>=1.38.1
+
+# Audio pour reconnaissance vocale (optionnel)
+vosk>=0.3.45
+sounddevice>=0.4.6
+pygame>=2.5.2
+
+# Utilitaires
+python-dotenv>=1.0.0
