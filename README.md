@@ -13,6 +13,10 @@
 
 **Guardian** transforme votre voix en interface d'urgence intelligente. Dites simplement *"Au secours, j'ai mal au cœur"* et l'IA Gemini analyse votre situation, évalue l'urgence (1-10), et déclenche automatiquement l'assistance appropriée.
 
+🔊 **Synthèse vocale corrigée** - Activation simplifiée en un clic  
+⌨️ **Saisie de texte intégrée** - Zone grise en bas de conversation  
+🎤 **Vosk optimisé** - Reconnaissance française hors ligne
+
 ### ✨ Fonctionnalités Principales
 
 - 🎤 **Reconnaissance vocale française** - Vosk offline, temps réel
