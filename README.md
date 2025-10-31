@@ -1,54 +1,73 @@
-# 🛡️ GuardianNav
-> **Assistant de sécurité intelligent à commande vocale**  
-> "Parlez, on s'occupe du reste" - Système d'urgence avec IA Gemini, reconnaissance vocale française et géolocalisation.
+# 🛡️ Guardian - Assistant de Sécurité Personnelle
+
+> **Interface vocale intelligente pour la sécurité personnelle**  
+> Reconnaissance vocale française + IA Gemini + Actions d'urgence automatiques
 
 [![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://python.org)
 [![AI](https://img.shields.io/badge/AI-Google_Gemini_2.5_Flash-green.svg)](https://ai.google.dev/)
 [![Voice](https://img.shields.io/badge/Voice-Vosk_French-orange.svg)](https://alphacephei.com/vosk/)
+[![Web](https://img.shields.io/badge/Web-Flask_+_Leaflet-red.svg)](https://flask.palletsprojects.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## 🎯 Vue d'ensemble
 
-**Guardian** transforme votre voix en interface d'urgence intelligente. Dites simplement "Au secours, j'ai mal au cœur" et l'IA Gemini analyse votre situation, évalue l'urgence (1-10), guide votre réponse et déclenche automatiquement l'assistance appropriée (SMS famille, email avec carte, services d'urgence).
+**Guardian** transforme votre voix en interface d'urgence intelligente. Dites simplement *"Au secours, j'ai mal au cœur"* et l'IA Gemini analyse votre situation, évalue l'urgence (1-10), et déclenche automatiquement l'assistance appropriée.
 
-### ✨ Fonctionnalités principales
-- 🎤 **Conversation naturelle** : Interface vocale française (Vosk + Google STT)
-- 🤖 **IA contextuelle** : Analyse Gemini 2.5 Flash adaptée à chaque situation  
-- ⚡ **Réponse < 7s** : Pipeline STT → IA → TTS → Actions optimisé
-- 📱 **Notifications intelligentes** : SMS/Email personnalisés selon urgence
-- 📍 **Géolocalisation précise** : GPS + What3Words + services d'urgence
-- 🤸 **Détection automatique** : Chutes, immobilité, déviations GPS
-- 👤 **Personnalisation complète** : Prénom, nom et numéro personnalisables
-- 📧 **Emails d'urgence enrichis** : Localisation exacte et situation rapportée
-- 💬 **Intégration WhatsApp** : Liens directs pour contacter la personne en danger
-- 🧠 **Décision IA autonome** : L'agent décide intelligemment quand alerter les proches
+### ✨ Fonctionnalités Principales
 
----
+- 🎤 **Reconnaissance vocale française** - Vosk offline, temps réel
+- � **IA Guardian** - Analyse contextuelle avec Gemini 2.5 Flash  
+- ⚡ **Réponse < 7s** - Pipeline optimisé STT → IA → Actions
+- � **Alertes intelligentes** - Emails/SMS automatiques selon urgence
+- �️ **Navigation sécurisée** - Itinéraires optimisés + lieux de refuge
+- 🛡️ **Interface moderne** - Design Google Material avec bouclier interactif
 
-## 🏗️ Architecture
+### � Démarrage Rapide
 
-### 🔄 Pipeline Conversation Vocale
+```bash
+# Installation
+git clone https://github.com/organicanna/GuardianNav.git
+cd GuardianNav
+pip install -r requirements.txt
+
+# Configuration APIs (voir DEPLOYMENT.md)
+cp config/api_keys.yaml.example config/api_keys.yaml
+
+# Lancement
+python3 run.py
+# ➜ http://localhost:5010
 ```
-🎤 Vosk STT (offline) → 🤖 Gemini Analysis → 🔊 Google TTS → 📱 Actions
-   < 0.5s                    < 2s                < 1s        < 3s
+
+## 📚 Documentation
+
+| Document | Description |
+|----------|-------------|
+| � **[DEPLOYMENT.md](DEPLOYMENT.md)** | Guide complet d'installation locale |
+| 🔧 **[docs/CODE_EXPLANATION.md](docs/CODE_EXPLANATION.md)** | Architecture technique détaillée |
+| 🏗️ **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** | Vue d'ensemble du système |
+
+## 🏗️ Architecture Simplifiée
+
+```
+🎤 Vosk STT → � Gemini AI → ⚡ Actions → � Réponse
+  (< 0.5s)     (< 2s)        (< 3s)     (< 1s)
 ```
 
-### 🧠 Différence IA Classique vs Guardian
-| Aspect | IA Classique | Guardian |
-|--------|-------------|-------------|
-| Interface | 📱 Boutons/Apps | 🗣️ Conversation naturelle |
-| Logique | 📋 Règles figées | 🧠 Analyse contextuelle IA |
-| Réponse | ⚙️ Générique | 🎯 Personnalisée situation |
-| Déclenchement | 🚨 Manuel | 🎤 Vocal automatique |
-
-### 🗂️ Structure Principale
+### Structure Projet
 ```
-guardian/
-├── voice_conversation_agent.py    # Pipeline vocal principal
-├── gemini_agent.py               # IA Gemini 2.5 Flash  
-├── voice_agent.py                # STT multi-engine
-├── speech_agent.py               # TTS contextuel
-├── guardian_agent.py             # Orchestrateur urgences
+guardian/          # 🧠 Modules IA et agents
+├── gemini_agent.py        # Intelligence artificielle
+├── voice_agent.py         # Reconnaissance vocale  
+├── guardian_agent.py      # Orchestrateur principal
+└── gmail_emergency_agent.py # Alertes d'urgence
+
+web/              # 🌐 Interface utilisateur
+├── templates/             # Pages HTML/CSS/JS
+└── web_interface_simple.py # Serveur Flask
+
+models/           # 🎤 Modèles reconnaissance vocale
+config/           # ⚙️ Configuration et APIs
+scripts/          # 🔧 Utilitaires et tests
 ├── sms_agent.py                  # Notifications Twilio
 ├── gmail_emergency_agent.py      # Emails d'urgence enrichis
 ├── emergency_response.py         # Emails + cartes

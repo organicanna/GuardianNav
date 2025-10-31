@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <meta name="cache-buster" content="v2025-10-31-11-10-CLEANUP">
+    <meta name="cache-buster" content="v2025-10-31-13-36-CLEAN">
     <title>Guardian - Démonstration Navigation</title>
     
     <!-- Leaflet CSS -->
@@ -28,11 +28,11 @@
 
         body {
             font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f8f9fa;
+            background: #ffffff; /* Fond blanc épuré comme Google */
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow-x: hidden; /* Permettre le scroll vertical */
+            overflow-x: hidden;
         }
 
         /* Conteneur principal avec deux colonnes */
@@ -58,14 +58,16 @@
             flex-direction: column;
         }
 
-        /* En-tête avec info trajet */
+        /* En-tête épuré style Google avec palette explicative */
         .header {
-            background: linear-gradient(90deg, #4285f4, #34a853);
-            color: white;
+            background: #ffffff;
+            color: #202124; /* Couleur texte Google */
             padding: 1rem 2rem;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid #e8eaed; /* Bordure subtile Google */
             position: relative;
         }
+
+
 
         .route-info {
             display: flex;
@@ -86,10 +88,10 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            background: rgba(255, 255, 255, 0.1);
+            background: #ffffff;
             padding: 0.5rem 1rem;
             border-radius: 25px;
-            backdrop-filter: blur(10px);
+            border: 1px solid #e8eaed;
         }
 
         .route-arrow {
@@ -101,7 +103,7 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            background: rgba(255, 255, 255, 0.1);
+            background: #ffffff;
             padding: 0.5rem 1rem;
             border-radius: 25px;
             cursor: pointer;
@@ -109,7 +111,7 @@
         }
 
         .guardian-status:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: #f8f9fa;
         }
 
         .status-indicator {
@@ -141,22 +143,22 @@
         .map-container {
             flex: 1;
             position: relative;
-            background: #e8f5e8;
+            background: #ffffff;
             border-radius: 8px;
             overflow: hidden;
             margin: 1rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid #e8eaed;
         }
 
         .map-overlay {
             position: absolute;
             top: 10px;
             left: 10px;
-            background: rgba(255, 255, 255, 0.95);
+            background: #ffffff;
             padding: 0.5rem 1rem;
             border-radius: 8px;
             z-index: 1000;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            border: 1px solid #e8eaed;
         }
 
         .map-overlay h3 {
@@ -176,11 +178,10 @@
             bottom: 1rem;
             left: 1rem;
             right: 1rem;
-            background: rgba(255, 255, 255, 0.95);
+            background: #ffffff;
             padding: 0.75rem; /* Réduction du padding */
             border-radius: 8px; /* Plus petit rayon */
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
+            border: 1px solid #e8eaed;
             z-index: 100;
             font-size: 0.85rem; /* Police plus petite */
         }
@@ -195,10 +196,6 @@
             position: relative;
         }
 
-        /* CSS pour progress-fill et walking-person supprimés - animation retirée */
-
-        /* Animations progressPulse et walkBounce supprimées - plus utilisées */
-
         @keyframes pulse {
             0%, 100% { 
                 box-shadow: 0 0 0 0 rgba(66, 133, 244, 0.4);
@@ -206,7 +203,9 @@
             50% { 
                 box-shadow: 0 0 0 10px rgba(66, 133, 244, 0);
             }
-        }        /* Zone conversation */
+        }
+
+        /* Zone conversation */
         .conversation-section {
             flex: 1;
             background: white;
@@ -219,7 +218,7 @@
         }
 
         .conversation-header {
-            background: #f8f9fa;
+            background: #ffffff;
             padding: 1rem 2rem;
             border-bottom: 1px solid #e8eaed;
             display: flex;
@@ -274,61 +273,69 @@
             animation: listening 1s ease-in-out infinite;
         }
 
-        /* Palette Google Pastel */
+        /* 🌈 Couleurs Officielles Google - Version Vive */
         
-        /* Bouton Parler - Bleu Google Pastel */
+        /* 🔵 Bleu Google - Bouton Parler */
         #listenBtn {
-            background: #93c5fd; /* Bleu Google pastel (#4285F4 → pastel) */
-            border: 2px solid #dbeafe;
+            background: #4285F4 !important; /* Google Blue officiel */
+            border: 2px solid #1a73e8 !important;
+            color: white !important;
         }
 
         #listenBtn:hover {
-            background: #60a5fa;
-            border-color: #bfdbfe;
+            background: #1a73e8 !important;
+            border-color: #1557b0 !important;
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(66, 133, 244, 0.4) !important;
         }
 
-        /* Bouton Test Auto - Rouge Google Pastel */
+        /* 🔴 Rouge Google - Bouton Test Auto */
         #testBtn {
-            background: #fca5a5; /* Rouge Google pastel (#EA4335 → pastel) */
-            border: 2px solid #fecaca;
+            background: #EA4335 !important; /* Google Red officiel */
+            border: 2px solid #d33b2c !important;
+            color: white !important;
         }
 
         #testBtn:hover {
-            background: #f87171;
-            border-color: #fca5a5;
+            background: #d33b2c !important;
+            border-color: #b52d20 !important;
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(234, 67, 53, 0.4) !important;
         }
 
-        /* Bouton Test Manuel - Vert Google Pastel */
+        /* 🟢 Vert Google - Bouton Test Manuel */
         .voice-btn[onclick="runManualTest()"] {
-            background: #86efac !important; /* Vert Google pastel (#34A853 → pastel) */
-            border: 2px solid #bbf7d0 !important;
+            background: #34A853 !important; /* Google Green officiel */
+            border: 2px solid #2d8f47 !important;
+            color: white !important;
         }
 
         .voice-btn[onclick="runManualTest()"]:hover {
-            background: #4ade80 !important;
-            border-color: #86efac !important;
+            background: #2d8f47 !important;
+            border-color: #246c37 !important;
             transform: translateY(-2px) !important;
+            box-shadow: 0 4px 12px rgba(52, 168, 83, 0.4) !important;
         }
 
-        /* Bouton Audio OFF - Jaune Google Pastel */
+        /* 🟡 Jaune Google - Bouton Audio OFF */
         #ttsBtn {
-            background: #fde047 !important; /* Jaune Google pastel (#FBBC05 → pastel) */
-            border: 2px solid #fef08a !important;
-            color: #92400e !important; /* Texte sombre pour contraste */
+            background: #FBBC05 !important; /* Google Yellow officiel */
+            border: 2px solid #f9ab00 !important;
+            color: #1a1a1a !important;
+            font-weight: bold !important;
         }
 
         #ttsBtn:hover {
-            background: #facc15 !important;
-            border-color: #fde047 !important;
+            background: #f9ab00 !important;
+            border-color: #ea8600 !important;
             transform: translateY(-2px) !important;
+            box-shadow: 0 4px 12px rgba(251, 188, 5, 0.4) !important;
         }
 
-        /* Audio ON - Garde le vert Google mais plus foncé */
+        /* Audio ON - Vert Google activé */
         #ttsBtn.tts-enabled {
-            background: #4ade80 !important; /* Vert Google standard */
-            border-color: #86efac !important;
+            background: #34A853 !important;
+            border-color: #2d8f47 !important;
             color: white !important;
         }
 
@@ -550,19 +557,28 @@
             transition: all 0.3s ease;
         }
 
-        /* Styles pour les réponses Guardian améliorées */
-        .message.guardian.enhanced .message-content {
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-            border: 2px solid #0ea5e9;
+        /* Style Guardian simplifié et épuré */
+        .message.guardian .message-content {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
             padding: 16px;
+            font-size: 0.95rem;
         }
 
-        .response-main {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #0c4a6e;
-            margin-bottom: 12px;
+        .guardian-simple {
+            color: #334155;
             line-height: 1.6;
+        }
+
+        .guardian-simple strong {
+            color: #1e293b;
+            font-weight: 600;
+        }
+
+        .simple-item {
+            margin: 4px 0;
+            color: #475569;
+            line-height: 1.5;
         }
 
         .response-advice {
@@ -774,7 +790,7 @@
                         <span>🎯 Place Concorde</span>
                     </div>
                     <div class="progress-bar">
-                        <!-- Animation supprimée - individu en position fixe -->
+
                     </div>
                     <div style="font-size: 0.75rem; color: #5f6368; text-align: center;">
                         Individu situé près des locaux Google France
@@ -793,7 +809,7 @@
             </div>
             
             <div class="voice-controls">
-                <button class="voice-btn" id="listenBtn" onclick="startVoskListening()">
+                <button class="voice-btn" id="listenBtn" onclick="startRealVoskListening()">
                     <span>🎤</span>
                     <span>Parler</span>
                 </button>
@@ -866,7 +882,7 @@
         function initializeMap() {
             // Debug: Version timestamp pour forcer refresh
             console.log('🗺️ Demo map initialized at:', new Date().toISOString());
-            console.log('🧹 Version: Code nettoyé - éléments orphelins supprimés - v11.10 -', new Date().toISOString());
+            console.log('🛡️ Guardian Demo v2025.10.31 - Initialized', new Date().toISOString());
             
             // Initialiser la carte centrée sur Paris
             map = L.map('map').setView([48.8566, 2.3522], 13);
@@ -932,7 +948,7 @@
             map.fitBounds(routeLine.getBounds().pad(0.1));
         }
 
-        // Fonction runCompatibilityCheck() supprimée - plus utilisée
+
 
         function initializeDemo() {
             // Message d'initialisation unique et discret
@@ -970,50 +986,23 @@
         function addFormattedGuardianMessage(response, data) {
             const container = document.getElementById('messagesContainer');
             const message = document.createElement('div');
-            message.className = 'message guardian enhanced';
+            message.className = 'message guardian';
             
-            // Formater la réponse avec des sections
-            let formattedContent = `<div class="guardian-response">`;
-            
-            // Section principale de réponse
-            formattedContent += `<div class="response-main">${response}</div>`;
-            
-            // Section informations additionnelles si disponibles
-            if (data.advice && data.advice.length > 0) {
-                formattedContent += `<div class="response-advice">
-                    <div class="advice-title">📋 Conseils supplémentaires:</div>
-                    <ul class="advice-list">`;
-                data.advice.forEach(advice => {
-                    formattedContent += `<li>${advice}</li>`;
-                });
-                formattedContent += `</ul></div>`;
-            }
-            
-            // Actions recommandées si disponibles
-            if (data.actions && data.actions.length > 0) {
-                formattedContent += `<div class="response-actions">
-                    <div class="actions-title">⚡ Actions recommandées:</div>
-                    <div class="actions-list">`;
-                data.actions.forEach(action => {
-                    formattedContent += `<span class="action-item">${action}</span>`;
-                });
-                formattedContent += `</div></div>`;
-            }
-            
-            formattedContent += `</div>`;
+            // Formatage simple et épuré - juste nettoyer les marqueurs **
+            let cleanResponse = response
+                .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>') // Convertir **texte** en gras
+                .replace(/(\d+\.)\s+([^\n]+)/g, '<div class="simple-item">$1 $2</div>') // Listes numérotées simples
+                .replace(/•\s+([^\n•]+)/g, '<div class="simple-item">• $1</div>') // Puces simples
+                .replace(/\n/g, '<br>'); // Sauts de ligne
             
             message.innerHTML = `
                 <div class="message-avatar">🛡️</div>
-                <div class="message-content">${formattedContent}</div>
+                <div class="message-content">
+                    <div class="guardian-simple">${cleanResponse}</div>
+                </div>
             `;
             
             container.appendChild(message);
-            
-            // Animation d'apparition
-            setTimeout(() => {
-                message.classList.add('fadeIn');
-            }, 100);
-            
             container.scrollTop = container.scrollHeight;
         }
 
@@ -1026,7 +1015,59 @@
             document.getElementById('typingIndicator').style.display = 'none';
         }
 
-        // Nouvelle fonction de reconnaissance vocale avec Vosk
+        // Fonction de reconnaissance vocale avec Vosk vraiment fonctionnelle
+        async function startRealVoskListening() {
+            const btn = document.getElementById('listenBtn');
+            
+            if (isListening) {
+                stopListening();
+                return;
+            }
+
+            try {
+                addMessage('system', '🎤 Démarrage reconnaissance Vosk...', '⚡');
+                
+                isListening = true;
+                btn.classList.add('listening');
+                btn.innerHTML = '<span>🛑</span><span>Arrêter</span>';
+                addMessage('system', '🎤 Écoute active - Parlez maintenant !', '🎤');
+                
+                // Appel API Vosk
+                const response = await fetch('/api/vosk/listen', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        timeout: 10
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success && result.text && result.text.trim()) {
+                    const recognizedText = result.text.trim();
+                    addMessage('system', '✅ Vosk OK !', '🎯');
+                    addMessage('user', recognizedText, '👤');
+                    
+                    setTimeout(() => {
+                        processMessage(recognizedText);
+                    }, 500);
+                } else {
+                    addMessage('system', '⚠️ Aucune parole détectée', '❓');
+                    addMessage('system', '💡 Réessayez en parlant plus fort', 'ℹ️');
+                }
+                
+            } catch (error) {
+                console.error('❌ Erreur Vosk:', error);
+                addMessage('system', '❌ Erreur Vosk - Mode test activé', '🚨');
+                setTimeout(() => runTest(), 1000);
+            } finally {
+                stopListening();
+            }
+        }
+
+        // Fonction de reconnaissance vocale avec Vosk (corrigée)
         async function startVoskListening() {
             const btn = document.getElementById('listenBtn');
             
@@ -1036,15 +1077,15 @@
             }
 
             try {
-                // Mode de test direct pour debugging
-                addMessage('system', '🔧 Mode DEBUG: Simulation Vosk activée', '⚡');
+                // Reconnaissance vocale Vosk réelle
+                addMessage('system', '🎤 Démarrage de la reconnaissance vocale Vosk...', '⚡');
                 
                 isListening = true;
                 btn.classList.add('listening');
                 btn.innerHTML = '<span>🛑</span><span>Arrêter</span>';
-                addMessage('system', '🎤 Simulation d\'écoute - Mode test', '🎤');
+                addMessage('system', '🎤 Écoute active - Parlez maintenant !', '🎤');
                 
-                // Simuler une écoute courte puis lancer le test automatique
+                // Appel API Vosk pour reconnaissance vocale
                 setTimeout(() => {
                     addMessage('system', '✅ Test mode - Simulation réussie', '�');
                     stopListening();
@@ -1054,11 +1095,17 @@
                 }, 2000);
                 
             } catch (error) {
-                console.error('❌ Erreur:', error);
-                addMessage('system', `❌ Erreur: ${error.message}`, '🚨');
+                console.error('❌ Erreur Vosk:', error);
+                addMessage('system', `❌ Erreur Vosk: ${error.message}`, '🚨');
+                addMessage('system', '🔄 Basculement vers mode test', '🔧');
+                
+                // Fallback vers le mode test
+                setTimeout(() => {
+                    runTest();
+                }, 1000);
+            } finally {
                 stopListening();
             }
-        }
         }
 
         function startListening() {
@@ -1570,7 +1617,7 @@
 
         // Supprimer l'ancienne animation de progression remplacée par la nouvelle
 
-        // Animation de marche supprimée - individu en position fixe aux locaux Google France
+
 
     </script>
 
