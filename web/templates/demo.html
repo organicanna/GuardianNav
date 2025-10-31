@@ -215,6 +215,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            position: relative; /* Important : pour que la barre de saisie reste dans cette section */
         }
 
         .conversation-header {
@@ -444,7 +445,7 @@
         /* Messages de conversation */
         .messages-container {
             flex: 1;
-            padding: 1rem 2rem 6rem 2rem; /* Ajout de padding-bottom pour éviter la superposition */
+            padding: 1rem 2rem 5rem 2rem; /* Plus d'espace pour la zone de saisie */
             overflow-y: auto;
             overflow-x: hidden;
             display: flex;
@@ -716,6 +717,79 @@
             60%, 100% { content: '●●●'; }
         }
 
+        /* Zone de saisie de texte en bas - limitée à la conversation */
+        .text-input-section {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #f8f9fa; /* Fond gris clair */
+            border-top: 1px solid #e8eaed;
+            padding: 12px 16px;
+            z-index: 10;
+            /* Reste dans les limites de la section conversation */
+            width: 100%;
+            box-sizing: border-box;
+            /* Respect des bords arrondis de la conversation */
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+        }
+
+        .text-input-container {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            max-width: 100%;
+        }
+
+        #quickTextInput {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #dadce0; /* Bordure grise */
+            border-radius: 20px;
+            font-size: 14px;
+            font-family: inherit;
+            background: #ffffff;
+            color: #5f6368; /* Texte gris */
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        #quickTextInput:focus {
+            border-color: #9aa0a6; /* Bordure gris foncé au focus */
+            box-shadow: 0 1px 6px rgba(154, 160, 166, 0.2);
+        }
+
+        #quickTextInput::placeholder {
+            color: #9aa0a6; /* Placeholder gris */
+        }
+
+        .send-text-btn {
+            background: #6c757d; /* Bouton gris */
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 16px;
+            box-shadow: 0 1px 3px rgba(108, 117, 125, 0.2);
+        }
+
+        .send-text-btn:hover {
+            background: #5a6268; /* Gris plus foncé au survol */
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(108, 117, 125, 0.3);
+        }
+
+        .send-text-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 2px rgba(108, 117, 125, 0.2);
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .route-details {
@@ -742,7 +816,15 @@
             }
 
             .messages-container {
-                padding: 0.5rem 1rem;
+                padding: 0.5rem 1rem 4rem 1rem; /* Ajout padding-bottom pour la zone de saisie */
+            }
+            
+            .text-input-section {
+                padding: 10px 12px;
+            }
+            
+            #quickTextInput {
+                font-size: 16px; /* Éviter le zoom sur iOS */
             }
         }
     </style>
@@ -813,6 +895,7 @@
                     <span>🎤</span>
                     <span>Parler</span>
                 </button>
+
                 <button class="voice-btn" id="testBtn" onclick="runTest()">
                     <span>🧪</span>
                     <span>Test Auto</span>
@@ -840,6 +923,16 @@
                 </div>
             </div>
         </div>
+            </div>
+            
+            <!-- Zone de saisie de texte en bas de conversation -->
+            <div class="text-input-section">
+                <div class="text-input-container">
+                    <input type="text" id="quickTextInput" placeholder="Tapez votre message pour Guardian..." maxlength="300" />
+                    <button onclick="sendQuickText()" class="send-text-btn">
+                        <span>📤</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -1015,12 +1108,12 @@
             document.getElementById('typingIndicator').style.display = 'none';
         }
 
-        // Fonction de reconnaissance vocale avec Vosk vraiment fonctionnelle
+        // Fonction de reconnaissance vocale avec Vosk (local, plus fiable)
         async function startRealVoskListening() {
             const btn = document.getElementById('listenBtn');
             
             if (isListening) {
-                stopListening();
+                stopRealListening();
                 return;
             }
 
@@ -1030,41 +1123,64 @@
                 isListening = true;
                 btn.classList.add('listening');
                 btn.innerHTML = '<span>🛑</span><span>Arrêter</span>';
-                addMessage('system', '🎤 Écoute active - Parlez maintenant !', '🎤');
+                btn.style.background = '#EA4335'; // Rouge pendant l'écoute
                 
-                // Appel API Vosk
+                addMessage('system', '🎤 Vosk écoute - Parlez maintenant !', '🛠️');
+                
+                // Appel API Vosk local (pas de dépendance réseau Google)
                 const response = await fetch('/api/vosk/listen', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        timeout: 10
+                        timeout: 8,
+                        language: 'fr-FR'
                     })
                 });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
                 
                 const result = await response.json();
                 
                 if (result.success && result.text && result.text.trim()) {
                     const recognizedText = result.text.trim();
-                    addMessage('system', '✅ Vosk OK !', '🎯');
+                    addMessage('system', '✅ Vosk reconnaissance réussie !', '🛠️');
                     addMessage('user', recognizedText, '👤');
                     
                     setTimeout(() => {
                         processMessage(recognizedText);
                     }, 500);
                 } else {
-                    addMessage('system', '⚠️ Aucune parole détectée', '❓');
-                    addMessage('system', '💡 Réessayez en parlant plus fort', 'ℹ️');
+                    addMessage('system', '⚠️ Vosk: Aucune parole détectée', '❓');
+                    addMessage('system', '💡 Réessayez en parlant plus clairement', 'ℹ️');
                 }
                 
             } catch (error) {
                 console.error('❌ Erreur Vosk:', error);
-                addMessage('system', '❌ Erreur Vosk - Mode test activé', '🚨');
+                addMessage('system', `❌ Erreur technique: ${error.message}`, '🚨');
+                addMessage('system', '🔄 Mode test activé', '�');
                 setTimeout(() => runTest(), 1000);
-            } finally {
-                stopListening();
+                stopRealListening();
             }
+        }
+
+        function stopRealListening() {
+            try {
+                if (recognition && isListening) {
+                    recognition.stop();
+                    recognition = null;
+                }
+            } catch (error) {
+                console.warn('Erreur arrêt reconnaissance:', error);
+            }
+            
+            isListening = false;
+            const btn = document.getElementById('listenBtn');
+            btn.classList.remove('listening');
+            btn.innerHTML = '<span>🎤</span><span>Parler</span>';
         }
 
         // Fonction de reconnaissance vocale avec Vosk (corrigée)
@@ -1279,23 +1395,8 @@
         }
 
         function stopListening() {
-            try {
-                if (recognition && isListening) {
-                    recognition.stop();
-                    recognition = null;
-                }
-            } catch (error) {
-                console.warn('Erreur lors de l\'arrêt de la reconnaissance:', error);
-            }
-            
-            isListening = false;
-            const btn = document.getElementById('listenBtn');
-            btn.classList.remove('listening');
-            btn.innerHTML = '<span>🎤</span><span>Parler</span>';
-            
-            if (document.getElementById('messagesContainer').lastElementChild?.textContent?.includes('Écoute active')) {
-                addMessage('system', '⏹️ Écoute interrompue', '✅');
-            }
+            // Rediriger vers la nouvelle fonction
+            stopRealListening();
         }
 
         function runTest() {
@@ -1374,6 +1475,119 @@
                 processMessage(command);
             }, 1000);
         }
+
+        function showTextInput() {
+            // Créer un popup de saisie de texte
+            const textInputHtml = `
+                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center;" id="textInputOverlay">
+                    <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); max-width: 500px; width: 90%;">
+                        <h3 style="margin: 0 0 1rem 0; color: #202124; font-size: 1.2rem;">⌨️ Saisir votre message pour Guardian</h3>
+                        <textarea id="userTextInput" placeholder="Tapez votre message ici... Ex: Guardian, j'ai besoin d'aide" style="width: 100%; height: 120px; padding: 1rem; border: 2px solid #e8eaed; border-radius: 8px; font-size: 1rem; resize: none; box-sizing: border-box;" maxlength="500"></textarea>
+                        <div style="margin-top: 1rem; display: flex; gap: 1rem; justify-content: flex-end;">
+                            <button onclick="closeTextInput()" style="padding: 0.75rem 1.5rem; background: #f8f9fa; color: #5f6368; border: 1px solid #e8eaed; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">Annuler</button>
+                            <button onclick="submitTextInput()" style="padding: 0.75rem 1.5rem; background: #4285f4; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 500;">Envoyer à Guardian</button>
+                        </div>
+                        <p style="margin-top: 0.5rem; font-size: 0.8rem; color: #5f6368; text-align: center;">Alternative à la reconnaissance vocale</p>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', textInputHtml);
+            
+            // Focus sur le textarea
+            setTimeout(() => {
+                const textarea = document.getElementById('userTextInput');
+                if (textarea) {
+                    textarea.focus();
+                    
+                    // Permettre l'envoi avec Ctrl+Entrée
+                    textarea.addEventListener('keydown', function(e) {
+                        if (e.ctrlKey && e.key === 'Enter') {
+                            submitTextInput();
+                        }
+                        if (e.key === 'Escape') {
+                            closeTextInput();
+                        }
+                    });
+                }
+            }, 100);
+        }
+
+        function closeTextInput() {
+            const overlay = document.getElementById('textInputOverlay');
+            if (overlay) {
+                overlay.remove();
+            }
+        }
+
+        function submitTextInput() {
+            const textarea = document.getElementById('userTextInput');
+            const text = textarea ? textarea.value.trim() : '';
+            
+            if (text.length === 0) {
+                alert('Veuillez saisir un message avant d\'envoyer.');
+                return;
+            }
+            
+            if (text.length < 5) {
+                alert('Votre message est trop court. Soyez plus précis pour une meilleure analyse.');
+                return;
+            }
+            
+            // Fermer le popup
+            closeTextInput();
+            
+            // Afficher le message de l'utilisateur
+            addMessage('system', '⌨️ Message saisi manuellement', '✅');
+            addMessage('user', text, '👤');
+            
+            // Traiter le message
+            showTyping();
+            setTimeout(() => {
+                processMessage(text);
+            }, 500);
+        }
+
+        // Fonction pour la zone de saisie rapide en bas
+        function sendQuickText() {
+            const input = document.getElementById('quickTextInput');
+            const text = input ? input.value.trim() : '';
+            
+            if (text.length === 0) {
+                input.focus();
+                return;
+            }
+            
+            if (text.length < 3) {
+                addMessage('system', '⚠️ Message trop court - Soyez plus précis', '⚠️');
+                input.focus();
+                return;
+            }
+            
+            // Vider l'input
+            input.value = '';
+            
+            // Afficher le message utilisateur
+            addMessage('user', text, '👤');
+            
+            // Traiter avec Guardian
+            showTyping();
+            setTimeout(() => {
+                processMessage(text);
+            }, 300);
+        }
+
+        // Gestion de l'appui sur Entrée dans la zone de saisie
+        document.addEventListener('DOMContentLoaded', function() {
+            const quickInput = document.getElementById('quickTextInput');
+            if (quickInput) {
+                quickInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        sendQuickText();
+                    }
+                });
+            }
+        });
 
         function processMessage(message) {
             showTyping();
@@ -1474,29 +1688,39 @@
         }
 
         function toggleTTS() {
-            // Vérifier si l'utilisateur a accepté la notification vocale
-            if (!voicePermissionGranted) {
-                addMessage('system', '⚠️ Veuillez d\'abord accepter l\'activation vocale via la notification', '🔔');
-                showVoiceNotification(); // Ré-afficher la notification
-                return;
-            }
-            
             const btn = document.getElementById('ttsBtn');
             ttsEnabled = !ttsEnabled;
             
             if (ttsEnabled) {
+                // Activer automatiquement les permissions vocales pour TTS
+                voicePermissionGranted = true;
+                
                 btn.innerHTML = '<span>🔊</span><span>Audio ON</span>';
-                btn.style.background = '#f59e0b';
+                btn.classList.add('tts-enabled');
                 addMessage('system', '🔊 Synthèse vocale activée', '✅');
-                speakText("Audio Guardian activé");
+                
+                // Test immédiat du TTS
+                if (window.speechSynthesis) {
+                    const testUtterance = new SpeechSynthesisUtterance("Audio Guardian activé");
+                    testUtterance.lang = 'fr-FR';
+                    testUtterance.rate = 0.9;
+                    testUtterance.pitch = 1.0;
+                    testUtterance.volume = 0.8;
+                    window.speechSynthesis.cancel();
+                    window.speechSynthesis.speak(testUtterance);
+                } else {
+                    addMessage('system', '⚠️ Synthèse vocale non disponible sur ce navigateur', '⚠️');
+                }
             } else {
                 btn.innerHTML = '<span>🔇</span><span>Audio OFF</span>';
-                btn.style.background = '#9aa0a6';
+                btn.classList.remove('tts-enabled');
                 addMessage('system', '🔇 Synthèse vocale désactivée', '⚠️');
                 if (window.speechSynthesis) {
                     window.speechSynthesis.cancel();
                 }
             }
+            
+            updateTTSButton();
         }
 
         function updateTTSButton() {
@@ -1598,17 +1822,26 @@
         }
 
         function speakText(text) {
-            // Vérifier les autorisations vocales ET que le TTS soit activé
-            if (!voicePermissionGranted || !ttsEnabled || !window.speechSynthesis) return;
+            // Vérifier que le TTS soit activé et disponible
+            if (!ttsEnabled || !window.speechSynthesis) return;
             
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'fr-FR';
-            utterance.rate = 0.9;
-            utterance.pitch = 1.0;
-            utterance.volume = 0.8;
-            
-            window.speechSynthesis.cancel();
-            window.speechSynthesis.speak(utterance);
+            try {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'fr-FR';
+                utterance.rate = 0.9;
+                utterance.pitch = 1.0;
+                utterance.volume = 0.8;
+                
+                // Gestion d'erreur pour TTS
+                utterance.onerror = function(event) {
+                    console.warn('Erreur TTS:', event.error);
+                };
+                
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.speak(utterance);
+            } catch (error) {
+                console.warn('Erreur lors de la synthèse vocale:', error);
+            }
         }
 
         function toggleGuardianInfo() {
