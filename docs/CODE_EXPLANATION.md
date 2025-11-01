@@ -1,10 +1,10 @@
-# 📋 Explication du Code - Guardian
+# Explication du Code - Guardian
 
 > Guide technique détaillé de l'architecture et du fonctionnement du code Guardian
 
-## 🏗️ Architecture Générale
+## Architecture Générale
 
-### 🎯 Principe de Fonctionnement
+### Principe de Fonctionnement
 
 Guardian suit un pattern **Pipeline Event-Driven** :
 
@@ -12,25 +12,25 @@ Guardian suit un pattern **Pipeline Event-Driven** :
 Input Vocal → Reconnaissance → Analyse IA → Décision → Actions → Retour Utilisateur
 ```
 
-### 🗂️ Structure des Modules
+### Structure des Modules
 
 ```
 guardian/
-├── 🎤 voice_agent.py                # Reconnaissance vocale (Vosk)
-├── 🧠 gemini_agent.py              # Intelligence artificielle (Gemini)  
-├── 🔊 speech_agent.py              # Synthèse vocale (Google TTS)
-├── 🛡️ guardian_agent.py            # Orchestrateur principal
-├── 📧 gmail_emergency_agent.py     # Gestion emails d'urgence
-├── 📱 sms_agent.py                 # Notifications SMS/WhatsApp
-├── 🗺️ GPS_agent.py                 # Géolocalisation et navigation
-├── 🚨 emergency_response.py        # Réponses d'urgence coordonnées
-├── ⚙️ config.py                    # Configuration système
-└── 🔧 __init__.py                  # Initialisation du package
+├── voice_agent.py                  # Reconnaissance vocale (Vosk)
+├── gemini_agent.py                 # Intelligence artificielle (Gemini)  
+├── speech_agent.py                 # Synthèse vocale (Google TTS)
+├── // guardian_agent.py            # Orchestrateur principal
+├── / gmail_emergency_agent.py     # Gestion emails d'urgence
+├── / sms_agent.py                 # Notifications SMS/WhatsApp
+├── // GPS_agent.py                 # Géolocalisation et navigation
+├── / emergency_response.py        # Réponses d'urgence coordonnées
+├── // config.py                    # Configuration système
+└── / __init__.py                  # Initialisation du package
 ```
 
 ---
 
-## 🎤 Module de Reconnaissance Vocale
+## / Module de Reconnaissance Vocale
 
 ### `voice_agent.py`
 
@@ -68,14 +68,14 @@ class VoiceRecognizer:
 5. **Nettoyage** : Suppression bruit, normalisation
 
 **Avantages Vosk** :
-- ✅ **Offline complet** (aucune donnée envoyée)
-- ✅ **Optimisé français** (accents, expressions)
-- ✅ **Temps réel** (< 500ms)
-- ✅ **Léger** (100MB vs 2GB Google)
+- / **Offline complet** (aucune donnée envoyée)
+- / **Optimisé français** (accents, expressions)
+- / **Temps réel** (< 500ms)
+- / **Léger** (100MB vs 2GB Google)
 
 ---
 
-## 🧠 Module Intelligence Artificielle  
+## / Module Intelligence Artificielle  
 
 ### `gemini_agent.py`
 
@@ -134,7 +134,7 @@ STYLE: Direct, rassurant, actionnable. Pas de bavardage.
 
 ---
 
-## 🛡️ Orchestrateur Principal
+## // Orchestrateur Principal
 
 ### `guardian_agent.py`
 
@@ -177,22 +177,22 @@ class GuardianAgent:
 ```
 📥 Audio Input
     ↓
-🎤 Vosk STT (< 500ms)
+/ Vosk STT (< 500ms)
     ↓  
-🧠 Gemini Analysis (< 2s)
+/ Gemini Analysis (< 2s)
     ↓
-⚖️ Decision Engine
+⚖/ Decision Engine
     ↓
-🚨 Emergency Actions (si besoin)
+/ Emergency Actions (si besoin)
     ↓
-🔊 Voice Response (< 1s)
+/ Voice Response (< 1s)
     ↓
-📊 Logging & Metrics
+/ Logging & Metrics
 ```
 
 ---
 
-## 📧 Système d'Alertes d'Urgence
+## / Système d'Alertes d'Urgence
 
 ### `gmail_emergency_agent.py`
 
@@ -212,7 +212,7 @@ class GmailEmergencyAgent:
 **Template Email Dynamique** :
 ```html
 <!-- Génération automatique -->
-<h2>🚨 ALERTE GUARDIAN - {situation.urgency_level}/10</h2>
+<h2>/ ALERTE GUARDIAN - {situation.urgency_level}/10</h2>
 
 <div class="situation">
     <h3>Situation Rapportée</h3>
@@ -221,14 +221,14 @@ class GmailEmergencyAgent:
 </div>
 
 <div class="location">  
-    <h3>📍 Localisation Exacte</h3>
+    <h3>/ Localisation Exacte</h3>
     <p>{address} - {gps_coordinates}</p>
-    <a href="{google_maps_link}">📍 Voir sur Google Maps</a>
+    <a href="{google_maps_link}">/ Voir sur Google Maps</a>
 </div>
 
 <div class="actions">
     <a href="tel:{user_phone}" class="btn-call">📞 Appeler {user_name}</a>
-    <a href="{whatsapp_link}" class="btn-whatsapp">💬 WhatsApp Direct</a>
+    <a href="{whatsapp_link}" class="btn-whatsapp">/ WhatsApp Direct</a>
 </div>
 ```
 
@@ -239,7 +239,7 @@ class GmailEmergencyAgent:
 
 ---
 
-## 🗺️ Géolocalisation et Navigation
+## // Géolocalisation et Navigation
 
 ### `GPS_agent.py`
 
@@ -338,7 +338,7 @@ class GuardianMap {
 
 ---
 
-## 🔊 Synthèse Vocale
+## / Synthèse Vocale
 
 ### `speech_agent.py`
 
@@ -367,7 +367,7 @@ VOICE_PARAMS = {
 
 ---
 
-## 📊 Gestion Configuration
+## / Gestion Configuration
 
 ### `config.py`
 
@@ -416,17 +416,17 @@ notifications:
 
 ---
 
-## 🧪 Tests et Validation
+## / Tests et Validation
 
 ### Structure Tests
 ```
 tests/
-├── 🎤 test_voice_agent.py         # Tests reconnaissance vocale
-├── 🧠 test_gemini_agent.py        # Tests analyse IA
-├── 📧 test_email_emergency.py     # Tests envoi emails 
-├── 🗺️ test_gps_agent.py           # Tests géolocalisation
-├── 🔄 test_integration.py         # Tests bout en bout
-└── 📊 test_performance.py         # Tests performance
+├── / test_voice_agent.py         # Tests reconnaissance vocale
+├── / test_gemini_agent.py        # Tests analyse IA
+├── / test_email_emergency.py     # Tests envoi emails 
+├── // test_gps_agent.py           # Tests géolocalisation
+├── / test_integration.py         # Tests bout en bout
+└── / test_performance.py         # Tests performance
 ```
 
 **Tests Critiques** :
@@ -446,7 +446,7 @@ def test_voice_recognition_accuracy():
 
 ---
 
-## ⚡ Performance et Optimisation
+## / Performance et Optimisation
 
 ### Métriques Cibles
 - **Reconnaissance vocale** : < 500ms
@@ -475,10 +475,10 @@ async def process_audio_stream():
 ## 🔒 Sécurité et Confidentialité
 
 ### Protection Données
-- ✅ **Reconnaissance offline** (Vosk local)
-- ✅ **Aucun stockage** des conversations
-- ✅ **Chiffrement HTTPS** pour APIs
-- ✅ **Clés API isolées** dans fichiers séparés
+- / **Reconnaissance offline** (Vosk local)
+- / **Aucun stockage** des conversations
+- / **Chiffrement HTTPS** pour APIs
+- / **Clés API isolées** dans fichiers séparés
 
 ### Validation Input
 ```python

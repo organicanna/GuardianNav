@@ -211,13 +211,20 @@ config/api_keys.yaml
 *.key
 secrets/
 logs/
-models/
 temp/
+models/
 
 # Aperçus emails HTML générés par les tests
 preview_*.html
 demo_*.html
 
-# Dossiers temporaires
+# Fichiers temporaires et caches
 *.tmp
 .DS_Store
+guardian.log
+maintenance.log
+
+# Dossiers de développement
+demos/
+vertex-ai/
+__temp__/

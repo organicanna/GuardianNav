@@ -1,10 +1,10 @@
-# 🚀 Guide de Déploiement Local - Guardian
+# Guide de Déploiement Local - Guardian
 
 > Guide complet pour installer et configurer Guardian sur votre machine locale
 
-## 📋 Prérequis Système
+## Prérequis Système
 
-### 🖥️ Configuration Minimale
+### Configuration Minimale
 - **OS** : macOS 10.15+, Windows 10+, Ubuntu 18.04+ 
 - **Python** : 3.9 ou supérieur
 - **RAM** : 4GB minimum (8GB recommandé)
@@ -12,7 +12,7 @@
 - **Microphone** : Requis pour la reconnaissance vocale
 - **Connexion Internet** : Pour les APIs Google
 
-### 🔧 Outils Requis
+### Outils Requis
 ```bash
 # Vérifier Python
 python3 --version  # Doit être ≥ 3.9
@@ -26,7 +26,7 @@ git --version
 
 ## 📥 Installation Étape par Étape
 
-### 1️⃣ Cloner le Repository
+### 1. Cloner le Repository
 
 ```bash
 # Cloner depuis GitHub
@@ -38,7 +38,7 @@ ls -la
 # Vous devez voir : guardian/, web/, config/, models/, etc.
 ```
 
-### 2️⃣ Créer l'Environnement Virtuel
+### 2. Créer l'Environnement Virtuel
 
 ```bash
 # Créer l'environnement virtuel
@@ -55,7 +55,7 @@ source .venv/bin/activate
 which python  # Doit pointer vers .venv/bin/python
 ```
 
-### 3️⃣ Installer les Dépendances
+### 3. Installer les Dépendances
 
 ```bash
 # Mise à jour pip
@@ -71,13 +71,13 @@ modules = ['flask', 'vosk', 'pygame', 'requests', 'yaml']
 for module in modules:
     try:
         __import__(module)
-        print(f'✅ {module}')
+        print(f' {module}')
     except ImportError as e:
-        print(f'❌ {module}: {e}')
+        print(f' {module}: {e}')
 "
 ```
 
-### 4️⃣ Télécharger le Modèle Vosk
+### 4. Télécharger le Modèle Vosk
 
 ```bash
 # Le modèle français Vosk (100MB)
@@ -94,9 +94,9 @@ ls models/vosk-model-small-fr-0.22/
 # Doit contenir: am/, conf/, graph/, ivector/
 ```
 
-## 🔑 Configuration des APIs
+##  Configuration des APIs
 
-### 5️⃣ Créer le Fichier de Configuration
+### 5. Créer le Fichier de Configuration
 
 ```bash
 # Copier le template
@@ -106,7 +106,7 @@ cp config/api_keys.yaml.example config/api_keys.yaml
 nano config/api_keys.yaml  # ou votre éditeur préféré
 ```
 
-### 6️⃣ Configuration des Clés API
+### 6. Configuration des Clés API
 
 #### Google Gemini API (Gratuite)
 ```yaml
@@ -147,7 +147,7 @@ google_maps_api_key: "VOTRE_CLE_MAPS"
 3. Créer une clé API
 4. Restreindre aux domaines localhost
 
-### 7️⃣ Configuration Complète
+### 7. Configuration Complète
 
 ```yaml
 # Exemple config/api_keys.yaml complet
@@ -179,9 +179,9 @@ user_profile:
   emergency_message: "Message d'urgence automatique"
 ```
 
-## ▶️ Lancement de l'Application
+##  Lancement de l'Application
 
-### 8️⃣ Test de Configuration
+### 8. Test de Configuration
 
 ```bash
 # Test des dépendances
@@ -194,7 +194,7 @@ python scripts/test_apis.py
 python scripts/test_audio.py
 ```
 
-### 9️⃣ Démarrage du Serveur
+### 9. Démarrage du Serveur
 
 ```bash
 # Lancement simple
@@ -209,14 +209,14 @@ nohup python3 run.py > logs/guardian.log 2>&1 &
 
 **Sortie attendue** :
 ```
-🛡️  GUARDIAN - Assistant de Sécurité Personnelle
+  GUARDIAN - Assistant de Sécurité Personnelle
 ==================================================
-✅ Vosk disponible pour reconnaissance vocale locale
+ Vosk disponible pour reconnaissance vocale locale
 📁 Chargement de api_keys.yaml...
-📧 Gmail API configuré pour emails d'urgence
-🤖 Guardian Agent: ✅ Disponible
-📧 Gmail Agent: ✅ Configuré
-✅ Modèle Vosk chargé avec succès
+ Gmail API configuré pour emails d'urgence
+ Guardian Agent:  Disponible
+ Gmail Agent:  Configuré
+ Modèle Vosk chargé avec succès
 🚀 Démarrage de Guardian Web Interface Simple
 💡 Ouvrez votre navigateur sur: http://localhost:5010
 ```
@@ -279,7 +279,7 @@ python3 -c "
 import google.generativeai as genai
 genai.configure(api_key='VOTRE_CLE')
 model = genai.GenerativeModel('gemini-2.5-flash')
-print('✅ Gemini API fonctionne')
+print(' Gemini API fonctionne')
 "
 ```
 
@@ -327,9 +327,9 @@ echo "config/gmail_credentials.json" >> .gitignore
 ```
 
 ### Utilisation Locale Seulement
-- ✅ Reconnaissance vocale **offline** (Vosk)
-- ✅ Données **jamais stockées** 
-- ✅ Communications **chiffrées** (HTTPS APIs)
+-  Reconnaissance vocale **offline** (Vosk)
+-  Données **jamais stockées** 
+-  Communications **chiffrées** (HTTPS APIs)
 - ⚠️ **Pas de production** (serveur développement Flask)
 
 ## 📱 Utilisation
@@ -343,9 +343,9 @@ echo "config/gmail_credentials.json" >> .gitignore
 ### Exemple Session
 ```
 👤 "J'ai mal au cœur, ça serre fort"
-🤖 "URGENCE CARDIAQUE détectée ! Niveau 9/10. 
+ "URGENCE CARDIAQUE détectée ! Niveau 9/10. 
      Asseyez-vous immédiatement. J'alerte le SAMU et vos proches."
-📧 Email automatique envoyé aux contacts d'urgence
+ Email automatique envoyé aux contacts d'urgence
 📱 Localisation partagée : "8 rue de Londres, 75009 Paris"  
 ⏱️ Temps total : 4.2 secondes
 ```

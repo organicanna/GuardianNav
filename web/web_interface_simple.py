@@ -10,8 +10,6 @@ import os
 import socket
 import threading
 import queue
-import base64
-import io
 import json
 import sys
 from pathlib import Path
@@ -25,10 +23,8 @@ try:
     import sounddevice as sd
     import numpy as np
     VOSK_AVAILABLE = True
-    print("✅ Vosk disponible pour reconnaissance vocale locale")
 except ImportError as e:
     VOSK_AVAILABLE = False
-    print(f"⚠️ Vosk non disponible: {e}")
 
 # Chargement de l'agent Guardian comme dans demo_live_agent.py
 guardian_agent = None
@@ -38,7 +34,7 @@ parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, parent_dir)
 
 try:
-    print("📁 Chargement de api_keys.yaml...")
+    
     config_path = os.path.join(parent_dir, 'config', 'api_keys.yaml')
     with open(config_path, 'r', encoding='utf-8') as f:
         guardian_config = yaml.safe_load(f)
@@ -67,12 +63,10 @@ try:
     # Ajouter l'agent Gmail à l'agent principal
     guardian_agent.gmail_agent = gmail_agent
     
-    print(f"🤖 Guardian Agent: {'✅ Disponible' if guardian_agent.is_available else '⚠️ Mode simulation'}")
-    print(f"📧 Gmail Agent: {'✅ Configuré' if gmail_agent.is_available else '❌ Non configuré'}")
-    print(f"🔊 Google TTS: {'✅ Configuré' if google_service else '❌ Non configuré'}")
+
     
 except Exception as e:
-    print(f"⚠️ Erreur chargement Guardian: {e}")
+    logging.error(f"Erreur chargement Guardian: {e}")
     guardian_agent = None
     gmail_agent = None
     google_service = None
@@ -103,10 +97,8 @@ class VoiceRecognizer:
                 logger.error(f"Modèle Vosk non trouvé: {self.model_path}")
                 return False
                 
-            logger.info("🔧 Chargement du modèle Vosk français...")
             self.model = vosk.Model(self.model_path)
             self.rec = vosk.KaldiRecognizer(self.model, 16000)
-            logger.info("✅ Modèle Vosk chargé avec succès")
             return True
             
         except Exception as e:
@@ -125,7 +117,7 @@ class VoiceRecognizer:
             return None
             
         try:
-            logger.info(f"🎤 ÉCOUTE ACTIVÉE (timeout: {timeout}s)")
+
             
             self.is_listening = True
             recognized_text = ""
@@ -145,7 +137,7 @@ class VoiceRecognizer:
                             text = result.get('text', '').strip()
                             
                             if text:
-                                logger.info(f"🗣️ RECONNU: '{text}'")
+                                logger.info(f"RECONNU: '{text}'")
                                 recognized_text = text
                                 
                                 # Vérifier les mots d'arrêt
@@ -169,7 +161,7 @@ class VoiceRecognizer:
                         break
             
             self.is_listening = False
-            logger.info(f"✅ Reconnaissance terminée: '{recognized_text}'")
+            logger.info(f"Reconnaissance terminée: '{recognized_text}'")
             return recognized_text if recognized_text else None
             
         except Exception as e:
@@ -239,7 +231,7 @@ GARDE TA RÉPONSE TRÈS COURTE. La personne est en état de choc et ne peut pas 
             raise Exception("Pas de réponse valide de l'API Guardian")
         
         ai_text = response['candidates'][0]['content']['parts'][0]['text']
-        logger.info("✅ Réponse Guardian reçue")
+        logger.info("Réponse Guardian reçue")
         
         # Extraire le niveau d'urgence
         urgency_match = re.search(r'\*\*NIVEAU D\'URGENCE:\*\*\s*(\d+)/10', ai_text)
@@ -266,7 +258,7 @@ GARDE TA RÉPONSE TRÈS COURTE. La personne est en état de choc et ne peut pas 
         
         # 2. Traitement de l'itinéraire sécurisé
         if "DEMANDE_ITINERAIRE_SECURISE" in ai_text:
-            logger.info("🗺️ Calcul itinéraire sécurisé...")
+            logger.info("Calcul itinéraire sécurisé...")
             route_info = get_safe_route_directions(
                 guardian_config, 
                 "8 rue de Londres, 75009 Paris", 
@@ -278,7 +270,7 @@ GARDE TA RÉPONSE TRÈS COURTE. La personne est en état de choc et ne peut pas 
         # 3. Traitement de l'email d'urgence (décision autonome de l'IA)
         email_sent = False
         if "DEMANDE_ENVOI_EMAIL_URGENCE" in ai_text:
-            logger.info("🚨 Envoi email d'urgence décidé par l'IA...")
+            logger.info("Envoi email d'urgence décidé par l'IA...")
             if gmail_agent and gmail_agent.is_available:
                 email_sent = send_emergency_email_guardian(
                     user_phone=user_phone,
@@ -379,12 +371,12 @@ voice_recognizer = None
 if VOSK_AVAILABLE:
     voice_recognizer = VoiceRecognizer()
     if voice_recognizer.initialize():
-        logger.info("🎤 VoiceRecognizer Vosk initialisé avec succès")
+        pass
     else:
-        logger.error("❌ Échec d'initialisation du VoiceRecognizer")
+        logger.error("Échec d'initialisation du VoiceRecognizer")
         voice_recognizer = None
 else:
-    logger.warning("⚠️ Vosk non disponible, reconnaissance vocale désactivée")
+    logger.warning("Vosk non disponible, reconnaissance vocale désactivée")
 
 @app.route('/')
 def home():
@@ -452,7 +444,7 @@ def start_guardian_agent():
             'location': data.get('location', 'Position actuelle')
         }
         
-        logger.info(f"🛡️ Démarrage de l'agent Guardian pour {user_info['firstName']}")
+        logger.info(f"Démarrage de l'agent Guardian pour {user_info['firstName']}")
         
         # Simulation de démarrage de l'agent
         return jsonify({
@@ -473,49 +465,37 @@ def start_guardian_agent():
 
 @app.route('/api/tts/speak', methods=['POST'])
 def tts_speak():
-    """API pour la synthèse vocale Google Text-to-Speech"""
+    """API pour valider et préparer la synthèse vocale côté client"""
     try:
         data = request.json
         text = data.get('text', '')
-        voice_name = data.get('voice', 'fr-FR-Neural2-A')  # Voix française par défaut
+        voice_name = data.get('voice', 'fr-FR-Neural2-A')
         
         if not text or len(text.strip()) == 0:
             return jsonify({'success': False, 'error': 'Texte requis'}), 400
         
-        logger.info(f"🔊 TTS demandé pour: '{text[:50]}...'")
+        logger.info(f"TTS préparé pour: '{text[:50]}...'")
         
-        # Utiliser l'API Google TTS via google_apis_service
-        if google_service:
-            success = google_service.google_text_to_speech_emergency(text, voice_name)
-            
-            if success:
-                logger.info("✅ TTS Google réussi")
-                return jsonify({
-                    'success': True,
-                    'message': 'Synthèse vocale réalisée',
-                    'text': text,
-                    'voice': voice_name
-                })
-            else:
-                logger.warning("⚠️ TTS Google échoué - Mode simulation")
-                return jsonify({
-                    'success': False,
-                    'error': 'API TTS non disponible - Utiliser le TTS du navigateur',
-                    'fallback': True
-                })
-        else:
-            logger.warning("⚠️ Service Google non disponible")
-            return jsonify({
-                'success': False,
-                'error': 'Service Google non configuré',
-                'fallback': True
-            })
+        # Nettoyer le texte pour une meilleure synthèse
+        clean_text = text.strip()
+        clean_text = clean_text.replace('**', '')  # Supprimer markdown
+        clean_text = clean_text.replace('*', '')   # Supprimer astérisques
+        
+        # Validation réussie - le TTS sera fait côté client
+        logger.info("TTS préparé avec succès")
+        return jsonify({
+            'success': True,
+            'message': 'Texte prêt pour synthèse vocale',
+            'text': clean_text,
+            'voice': voice_name,
+            'use_browser_tts': True  # Utiliser le TTS du navigateur
+        })
     
     except Exception as e:
-        logger.error(f"❌ Erreur TTS: {e}")
+        logger.error(f"Erreur préparation TTS: {e}")
         return jsonify({
             'success': False,
-            'error': f'Erreur TTS: {str(e)}',
+            'error': f'Erreur: {str(e)}',
             'fallback': True
         }), 500
 
@@ -821,17 +801,17 @@ if __name__ == '__main__':
         # Trouver un port disponible
         port = find_available_port(5001)
         if port is None:
-            logger.error("❌ Impossible de trouver un port disponible")
+            logger.error("Impossible de trouver un port disponible")
             exit(1)
         
-        logger.info(f"🚀 Démarrage de Guardian Web Interface Simple")
-        logger.info(f"📍 Projet: {project_dir}")
-        logger.info(f"🌐 URL: http://localhost:{port}")
-        logger.info(f"🗺️ Carte: http://localhost:{port}/map")
-        logger.info(f"🚨 Urgence: http://localhost:{port}/emergency")
-        logger.info(f"")
-        logger.info(f"💡 Ouvrez votre navigateur sur: http://localhost:{port}")
-        logger.info(f"")
+        logger.info("Démarrage de Guardian Web Interface Simple")
+        logger.info(f"Projet: {project_dir}")
+        logger.info(f"URL: http://localhost:{port}")
+        logger.info(f"Carte: http://localhost:{port}/map")
+        logger.info(f"Urgence: http://localhost:{port}/emergency")
+        logger.info("")
+        logger.info(f"Ouvrez votre navigateur sur: http://localhost:{port}")
+        logger.info("")
         
         # Démarrage du serveur
         socketio.run(app, host='0.0.0.0', port=port, debug=False)

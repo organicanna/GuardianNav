@@ -6,7 +6,6 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <meta name="cache-buster" content="v2025-10-31-14-40-GOOGLE-TTS-API-INTEGRATED">
     <title>Guardian - Démonstration Navigation</title>
     
     <!-- Leaflet CSS -->
@@ -28,22 +27,20 @@
 
         body {
             font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #ffffff; /* Fond blanc épuré comme Google */
+            background: #ffffff;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             overflow-x: hidden;
         }
 
-        /* Conteneur principal avec deux colonnes */
         .main-content {
             display: flex;
             flex: 1;
-            min-height: calc(100vh - 80px); /* Ajuster selon la hauteur du header */
+            min-height: calc(100vh - 80px);
             overflow: visible;
         }
 
-        /* Colonne gauche - Trajet */
         .left-column {
             flex: 1;
             display: flex;
@@ -51,14 +48,12 @@
             border-right: 1px solid #e0e0e0;
         }
 
-        /* Colonne droite - Conversation */
         .right-column {
             flex: 1;
             display: flex;
             flex-direction: column;
         }
 
-        /* En-tête épuré style Google avec palette explicative */
         .header {
             background: #ffffff;
             color: #202124; /* Couleur texte Google */
@@ -350,7 +345,6 @@
             50% { transform: scale(1.05); }
         }
 
-        /* Notification vocale en haut à droite */
         .voice-notification {
             position: fixed;
             top: 20px;
@@ -853,6 +847,10 @@
         let recognition = null;
         let ttsEnabled = false; // Désactivé par défaut
         let voicePermissionGranted = false; // Track l'acceptation de la notification vocale
+        let notificationTimeout = null; // Timeout de l'auto-masquage de la notification
+        let ttsTimeouts = []; // Tracker tous les timeouts pour speakText
+        let notificationHandled = false; // Empêcher la gestion multiple de la notification
+        let welcomeMessageSent = false; // Empêcher l'envoi multiple du message d'accueil
         let conversationHistory = [];
         let userInfo = {
             firstName: 'Utilisateur',
@@ -884,9 +882,7 @@
         });
 
         function initializeMap() {
-            // Debug: Version timestamp pour forcer refresh
-            console.log('🗺️ Demo map initialized at:', new Date().toISOString());
-            console.log('🛡️ Guardian Demo v2025.10.31 - Initialized', new Date().toISOString());
+
             
             // Initialiser la carte centrée sur Paris
             map = L.map('map').setView([48.8566, 2.3522], 13);
@@ -955,18 +951,9 @@
 
 
         function initializeDemo() {
-            // Message d'initialisation avec version et timestamp
-            const version = "v2.3-GOOGLE-TTS-API";
-            const timestamp = new Date().toISOString().slice(0, 16);
-            addMessage('system', `� Guardian ${version} | ${timestamp} • API Google TTS • Interface vocale pure • Vosk local`, '🎤', true);
+            addMessage('system', 'Guardian - Assistant de sécurité initialisé', '🛡️', true);
             
-            // Debug: Vérification des fonctionnalités
-            console.log('🛡️ Guardian Demo v2.1 chargé:', {
-                timestamp: new Date().toISOString(),
-                tts: !!window.speechSynthesis,
-                vosk: true,
-                textInput: !!document.getElementById('quickTextInput')
-            });
+
             
             // Afficher la notification vocale 
             setTimeout(() => {
@@ -1540,9 +1527,7 @@
                 
                 // Synthèse vocale
                 if (ttsEnabled) {
-                    setTimeout(() => {
-                        speakText(response);
-                    }, 500);
+                    scheduleSpeakText(response);
                 }
                 
                 // Ajouter à l'historique
@@ -1564,7 +1549,7 @@
                 addMessage('guardian', emergencyResponse, '🚨');
                 
                 if (ttsEnabled) {
-                    setTimeout(() => speakText(emergencyResponse), 500);
+                    scheduleSpeakText(emergencyResponse);
                 }
             });
         }
@@ -1573,63 +1558,125 @@
             const btn = document.getElementById('ttsBtn');
             
             if (!ttsEnabled) {
+                // Vérifier la disponibilité du TTS
+                if (!window.speechSynthesis) {
+                    addMessage('system', '❌ Synthèse vocale non supportée par ce navigateur', '⚠️');
+                    return;
+                }
+                
                 // Activation TTS
                 ttsEnabled = true;
                 voicePermissionGranted = true;
                 
                 btn.innerHTML = '<span>🔊</span><span>Audio ON</span>';
                 btn.classList.add('tts-enabled');
-                addMessage('system', '🔊 Audio activé - Guardian vous parlera maintenant', '✅');
+                addMessage('system', '🔊 Audio Guardian activé', '✅');
                 
-                // Test immédiat et fiable du TTS
+                // Test immédiat avec voix française si disponible
                 setTimeout(() => {
-                    if (window.speechSynthesis && ttsEnabled) {
+                    if (ttsEnabled) {
                         try {
-                            // Annuler toutes les synthèses précédentes
-                            window.speechSynthesis.cancel();
-                            
-                            // Attendre que la synthèse soit prête
-                            setTimeout(() => {
-                                const testMessage = "Guardian audio activé avec succès";
-                                const testUtterance = new SpeechSynthesisUtterance(testMessage);
-                                
-                                // Configuration française optimale
-                                testUtterance.lang = 'fr-FR';
-                                testUtterance.rate = 1.0;
-                                testUtterance.pitch = 1.0;
-                                testUtterance.volume = 1.0;
-                                
-                                // Callbacks pour debug
-                                testUtterance.onstart = () => console.log('🔊 TTS démarré');
-                                testUtterance.onend = () => console.log('🔊 TTS terminé');
-                                testUtterance.onerror = (e) => {
-                                    console.error('❌ Erreur TTS:', e);
-                                    addMessage('system', '⚠️ Problème audio - Vérifiez le volume', '⚠️');
+                            // S'assurer que les voix sont chargées
+                            const voices = window.speechSynthesis.getVoices();
+                            if (voices.length === 0) {
+                                // Attendre que les voix se chargent
+                                window.speechSynthesis.onvoiceschanged = () => {
+                                    performTTSTest();
                                 };
-                                
-                                window.speechSynthesis.speak(testUtterance);
-                                addMessage('system', '🎵 Test audio en cours...', '🔊');
-                            }, 200);
+                            } else {
+                                performTTSTest();
+                            }
+                            
                         } catch (error) {
                             console.error('❌ Erreur activation TTS:', error);
-                            addMessage('system', `❌ Erreur audio: ${error.message}`, '⚠️');
+                            addMessage('system', '⚠️ Erreur audio - TTS non disponible', '⚠️');
                         }
-                    } else {
-                        addMessage('system', '❌ Synthèse vocale non supportée par ce navigateur', '⚠️');
                     }
-                }, 300);
+                }, 100);
                 
             } else {
-                // Désactivation TTS
+                // Désactivation TTS - ARRÊT IMMÉDIAT
                 ttsEnabled = false;
                 btn.innerHTML = '<span>🔇</span><span>Audio OFF</span>';
                 btn.classList.remove('tts-enabled');
-                addMessage('system', '🔇 Audio désactivé', '⚠️');
+                addMessage('system', '🔇 Audio Guardian désactivé', '📴');
                 
-                // Arrêter toute synthèse en cours
+                // Annuler tous les timeouts TTS programmés
+                cancelAllTTSTimeouts();
+                
+                // Arrêter toute synthèse en cours - Multi-tentatives pour s'assurer de l'arrêt
                 if (window.speechSynthesis) {
                     window.speechSynthesis.cancel();
+                    
+                    // Deuxième tentative après un court délai
+                    setTimeout(() => {
+                        if (window.speechSynthesis.speaking) {
+                            window.speechSynthesis.cancel();
+                            console.log('🔇 Synthèse forcée à s\'arrêter');
+                        }
+                    }, 100);
+                    
+                    // Troisième tentative si nécessaire
+                    setTimeout(() => {
+                        if (window.speechSynthesis.speaking) {
+                            window.speechSynthesis.cancel();
+                            console.log('🔇 Arrêt forcé final de la synthèse');
+                        }
+                    }, 300);
                 }
+            }
+        }
+        
+        function performTTSTest() {
+            try {
+                // Annuler toute synthèse précédente
+                window.speechSynthesis.cancel();
+                
+                setTimeout(() => {
+                    const testMessage = "Audio Guardian opérationnel";
+                    const testUtterance = new SpeechSynthesisUtterance(testMessage);
+                    
+                    // Configuration française
+                    testUtterance.lang = 'fr-FR';
+                    testUtterance.rate = 1.0;
+                    testUtterance.pitch = 1.0;
+                    testUtterance.volume = 1.0;
+                    
+                    // Essayer de sélectionner une voix française
+                    const voices = window.speechSynthesis.getVoices();
+                    const frenchVoice = voices.find(voice => 
+                        voice.lang.startsWith('fr') && !voice.name.includes('eSpeak')
+                    );
+                    
+                    if (frenchVoice) {
+                        testUtterance.voice = frenchVoice;
+                        console.log('🗣️ Voix française détectée:', frenchVoice.name);
+                    }
+                    
+                    // Callbacks pour le test
+                    testUtterance.onstart = () => {
+                        console.log('🔊 Test TTS démarré');
+                        addMessage('system', '🎵 Test vocal en cours...', '🔊');
+                    };
+                    
+                    testUtterance.onend = () => {
+                        console.log('✅ Test TTS réussi');
+                        addMessage('system', '✅ Guardian peut maintenant vous parler', '🎤');
+                    };
+                    
+                    testUtterance.onerror = (e) => {
+                        console.error('❌ Erreur test TTS:', e.error);
+                        addMessage('system', `⚠️ Problème audio: ${e.error}`, '⚠️');
+                    };
+                    
+                    // Lancer le test
+                    window.speechSynthesis.speak(testUtterance);
+                    
+                }, 300);
+                
+            } catch (error) {
+                console.error('❌ Erreur test TTS:', error);
+                addMessage('system', '❌ Impossible de tester l\'audio', '⚠️');
             }
         }
 
@@ -1648,51 +1695,114 @@
             }
         }
 
+        // Fonction centralisée pour envoyer le message d'accueil (une seule fois)
+        function sendWelcomeMessage(withVoice = false) {
+            if (welcomeMessageSent) {
+                return;
+            }
+            
+            welcomeMessageSent = true;
+            
+            if (withVoice && ttsEnabled && voicePermissionGranted) {
+                const welcomeMsg = `Bonjour ${userInfo.firstName} ! Je suis Guardian, votre assistant de sécurité. Fonctions vocales activées - Je surveille votre position et vous pouvez maintenant me parler directement.`;
+                addFormattedGuardianMessage(welcomeMsg, {
+                    advice: [
+                        "Fonctions vocales maintenant actives",
+                        "Parlez naturellement à Guardian",
+                        "Votre sécurité est surveillée en permanence"
+                    ],
+                    actions: ["Écouter", "Répondre", "Surveiller"]
+                });
+                speakText(welcomeMsg);
+            } else {
+                const welcomeMsg = `Bonjour ${userInfo.firstName} ! Je suis Guardian, votre assistant de sécurité. Je surveille votre position près des locaux Google France. Vous pouvez utiliser les boutons de test pour interagir avec moi.`;
+                addFormattedGuardianMessage(welcomeMsg, {
+                    advice: [
+                        "Testez la commande vocale en cliquant sur le micro",
+                        "Utilisez la carte interactive pour naviguer",
+                        "Guardian surveille votre sécurité en temps réel"
+                    ],
+                    actions: ["Explorer", "Parler", "Naviguer"]
+                });
+            }
+            
+            // Scroll vers le bas pour voir les messages
+            setTimeout(() => {
+                const messagesContainer = document.querySelector('.messages-container');
+                if (messagesContainer) {
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }
+            }, 100);
+        }
+
         // Fonctions pour la notification vocale
         function showVoiceNotification() {
             const notification = document.getElementById('voiceNotification');
             if (notification) {
+                notificationHandled = false; // Réinitialiser pour cette nouvelle notification
+                welcomeMessageSent = false; // Réinitialiser le message d'accueil aussi
                 notification.classList.add('show');
                 
-                // Auto-masquer après 10 secondes si pas d'interaction
-                setTimeout(() => {
-                    if (notification.classList.contains('show')) {
-                        dismissVoiceNotification();
+                // Auto-masquer après 10 secondes si pas d'interaction (SANS message d'accueil)
+                notificationTimeout = setTimeout(() => {
+                    if (notification.classList.contains('show') && !notificationHandled) {
+                        // Fermer silencieusement la notification sans message d'accueil
+                        notification.classList.remove('show');
+                        notificationHandled = true;
+
                     }
                 }, 10000);
             }
         }
 
         function dismissVoiceNotification() {
+            // Empêcher l'exécution multiple
+            if (notificationHandled) {
+                return;
+            }
+            
             const notification = document.getElementById('voiceNotification');
             if (notification) {
                 notification.classList.remove('show');
+                notificationHandled = true; // Marquer comme traitée
+                
+                // Annuler le timeout d'auto-masquage s'il existe
+                if (notificationTimeout) {
+                    clearTimeout(notificationTimeout);
+                    notificationTimeout = null;
+                }
+                
+                // TOUJOURS envoyer le message d'accueil car cette fonction n'est appelée que par clic utilisateur
+                console.log('� Clic "Plus tard" - Envoi du message d\'accueil sans voix');
                 // Informer que les fonctions vocales restent désactivées
                 addMessage('system', 'ℹ️ Fonctions vocales désactivées - Vous pouvez utiliser les boutons de test pour interagir', 'ℹ️');
                 
-                // Envoyer le message de bienvenue de l'agent même sans vocal
+                // Envoyer le message de bienvenue via la fonction centralisée
                 setTimeout(() => {
-                    const welcomeMsg = `Bonjour ${userInfo.firstName} ! Je suis Guardian, votre assistant de sécurité. Je surveille votre position près des locaux Google France. Vous pouvez utiliser les boutons de test pour interagir avec moi.`;
-                    addFormattedGuardianMessage(welcomeMsg, {
-                        advice: [
-                            "Testez la commande vocale en cliquant sur le micro",
-                            "Utilisez la carte interactive pour naviguer",
-                            "Guardian surveille votre sécurité en temps réel"
-                        ],
-                        actions: ["Explorer", "Parler", "Naviguer"]
-                    });
-                    
-                    // Scroll vers le bas pour voir les messages
-                    const messagesContainer = document.querySelector('.messages-container');
-                    if (messagesContainer) {
-                        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-                    }
+                    sendWelcomeMessage(false);
                 }, 1000);
             }
         }
 
         function enableVoiceCommand() {
-            dismissVoiceNotification();
+            // Empêcher l'exécution multiple
+            if (notificationHandled) {
+                console.log('🎤 Notification déjà traitée - Ignore cette action');
+                return;
+            }
+            
+            // Annuler le timeout d'auto-masquage d'abord
+            if (notificationTimeout) {
+                clearTimeout(notificationTimeout);
+                notificationTimeout = null;
+            }
+            
+            // Fermer la notification (la fonction n'envoie plus de message automatiquement)
+            const notification = document.getElementById('voiceNotification');
+            if (notification) {
+                notification.classList.remove('show');
+                notificationHandled = true;
+            }
             
             // Marquer que l'utilisateur a accepté les fonctions vocales
             voicePermissionGranted = true;
@@ -1710,30 +1820,51 @@
             // Afficher message de confirmation
             addMessage('system', '🎤 Commande vocale et synthèse audio activées', '✅');
             
-            // Parler le message de bienvenue avec fonctions vocales activées
+            // Parler le message de bienvenue avec fonctions vocales activées (UNIQUE MESSAGE)
+
             setTimeout(() => {
-                const welcomeMsg = `Bonjour ${userInfo.firstName} ! Je suis Guardian, votre assistant de sécurité. Fonctions vocales activées - Je surveille votre position et vous pouvez maintenant me parler directement.`;
-                addFormattedGuardianMessage(welcomeMsg, {
-                    advice: [
-                        "Fonctions vocales maintenant actives",
-                        "Parlez naturellement à Guardian",
-                        "Votre sécurité est surveillée en permanence"
-                    ],
-                    actions: ["Écouter", "Répondre", "Surveiller"]
-                });
-                speakText(welcomeMsg);
+                sendWelcomeMessage(true);
             }, 1000);
-            
-            // Scroll vers le bas pour voir les messages
-            const messagesContainer = document.querySelector('.messages-container');
-            if (messagesContainer) {
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Fonction helper pour programmer speakText avec annulation possible
+        function scheduleSpeakText(text, delay = 500) {
+            if (!ttsEnabled) {
+                console.log('🔇 TTS désactivé - Pas de programmation de synthèse');
+                return;
             }
+            
+            const timeoutId = setTimeout(() => {
+                // Supprimer ce timeout de la liste
+                ttsTimeouts = ttsTimeouts.filter(id => id !== timeoutId);
+                
+                // Vérifier encore une fois si TTS est activé avant de parler
+                if (ttsEnabled) {
+                    speakText(text);
+                }
+            }, delay);
+            
+            // Ajouter à la liste des timeouts
+            ttsTimeouts.push(timeoutId);
+            return timeoutId;
+        }
+
+        // Fonction pour annuler tous les timeouts TTS en cours
+        function cancelAllTTSTimeouts() {
+            ttsTimeouts.forEach(timeoutId => clearTimeout(timeoutId));
+            ttsTimeouts = [];
+            console.log('🔇 Tous les timeouts TTS annulés');
         }
 
         async function speakText(text) {
-            // Vérifications strictes
-            if (!ttsEnabled || !text || text.trim().length === 0) {
+            // Vérifications strictes - Vérifier l'état TTS en premier
+            if (!ttsEnabled) {
+                console.log('🔇 TTS désactivé - Guardian ne parlera pas');
+                return;
+            }
+            
+            if (!text || text.trim().length === 0) {
+                console.log('🔇 Texte vide - Rien à dire');
                 return;
             }
             
@@ -1742,78 +1873,93 @@
                 let cleanText = text
                     .replace(/<[^>]*>/g, '') // Supprimer HTML
                     .replace(/\*\*([^*]+)\*\*/g, '$1') // Supprimer markdown gras
+                    .replace(/\*/g, '') // Supprimer astérisques simples
                     .replace(/\n/g, ' ') // Remplacer sauts de ligne par espaces
+                    .replace(/\s+/g, ' ') // Compacter les espaces multiples
                     .trim();
                 
-                if (cleanText.length === 0) return;
+                if (cleanText.length === 0) {
+                    console.log('🔇 Texte vide après nettoyage');
+                    return;
+                }
                 
                 // Limiter la longueur pour éviter les timeouts
-                if (cleanText.length > 300) {
-                    cleanText = cleanText.substring(0, 297) + '...';
+                if (cleanText.length > 400) {
+                    cleanText = cleanText.substring(0, 397) + '...';
                 }
                 
-                console.log('🔊 Tentative TTS API pour:', cleanText.substring(0, 50));
+                console.log('🔊 TTS Guardian:', cleanText.substring(0, 80));
                 
-                // Essayer d'abord l'API Google TTS
-                try {
-                    const response = await fetch('/api/tts/speak', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            text: cleanText,
-                            voice: 'fr-FR-Neural2-A'
-                        })
-                    });
-                    
-                    const result = await response.json();
-                    
-                    if (result.success) {
-                        console.log('✅ TTS API Google réussi');
-                        return;
-                    } else if (result.fallback) {
-                        console.log('⚠️ TTS API indisponible - Fallback navigateur');
-                        // Continuer vers le fallback
-                    } else {
-                        console.warn('❌ TTS API échoué:', result.error);
-                    }
-                } catch (apiError) {
-                    console.warn('❌ Erreur TTS API:', apiError);
+                // Vérifier la disponibilité du TTS navigateur
+                if (!window.speechSynthesis) {
+                    console.error('❌ TTS non supporté par ce navigateur');
+                    return;
                 }
                 
-                // Fallback vers la synthèse vocale du navigateur
-                if (window.speechSynthesis) {
-                    console.log('🔄 Utilisation TTS navigateur en fallback');
-                    
-                    // Arrêter toute synthèse précédente
-                    window.speechSynthesis.cancel();
-                    
-                    setTimeout(() => {
+                // Arrêter toute synthèse précédente
+                window.speechSynthesis.cancel();
+                
+                // Attendre que l'arrêt soit effectif avant de commencer
+                setTimeout(() => {
+                    try {
                         const utterance = new SpeechSynthesisUtterance(cleanText);
                         
-                        // Configuration française optimisée
+                        // Configuration française optimisée pour Guardian
                         utterance.lang = 'fr-FR';
-                        utterance.rate = 0.95;
-                        utterance.pitch = 1.0;
-                        utterance.volume = 1.0;
+                        utterance.rate = 1.0;  // Vitesse normale pour clarté
+                        utterance.pitch = 1.0; // Tonalité normale
+                        utterance.volume = 1.0; // Volume maximum
                         
-                        // Callbacks de debug
-                        utterance.onstart = () => console.log('🎤 Lecture navigateur:', cleanText.substring(0, 50));
-                        utterance.onend = () => console.log('✅ Lecture terminée');
-                        utterance.onerror = (event) => {
-                            console.error('❌ Erreur TTS navigateur:', event.error);
+                        // Essayer de sélectionner une voix française si disponible
+                        const voices = window.speechSynthesis.getVoices();
+                        const frenchVoice = voices.find(voice => 
+                            voice.lang.startsWith('fr') && 
+                            (voice.name.includes('Google') || voice.name.includes('Microsoft'))
+                        );
+                        
+                        if (frenchVoice) {
+                            utterance.voice = frenchVoice;
+                            console.log('�️ Voix française sélectionnée:', frenchVoice.name);
+                        }
+                        
+                        // Callbacks pour le suivi
+                        utterance.onstart = () => {
+                            console.log('🎤 Guardian parle:', cleanText.substring(0, 60) + '...');
                         };
+                        
+                        utterance.onend = () => {
+                            console.log('✅ Guardian a terminé de parler');
+                        };
+                        
+                        utterance.onerror = (event) => {
+                            console.error('❌ Erreur TTS Guardian:', event.error);
+                            // Réessayer une fois en cas d'erreur seulement si TTS toujours activé
+                            if (event.error === 'interrupted' && ttsEnabled) {
+                                console.log('🔄 Nouvelle tentative TTS...');
+                                setTimeout(() => {
+                                    if (ttsEnabled) {
+                                        window.speechSynthesis.speak(utterance);
+                                    }
+                                }, 500);
+                            }
+                        };
+                        
+                        // Vérification finale avant de parler (au cas où TTS désactivé entre-temps)
+                        if (!ttsEnabled) {
+                            console.log('🔇 TTS désactivé pendant préparation - Guardian ne parlera pas');
+                            return;
+                        }
                         
                         // Lancer la synthèse
                         window.speechSynthesis.speak(utterance);
-                    }, 100);
-                } else {
-                    console.error('❌ Aucune synthèse vocale disponible');
-                }
+                        
+                    } catch (synthError) {
+                        console.error('❌ Erreur création utterance:', synthError);
+                    }
+                }, 200); // Délai plus long pour s'assurer que cancel() est effectif
                 
             } catch (error) {
-                console.error('❌ Exception TTS:', error);
+                console.error('❌ Exception TTS Guardian:', error);
             }
         }
 

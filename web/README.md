@@ -1,61 +1,45 @@
-# 🌐 Web Interface - Guardian
+# Interface Web - Guardian
 
-Interface web moderne pour Guardian avec Flask et JavaScript.
+Interface web moderne et épurée pour Guardian avec Flask et JavaScript.
 
-## 📁 Structure
+## Structure
 
 ```
 web/
-├── 🚀 start_web_server.py      # Lanceur du serveur web
-├── 🌐 web_interface_simple.py  # Serveur Flask principal
-├── 📄 templates/              # Pages HTML
-│   ├── home.html             # Page d'accueil avec formulaire
-│   ├── demo.html             # Interface principale (carte + conversation)
-│   ├── conversation.html     # Page conversation seule
-│   ├── debug.html            # Page de debug
-│   ├── voice_test.html       # Test de reconnaissance vocale
-│   ├── map.html              # Carte interactive
-│   ├── emergency.html        # Interface d'urgence
-│   ├── guardian_agent.html   # Configuration Guardian
-│   └── guardian_setup.html   # Setup initial
-└── 📦 static/                # Assets statiques
+├── web_interface_simple.py    # Serveur Flask principal avec Vosk
+├── templates/                 # Pages HTML
+│   └── demo.html            # Interface principale optimisée
+└── static/                   # Assets statiques (si nécessaire)
     ├── css/                  # Styles CSS
     └── js/                   # Scripts JavaScript
 ```
 
-## 🚀 Utilisation
+## Utilisation
 
-### Lancement direct
+### Lancement de l'interface web
 ```bash
 cd web/
-python3 start_web_server.py
+python3 web_interface_simple.py
 ```
+Puis ouvrir http://localhost:5001 dans votre navigateur.
 
-### Lancement depuis la racine
-```bash
-python3 guardian_web.py
-```
+## Fonctionnalités
 
-## 🔧 Fonctionnalités
+- **Reconnaissance Vocale**: Vosk français local et fiable
+- **Synthèse Vocale Contrôlable**: TTS avec boutons ON/OFF
+- **Conversation Temps Réel**: Interface directe avec Guardian AI
+- **Alertes Email**: Envoi automatique selon niveau d'urgence
+- **Cartes Interactives**: OpenStreetMap avec Leaflet
+- **Interface Épurée**: Design moderne et professionnel
+- **Notifications Intelligentes**: Messages de bienvenue contrôlés
 
-- **🎤 Reconnaissance Vocale**: Vosk local + Web Speech API fallback
-- **💬 Conversation Temps Réel**: WebSocket avec Guardian AI
-- **📧 Alertes Email**: Envoi automatique selon niveau d'urgence
-- **🗺️ Cartes Interactives**: OpenStreetMap avec Leaflet
-- **📱 Responsive Design**: Compatible mobile et desktop
-- **🎨 Interface Moderne**: Google Material Design
+## Pages Disponibles
 
-## 🌍 Pages Disponibles
-
-- `/` - Page d'accueil avec formulaire utilisateur
-- `/demo` - Interface principale (recommandée)
-- `/conversation` - Conversation seule
-- `/map` - Carte interactive
+- `/demo` - Interface principale complète (recommandée)
+- `/map` - Carte interactive standalone
 - `/emergency` - Interface d'urgence
-- `/debug` - Outils de debug
-- `/voice-test` - Test reconnaissance vocale
 
-## 🔧 Configuration
+## Configuration
 
 Le serveur utilise automatiquement :
 - **Port**: 5001 (ou port libre suivant)
@@ -63,7 +47,7 @@ Le serveur utilise automatiquement :
 - **Config**: `../api_keys.yaml` (depuis racine du projet)
 - **Modèle Vosk**: `../vosk-model-small-fr-0.22/`
 
-## 📡 API Endpoints
+## API Endpoints
 
 ### Guardian AI
 - `POST /api/guardian/analyze` - Analyse situation avec IA
@@ -74,7 +58,7 @@ Le serveur utilise automatiquement :
 - `GET /health` - Vérification santé du serveur
 - `GET /debug` - Informations de debug
 
-## 🔧 Dépannage
+## Dépannage
 
 **Erreur de chemins**: Les chemins sont configurés automatiquement depuis le dossier web vers la racine du projet.
 
@@ -84,4 +68,4 @@ Le serveur utilise automatiquement :
 
 ---
 
-💡 **Conseil**: Pour une utilisation normale, utilisez `python3 guardian_web.py` depuis la racine du projet.
+**Note**: Cette interface web a été optimisée pour une expérience utilisateur fluide avec un code professionnel et épuré.

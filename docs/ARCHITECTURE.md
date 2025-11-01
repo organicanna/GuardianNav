@@ -1,34 +1,48 @@
-# 🛡️ Guardian - Architecture du Système
+# Guardian - Architecture du Système
 
-## 📋 Vue d'ensemble
+## Vue d'ensemble
 
 Guardian est un système d'assistance de sécurité personnelle utilisant l'IA pour analyser les situations d'urgence et fournir des conseils en temps réel.
 
 ## 🏗️ Structure du Projet
 
 ```
+## Structure du Projet
+
+```
 GuardianNav/
-├── 📁 config/           # Configuration et clés API
-│   ├── api_keys.yaml    # Clés d'API (Google, Gmail, etc.)
-│   └── settings.yaml    # Paramètres système
-├── 📁 guardian/         # Modules IA et agents
-│   ├── gemini_agent.py       # Agent Gemini AI (analyse)
+├── config/                      # Configuration et clés API
+│   ├── api_keys.yaml           # Clés d'API (Google, Gmail, etc.)
+│   └── api_keys_template.yaml  # Template de configuration
+├── guardian/                    # Modules IA et agents
+│   ├── gemini_agent.py         # Agent Gemini AI (analyse)
 │   ├── gmail_emergency_agent.py # Envoi d'emails d'urgence
-│   ├── speech_agent.py       # Reconnaissance vocale
-│   └── voice_conversation_agent.py # Conversation vocale
-├── 📁 web/              # Interface web
+│   ├── speech_agent.py         # Reconnaissance vocale
+│   ├── voice_conversation_agent.py # Conversation vocale
+│   ├── guardian_agent.py       # Agent principal
+│   ├── GPS_agent.py           # Géolocalisation
+│   ├── sms_agent.py           # Notifications SMS
+│   └── emergency_email_generator.py # Génération emails
+├── web/                        # Interface web
 │   ├── templates/       
-│   │   ├── demo.html    # Page démonstration interactive
-│   │   ├── home.html    # Page d'accueil
-│   │   └── map.html     # Carte de navigation
-│   └── web_interface_simple.py # Serveur Flask
-├── 📁 models/           # Modèles ML et données
+│   │   └── demo.html          # Interface principale
+│   └── web_interface_simple.py # Serveur Flask + Vosk
+├── models/                     # Modèles ML et données
 │   └── vosk-model-small-fr-0.22/ # Modèle Vosk français
-├── 📁 scripts/          # Scripts utilitaires
-├── 📁 tests/            # Tests unitaires
-├── 📁 demos/            # Fichiers de démonstration
-├── 📁 docs/             # Documentation technique
-├── 📁 logs/             # Fichiers de logs
+├── scripts/                    # Scripts utilitaires
+│   ├── clean_orphans.py       # Nettoyage automatique
+│   ├── cleanup.py             # Maintenance
+│   └── test_dependencies.py   # Tests dépendances
+├── tests/                      # Tests unitaires
+├── docs/                       # Documentation technique
+│   ├── ARCHITECTURE.md        # Ce fichier
+│   ├── CODE_EXPLANATION.md    # Détails techniques
+│   ├── DEPLOYMENT.md          # Guide installation
+│   ├── CHANGELOG.md           # Historique versions
+│   └── CLEANUP_REPORT.md      # Rapport nettoyage
+├── run.py                     # Point d'entrée principal
+├── requirements.txt           # Dépendances Python
+└── .gitignore                # Fichiers ignorés
 └── run.py               # Point d'entrée principal
 ```
 
