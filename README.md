@@ -8,9 +8,9 @@
 
 Guardian est un **agent d'accompagnement discret** qui utilise l'intelligence artificielle pour assister les personnes en situation de vulnérabilité. Par une simple commande vocale, Guardian analyse votre situation, évalue le niveau d'urgence et déclenche automatiquement l'assistance appropriée.
 
-### 👥 Équipe InvadHer
+### 👥 Équipe InvadHers
 
-Ce projet est développé par **InvadHer**, une équipe de 5 filles qui connaissent personnellement ces problématiques de sécurité. Nous avons créé Guardian parce que c'est un problème qui nous touche directement et que nous voulons apporter une solution technologique concrète pour toutes les personnes en situation de vulnérabilité.
+Ce projet est développé par **InvadHers**, une équipe de 5 filles qui connaissent personnellement ces problématiques de sécurité. Nous avons créé Guardian parce que c'est un problème qui nous touche directement et que nous voulons apporter une solution technologique concrète pour toutes les personnes en situation de vulnérabilité.
 
 > **Interface vocale intelligente pour la sécurité de tous**  
 > Reconnaissance vocale multilingue + IA Gemini + Actions d'urgence automatiques  
