@@ -91,9 +91,9 @@ Guardian **agit** au lieu de simplement **conseiller** :
 |----------|-------------|
 | **[docs/INDEX.md](docs/INDEX.md)** | Index complet de la documentation |
 | **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)** | Guide complet d'installation locale |
+| **[INSTALL_MODELS.md](INSTALL_MODELS.md)** | **Installation modèles Vosk reconnaissance vocale** |
 | **[docs/CODE_EXPLANATION.md](docs/CODE_EXPLANATION.md)** | Architecture technique détaillée |
 | **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** | Vue d'ensemble du système |
-| **[docs/CHANGELOG.md](docs/CHANGELOG.md)** | Historique des versions et améliorations |
 | **[docs/INTERNATIONAL_EXPANSION.md](docs/INTERNATIONAL_EXPANSION.md)** | Plan d'expansion mondiale et vision inclusive |
 | **[web/README.md](web/README.md)** | Interface web et API |
 
@@ -138,6 +138,17 @@ cd GuardianNav
 python3.9 -m venv .venv
 source .venv/bin/activate  # macOS/Linux
 pip install -r requirements.txt
+```
+
+##### Installation Modèles Vosk
+```bash
+# Installation automatique du modèle français (recommandée)
+python3 setup_models.py
+
+# OU installation manuelle (voir INSTALL_MODELS.md)
+mkdir models && cd models
+wget https://alphacephei.com/vosk/models/vosk-model-small-fr-0.22.zip
+unzip vosk-model-small-fr-0.22.zip
 ```
 
 ### Configuration APIs (api_keys.yaml)
