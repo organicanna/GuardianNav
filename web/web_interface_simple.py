@@ -174,7 +174,7 @@ class VoiceRecognizer:
         self.is_listening = False
 
 def analyze_situation_with_guardian_ai(situation_text, user_info={}):
-    """Analyse la situation avec l'IA Guardian - Logique complète comme demo_live_agent.py"""
+    """Analyze situation with Guardian AI"""
     if not guardian_agent or not guardian_agent.is_available:
         logger.error("Guardian agent non disponible")
         return {
@@ -189,8 +189,7 @@ def analyze_situation_with_guardian_ai(situation_text, user_info={}):
         user_fullname = user_info.get('fullName', user_firstname)
         user_phone = user_info.get('phone', 'Non renseigné')
         
-        # Prompt complet comme dans demo_live_agent.py
-        full_prompt = f"""Tu es GUARDIAN, l'IA d'assistance d'urgence experte. Analyse cette situation d'urgence RÉELLE et réponds de façon CONCISE et ACTIONNABLE.
+        full_prompt = f"""Tu es GUARDIAN, l'IA d'assistance d'urgence. Analyse cette situation et réponds de façon concise.
 
 **SITUATION RAPPORTÉE:**
 "{situation_text}"
@@ -200,7 +199,7 @@ def analyze_situation_with_guardian_ai(situation_text, user_info={}):
 - Téléphone: {user_phone}
 - Localisation: 8 rue de Londres, 75009 Paris (bureaux Google France)
 
-**INSTRUCTIONS - SOIS TRÈS CONCIS:**
+**INSTRUCTIONS:**
 
 **NIVEAU D'URGENCE:** X/10 (1=info, 5=attention, 8=urgence, 10=danger mortel)
 
@@ -465,7 +464,7 @@ def start_guardian_agent():
 
 @app.route('/api/tts/speak', methods=['POST'])
 def tts_speak():
-    """API pour valider et préparer la synthèse vocale côté client"""
+    """Prepare text for client-side TTS"""
     try:
         data = request.json
         text = data.get('text', '')
@@ -476,19 +475,19 @@ def tts_speak():
         
         logger.info(f"TTS préparé pour: '{text[:50]}...'")
         
-        # Nettoyer le texte pour une meilleure synthèse
+        # Clean text for better synthesis
         clean_text = text.strip()
-        clean_text = clean_text.replace('**', '')  # Supprimer markdown
-        clean_text = clean_text.replace('*', '')   # Supprimer astérisques
+        clean_text = clean_text.replace('**', '')
+        clean_text = clean_text.replace('*', '')
         
-        # Validation réussie - le TTS sera fait côté client
+        # Validation successful - TTS will be done client-side
         logger.info("TTS préparé avec succès")
         return jsonify({
             'success': True,
             'message': 'Texte prêt pour synthèse vocale',
             'text': clean_text,
             'voice': voice_name,
-            'use_browser_tts': True  # Utiliser le TTS du navigateur
+            'use_browser_tts': True
         })
     
     except Exception as e:
@@ -501,7 +500,7 @@ def tts_speak():
 
 @app.route('/api/guardian/analyze', methods=['POST'])
 def guardian_analyze():
-    """API pour l'analyse Guardian - Utilise la vraie IA comme demo_live_agent.py"""
+    """Guardian analysis API"""
     try:
         data = request.json
         situation = data.get('situation', '')
@@ -509,9 +508,9 @@ def guardian_analyze():
         user_info = data.get('user_info', {})
         conversation_history = data.get('conversation_history', [])
         
-        logger.info(f"🔍 Analyse Guardian pour: '{situation}'")
+        logger.info(f"Guardian analysis for: '{situation}'")
         
-        # Utiliser la vraie analyse Guardian
+        # Use Guardian AI analysis
         analysis_result = analyze_situation_with_guardian_ai(situation, user_info)
         
         if analysis_result['success']:
@@ -581,69 +580,69 @@ def guardian_analyze():
                 "Rappelez-vous que cette sensation est temporaire"
             ]
         
-        # Détection de problème d'orientation
+        # Problème d'orientation
         elif any(word in situation for word in ['perdu', 'égaré', 'trouvé', 'où', 'direction', 'chemin']):
             urgency_level = 5
             advice = [
-                f"🧭 Pas de panique {first_name}, je vais vous aider à vous orienter",
-                "📱 J'active le système de navigation GPS",
-                "🏢 Cherchez des points de repère autour de vous",
-                "🚶‍♀️ Restez sur les voies principales et éclairées"
+                f"Pas de panique {first_name}, je vais vous aider",
+                "Activation du GPS en cours",
+                "Cherchez des points de repère autour de vous",
+                "Restez sur les voies principales"
             ]
             recommendations = [
-                "Notez les noms de rues ou numéros visibles",
+                "Notez les noms de rues",
                 "Dirigez-vous vers des lieux fréquentés",
-                "Utilisez la boussole de votre téléphone"
+                "Utilisez votre boussole"
             ]
         
-        # Détection de fatigue/malaise
+        # Fatigue ou malaise
         elif any(word in situation for word in ['fatigué', 'épuisé', 'vertiges', 'étourdi', 'nausée']):
             urgency_level = 6
             advice = [
-                f"⚡ {first_name}, écoutons votre corps",
-                "🪑 Trouvez un endroit sûr pour vous asseoir",
-                "� Hydratez-vous si possible",
-                "🌬️ Prenez l'air frais quelques instants"
+                f"{first_name}, écoutons votre corps",
+                "Trouvez un endroit pour vous asseoir",
+                "Hydratez-vous si possible",
+                "Prenez l'air frais"
             ]
             recommendations = [
-                "Reposez-vous 10-15 minutes minimum",
+                "Repos de 10-15 minutes minimum",
                 "Évitez les mouvements brusques",
-                "Contactez quelqu'un si les symptômes persistent"
+                "Contactez quelqu'un si ça persiste"
             ]
         
-        # Détection de problèmes de foule/sécurité
+        # Problèmes de foule ou sécurité
         elif any(word in situation for word in ['foule', 'monde', 'bousculade', 'danger', 'suspect']):
             urgency_level = 7
             advice = [
-                f"👥 {first_name}, j'analyse l'environnement avec vous",
-                "🚶‍♀️ Éloignez-vous calmement des zones denses",
-                "👀 Restez vigilant(e) et gardez vos affaires près de vous",
-                "🏃‍♀️ Préparez un itinéraire de sortie"
+                f"{first_name}, analysons l'environnement",
+                "Éloignez-vous calmement des zones denses",
+                "Restez vigilant, gardez vos affaires",
+                "Préparez une sortie"
             ]
             recommendations = [
                 "Suivez les sorties de secours",
-                "Restez près des murs plutôt qu'au centre",
-                "Gardez un contact visuel avec les issues"
+                "Restez près des murs",
+                "Gardez les issues en vue"
             ]
         
-        # Situation normale - conseils préventifs
+        # Situation normale
         else:
             urgency_level = 3
             advice = [
-                f"� Bonjour {first_name}, merci de me tenir informé",
-                "�👂 Je vous écoute attentivement",
-                "🤖 Continuez à me parler de votre situation",
-                "💪 Votre sécurité est ma priorité"
+                f"Bonjour {first_name}",
+                "Je vous écoute",
+                "Continuez à me parler",
+                "Votre sécurité est ma priorité"
             ]
             recommendations = [
                 "Gardez votre téléphone chargé",
-                "Restez conscient(e) de votre environnement",
-                "N'hésitez pas à me parler à tout moment"
+                "Restez conscient de votre environnement",
+                "N'hésitez pas à me contacter"
             ]
         
-        # Ajustement basé sur l'historique de conversation
+        # Ajustement selon l'historique
         if len(conversation_history) > 3:
-            advice.append("📈 Je note une amélioration dans notre échange")
+            advice.append("Votre situation semble s'améliorer")
             urgency_level = max(1, urgency_level - 1)
         
         return jsonify({

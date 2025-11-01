@@ -230,8 +230,8 @@ class VertexAIAgent:
             return self._simulate_response(prompt)
     
     def _simulate_response(self, prompt: str) -> Dict:
-        """Génère une réponse simulée intelligente basée sur l'analyse contextuelle"""
-        self.logger.info("Mode simulation Vertex AI - Analyse contextuelle avancée")
+        """Generate simulated response based on contextual analysis"""
+        self.logger.info("Vertex AI simulation mode - advanced analysis")
         
         # Analyse approfondie du prompt pour une réponse très réaliste
         prompt_lower = prompt.lower()
@@ -248,8 +248,8 @@ class VertexAIAgent:
         security_keywords = ['danger', 'agression', 'menace', 'peur', 'suspect']
         location_keywords = ['perdu', 'égaré', 'ne sais pas où', 'trouve plus']
         
-        # Analyser le niveau d'urgence
-        urgency_level = 3  # par défaut
+        # Analyze urgency level
+        urgency_level = 3  # default
         urgency_category = "Modérée"
         
         for level, keywords in urgency_indicators.items():
@@ -268,7 +268,7 @@ class VertexAIAgent:
                     urgency_category = "Faible"
                 break
         
-        # Générer une réponse contextuelle très détaillée
+        # Generate detailed contextual response
         if any(word in prompt_lower for word in ['chute', 'tombé', 'chu', 'glissé']):
             body_parts = ['bras', 'jambe', 'dos', 'tête', 'cheville', 'poignet', 'genou']
             injured_part = next((part for part in body_parts if part in prompt_lower), "corps")
@@ -282,9 +282,9 @@ class VertexAIAgent:
                     "Immobiliser la zone si fracture suspectée",
                     "Appliquer de la glace si possible"
                 ],
-                "specific_advice": f"Chute avec impact sur le {injured_part}. Si douleur intense ou déformation visible, consultation médicale urgente recommandée. Surveillez les signes de commotion si impact à la tête.",
+                "specific_advice": f"Chute avec impact sur le {injured_part}. Si douleur intense ou déformation visible, consultez rapidement. Surveillez les signes de commotion si impact à la tête.",
                 "emergency_services": "SAMU (15) si douleur sévère",
-                "reassurance_message": "La plupart des chutes peuvent être traitées efficacement. Restez calme et évaluez précisément vos symptômes.",
+                "reassurance_message": "Restez calme et évaluez vos symptômes.",
                 "recommended_actions": [
                     "Tester la mobilité progressivement",
                     "Surveiller l'évolution de la douleur",
@@ -588,23 +588,23 @@ Réponds UNIQUEMENT avec ce JSON (sans autre texte):
         }
     
     def get_personalized_emergency_message(self, analysis: Dict) -> str:
-        """Génère un message d'urgence personnalisé"""
+        """Generate personalized emergency message"""
         
         emergency_type = analysis.get('emergency_type', 'Urgence')
         urgency_level = analysis.get('urgency_level', 5)
         advice = analysis.get('specific_advice', '')
         
         if urgency_level >= 8:
-            intensity = "🚨 URGENCE CRITIQUE"
+            intensity = "URGENCE CRITIQUE"
         elif urgency_level >= 6:
-            intensity = "⚠️ URGENCE ÉLEVÉE"
+            intensity = "URGENCE ÉLEVÉE"
         else:
-            intensity = "📋 SITUATION À SURVEILLER"
+            intensity = "SITUATION À SURVEILLER"
         
         message = f"{intensity}\n"
         message += f"Type: {emergency_type}\n"
         message += f"Niveau: {urgency_level}/10\n\n"
-        message += f"💡 Conseil: {advice}"
+        message += f"Conseil: {advice}"
         
         return message
     

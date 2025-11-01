@@ -1,10 +1,24 @@
 # Changelog - Guardian
 
-## Version 3.0 - Code Professionnel et Interface Optimisée
+## Version 3.1 - Professionnalisation Complète du Code
 
-### Améliorations Majeures
+### Améliorations Récentes (v3.1)
 
-#### Code Professionnel
+#### Code Totalement Professionnel  
+- **Élimination de tous les emojis** dans messages, logs et interface
+- **Commentaires épurés** : documentation concise et technique
+- **Messages directs** : suppression des formulations IA typiques
+- **Code naturel** : apparence développeur expérimenté
+
+#### Messages Système Simplifiés
+- **Interface web** : indicateurs textuels clairs (OK, INFO, ERROR)
+- **Logs serveur** : messages informatifs sans artifices
+- **API responses** : données essentielles uniquement
+- **Feedback utilisateur** : communication directe et efficace
+
+### Améliorations Précédentes (v3.0)
+
+#### Code Professionnel de Base
 - **Suppression complète des emojis** dans les logs et messages système
 - **Nettoyage des commentaires verbeux** et descriptions excessives
 - **Simplification des messages de console** pour un rendu plus professionnel

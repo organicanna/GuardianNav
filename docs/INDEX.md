@@ -21,12 +21,16 @@ Historique des versions et évolutions du projet. Détaille les améliorations, 
 ### [CLEANUP_REPORT.md](CLEANUP_REPORT.md)
 Rapport du nettoyage des codes orphelins. Liste les fichiers supprimés et les optimisations apportées au projet.
 
+### [INTERNATIONAL_EXPANSION.md](INTERNATIONAL_EXPANSION.md)
+Plan d'expansion mondiale de Guardian. Stratégie multilingue, public cible universel et roadmap internationale.
+
 ## Navigation rapide
 
 - **Installation** → [DEPLOYMENT.md](DEPLOYMENT.md)
 - **Architecture** → [ARCHITECTURE.md](ARCHITECTURE.md)  
 - **Détails techniques** → [CODE_EXPLANATION.md](CODE_EXPLANATION.md)
 - **Nouveautés** → [CHANGELOG.md](CHANGELOG.md)
+- **Vision mondiale** → [INTERNATIONAL_EXPANSION.md](INTERNATIONAL_EXPANSION.md)
 
 ## Contribution
 
@@ -39,4 +43,4 @@ Pour mettre à jour cette documentation :
 
 ---
 
-Documentation maintenue à jour pour Guardian v3.0
+Documentation maintenue à jour pour Guardian v3.1

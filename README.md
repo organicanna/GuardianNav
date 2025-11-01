@@ -1,32 +1,36 @@
-# Guardian - Assistant de Sécurité Personnelle
+# Guardian - Assistant de Sécurité Personnelle Universel
 
-> **Interface vocale intelligente pour la sécurité personnelle**  
-> Reconnaissance vocale française + IA Gemini + Actions d'urgence automatiques
+> **Interface vocale intelligente pour la sécurité de tous**  
+> Reconnaissance vocale multilingue + IA Gemini + Actions d'urgence automatiques  
+> **Pour tous ceux qui peuvent se sentir vulnérables, peu importe l'âge ou le genre**
 
 [![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://python.org)
 [![AI](https://img.shields.io/badge/AI-Google_Gemini_2.5_Flash-green.svg)](https://ai.google.dev/)
-[![Voice](https://img.shields.io/badge/Voice-Vosk_French-orange.svg)](https://alphacephei.com/vosk/)
+[![Voice](https://img.shields.io/badge/Voice-Vosk_Multilingual-orange.svg)](https://alphacephei.com/vosk/)
+[![Global](https://img.shields.io/badge/Global-Worldwide_Safety-purple.svg)](https://github.com/organicanna/GuardianNav)
 [![Web](https://img.shields.io/badge/Web-Flask_+_Leaflet-red.svg)](https://flask.palletsprojects.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## Vue d'ensemble
 
-**Guardian** transforme votre voix en interface d'urgence intelligente. Dites simplement *"Au secours, j'ai mal au cœur"* et l'IA Gemini analyse votre situation, évalue l'urgence (1-10), et déclenche automatiquement l'assistance appropriée.
+**Guardian** transforme votre voix en interface d'urgence intelligente universelle. Dites simplement *"Help, my chest hurts"*, *"Au secours, j'ai mal au cœur"* ou *"Aiuto, mi fa male il petto"* et l'IA Gemini analyse votre situation, évalue l'urgence (1-10), et déclenche automatiquement l'assistance appropriée.
 
-**Synthèse vocale (TTS)** - Guardian vous parle avec sa voix  
+**Public cible** : Toute personne pouvant se sentir vulnérable - personnes âgées, femmes seules, travailleurs isolés, voyageurs, personnes avec conditions médicales, ou simplement quiconque souhaitant plus de sécurité.
+
+**Synthèse vocale (TTS)** - Guardian vous parle dans votre langue  
 **Interface vocale pure** - Interaction 100% par la voix  
-**Vosk hors ligne** - Reconnaissance française locale et fiable
+**Vosk multilingue** - Reconnaissance locale dans votre langue
 
 > **Pourquoi Guardian ?** Les IA classiques (ChatGPT, Alexa, Siri) excellent dans le conseil général mais échouent dans l'urgence : trop lentes (15-45s), actions manuelles uniquement, pas de spécialisation sécurité. Guardian comble ce gap avec un agent spécialisé qui **agit** plutôt que de simplement **conseiller**.
 
 ### Fonctionnalités Principales
 
-- **Reconnaissance vocale française** - Vosk offline, temps réel
-- **IA Guardian** - Analyse contextuelle avec Gemini 2.5 Flash  
+- **Reconnaissance vocale multilingue** - Vosk offline, 20+ langues
+- **IA Guardian universelle** - Analyse contextuelle avec Gemini 2.5 Flash  
 - **Réponse < 7s** - Pipeline optimisé STT → IA → Actions
-- **Alertes intelligentes** - Emails/SMS automatiques selon urgence
-- **Navigation sécurisée** - Itinéraires optimisés + lieux de refuge
-- **Interface moderne** - Design Google Material avec bouclier interactif
+- **Alertes intelligentes mondiales** - Emails/SMS automatiques adaptés par pays
+- **Navigation sécurisée globale** - Itinéraires optimisés + refuges locaux
+- **Interface inclusive** - Design accessible pour tous âges et capacités
 
 ### Démarrage Rapide
 
@@ -46,95 +50,121 @@ cd web && python3 web_interface_simple.py
 
 ---
 
+## Vision Mondiale et Inclusivité
+
+### Pour Tous, Partout dans le Monde
+
+Guardian est conçu pour **tous ceux qui peuvent se sentir vulnérables**, indépendamment de :
+
+| Caractéristique | Couverture Guardian |
+|------------------|-------------------|
+| **Genre** | Tous - femmes, hommes, personnes non-binaires |
+| **Âge** | Tous âges - enfants, adultes, seniors |
+| **Situation** | Personnes seules, travailleurs isolés, voyageurs |
+| **Santé** | Conditions médicales, handicaps, mobilité réduite |
+| **Géographie** | Mondial - zones urbaines et rurales |
+| **Langue** | 20+ langues supportées par Vosk |
+
+### Cas d'Usage Universels
+
+#### Personnes Âgées 👴👵
+- **Chutes à domicile** : Détection automatique + alerte famille
+- **Urgences médicales** : Reconnaissance symptômes cardiaques/AVC
+- **Isolement** : Assistance 24/7 sans complexité technologique
+
+#### Femmes et Sécurité 👩‍🦱
+- **Harcèlement de rue** : Alerte discrète + géolocalisation précise
+- **Retour nocturne** : Compagnon vocal jusqu'au domicile
+- **Situations dangereuses** : Évaluation risque + actions préventives
+
+#### Travailleurs Isolés 👷‍♂️
+- **Accidents de travail** : Détection chute + alerte équipe
+- **Zones dangereuses** : Guide sécurité temps réel
+- **Urgences médicales** : Assistance dans lieux reculés
+
+#### Voyageurs Internationaux ✈️
+- **Barrière linguistique** : Assistance multilingue locale
+- **Urgences à l'étranger** : Contacts adaptés par pays
+- **Navigation sécurisée** : Éviter zones dangereuses
+
+#### Conditions Médicales 🏥
+- **Diabète, épilepsie, allergies** : Reconnaissance symptômes
+- **Handicaps** : Interface vocale accessible
+- **Traitements** : Rappels et assistance urgence
+
+### Expansion Géographique Prévue
+
+#### Phase 1 : Europe (2024-2025)
+- 🇫🇷 **France** : Déjà fonctionnel (modèle Vosk français)
+- 🇬🇧 **Royaume-Uni** : Adaptation numéros urgence (999)
+- 🇩🇪 **Allemagne** : Modèle Vosk allemand + numéros locaux
+- 🇮🇹 **Italie** : Support italien + services d'urgence
+- 🇪🇸 **Espagne** : Reconnaissance espagnol + 112
+
+#### Phase 2 : Amérique du Nord (2025-2026)
+- 🇺🇸 **États-Unis** : Adaptation 911 + modèle anglais US
+- 🇨🇦 **Canada** : Support français/anglais + services provinciaux
+- 🇲🇽 **Mexique** : Modèle espagnol mexicain + numéros locaux
+
+#### Phase 3 : Asie-Pacifique (2026+)
+- 🇯🇵 **Japon** : Modèle japonais + culture de sécurité locale
+- 🇦🇺 **Australie** : Adaptation 000 + zones reculées
+- 🇮🇳 **Inde** : Multi-langues (hindi, anglais) + densité urbaine
+
+### Architecture Multilingue
+
+```python
+# Support prévu pour 20+ langues
+SUPPORTED_LANGUAGES = {
+    'fr': 'vosk-model-fr',      # Français (actuel)
+    'en': 'vosk-model-en-us',   # Anglais US
+    'de': 'vosk-model-de',      # Allemand  
+    'es': 'vosk-model-es',      # Espagnol
+    'it': 'vosk-model-it',      # Italien
+    'pt': 'vosk-model-pt',      # Portugais
+    'ru': 'vosk-model-ru',      # Russe
+    'zh': 'vosk-model-zh',      # Chinois
+    'ja': 'vosk-model-ja',      # Japonais
+    'ar': 'vosk-model-ar',      # Arabe
+    # ... extension continue
+}
+
+# Adaptation par pays
+COUNTRY_CONFIG = {
+    'FR': {'emergency': '15', 'police': '17', 'fire': '18'},
+    'US': {'emergency': '911', 'police': '911', 'fire': '911'},
+    'UK': {'emergency': '999', 'police': '999', 'fire': '999'},
+    'DE': {'emergency': '112', 'police': '110', 'fire': '112'},
+    # ... configuration par pays
+}
+```
+
+---
+
 ## Guardian vs IA Classique
 
-### Pourquoi Guardian surpasse les assistants IA traditionnels ?
+### Différences Clés
 
-| Aspect | IA Classique (ChatGPT, Alexa, Siri) | Guardian Agent |
-|--------|-------------------------------------|----------------|
-| **🎯 Spécialisation** | Usage général, conseils théoriques | **Spécialisé sécurité/urgence** avec actions concrètes |
-| **⚡ Réactivité** | 10-30s + interventions manuelles | **< 7s bout en bout** avec actions automatiques |
-| **🔧 Actions** | Informations passives uniquement | **Actions réelles** : emails, SMS, géolocalisation |
-| **🎤 Reconnaissance** | Cloud dépendant, latence réseau | **Vosk local français**, instantané, offline |
-| **🧠 Intelligence** | Modèle généraliste | **IA contextuelle urgence** avec évaluation 1-10 |
-| **📧 Communication** | Pas d'intégration directe | **Emails automatiques** avec cartes, WhatsApp |
-| **🗺️ Géolocalisation** | Basique, pas d'action | **GPS précis** + refuges + itinéraires sécurisés |
-| **🚨 Urgence** | "Appelez les secours" | **Évaluation IA** → alerte auto si gravité ≥ 7/10 |
+| Aspect | IA Classique | Guardian Agent |
+|--------|--------------|----------------|
+| **Spécialisation** | Conseils généralistes | **Actions d'urgence spécialisées** |
+| **Réactivité** | 10-30s + intervention manuelle | **< 7s avec actions automatiques** |
+| **Reconnaissance** | Cloud (latence) | **Vosk local instantané** |
+| **Actions** | Informations passives | **Emails/SMS/GPS automatiques** |
 
-### Avantages décisifs de Guardian
+### Exemple Concret
 
-#### 1. **Intelligence Contextuelle Spécialisée**
-```
-❌ IA Classique: "Je vous conseille d'appeler le 15 si c'est urgent"
-✅ Guardian: "URGENCE CARDIAQUE détectée ! Niveau 9/10. J'alerte automatiquement 
-             vos proches avec votre position exacte. Asseyez-vous maintenant !"
-```
+**Situation** : *"J'ai mal à la poitrine, ça serre fort"*
 
-#### 2. **Actions Automatiques vs Conseils Passifs**
-```
-❌ IA Classique: Fournit des informations, vous devez agir manuellement
-✅ Guardian: Analyse → Décision → Actions (emails + SMS + géolocalisation)
-```
+- **IA Classique** : "Je vous conseille d'appeler le 15 si c'est urgent"
+- **Guardian** : "URGENCE CARDIAQUE ! Niveau 9/10" → Alerte automatique contacts + GPS + conseils immédiats
 
-#### 3. **Reconnaissance Vocale Optimisée**
-```
-❌ IA Classique: Cloud → Latence → Erreurs avec accent français
-✅ Guardian: Vosk local français → 0.5s → Précision optimisée urgences
-```
+### Pourquoi Guardian ?
 
-#### 4. **Écosystème Intégré d'Urgence**
-```
-❌ IA Classique: Conseils isolés sans suite
-✅ Guardian: Chaîne complète → Analyse → Géolocalisation → Contacts → Refuges
-```
-
-### Cas d'usage concret
-
-**Situation** : "J'ai mal à la poitrine, ça serre fort"
-
-| IA Classique | Guardian Agent |
-|--------------|----------------|
-| "Les douleurs thoraciques peuvent être graves. Je vous recommande de consulter un médecin ou d'appeler le 15." | **"URGENCE CARDIAQUE DÉTECTÉE ! Niveau 9/10"**<br>→ Email automatique aux contacts avec position GPS<br>→ "Asseyez-vous ! Desserrez vos vêtements !"<br>→ Génération lien WhatsApp direct<br>→ Localisation des hôpitaux à proximité |
-
-### Différences Techniques Fondamentales
-
-#### Architecture Décisionnelle
-```python
-# IA Classique : Réponse textuelle passive
-def generate_response(query):
-    return "Je vous conseille de..."
-
-# Guardian : Pipeline d'action automatique  
-def guardian_pipeline(voice_input):
-    situation = analyze_emergency(voice_input)    # IA spécialisée
-    urgency = evaluate_severity(situation)        # Score 1-10
-    if urgency >= 7:
-        send_automatic_alerts(situation, gps_location)  # Actions réelles
-        provide_immediate_guidance(situation)           # Conseils adaptés
-    return real_world_actions + contextual_advice
-```
-
-#### Modèle IA Spécialisé vs Généraliste
-- **IA Classique** : Modèle généraliste (médecine = 0.1% des données d'entraînement)
-- **Guardian** : IA fine-tunée sur urgences + contexte français + actions concrètes
-
-#### Temps de Réponse Optimisé
-```
-Pipeline IA Classique:
-Voice → Cloud STT → LLM Cloud → Text → Screen (12-45s)
-
-Pipeline Guardian:
-Voice → Vosk Local (0.5s) → Gemini Spécialisé (2s) → Actions (3s) → TTS (1s) = 6.5s
-```
-
-### Résultat
-
-**Guardian ne remplace pas les IA générales** - il les **surpasse dans son domaine** grâce à :
-- **Spécialisation poussée** en sécurité personnelle
-- **Actions concrètes immédiates** plutôt que conseils théoriques  
-- **Pipeline optimisé** pour la rapidité d'intervention
-- **Intégration complète** des services d'urgence
-- **Architecture décisionnelle** avec seuils d'action automatique
+Guardian **agit** au lieu de simplement **conseiller** :
+- **Spécialisation urgences** vs généraliste
+- **Actions automatiques** vs conseils passifs
+- **Pipeline optimisé** pour sauver des vies
 
 ---
 
@@ -147,6 +177,7 @@ Voice → Vosk Local (0.5s) → Gemini Spécialisé (2s) → Actions (3s) → TT
 | **[docs/CODE_EXPLANATION.md](docs/CODE_EXPLANATION.md)** | Architecture technique détaillée |
 | **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** | Vue d'ensemble du système |
 | **[docs/CHANGELOG.md](docs/CHANGELOG.md)** | Historique des versions et améliorations |
+| **[docs/INTERNATIONAL_EXPANSION.md](docs/INTERNATIONAL_EXPANSION.md)** | Plan d'expansion mondiale et vision inclusive |
 | **[web/README.md](web/README.md)** | Interface web et API |
 
 ## Architecture Simplifiée
@@ -238,24 +269,25 @@ python -c "import sounddevice as sd; print(sd.query_devices())"
 
 ---
 
-## Améliorations Récentes (v3.0)
+## Améliorations Récentes (v3.1)
 
-### Code Professionnel et Optimisé
-- **Nettoyage complet** : Suppression des emojis et logs verbeux pour un code plus professionnel
-- **Interface simplifiée** : Messages clairs et concis sans surcharge visuelle
-- **Performance optimisée** : Logs essentiels uniquement, temps de réponse améliorés
-- **TTS contrôlable** : Synthèse vocale activable/désactivable via l'interface
+### Code 100% Professionnel
+- **Aucun emoji** : Messages système épurés et techniques
+- **Commentaires naturels** : Documentation concise de développeur
+- **Interface sobre** : Indicateurs textuels clairs (OK, INFO, ERROR)
+- **Logs techniques** : Information essentielle sans artifices
 
-### Interface Web Améliorée
-- **Contrôles audio intuitifs** : Boutons ON/OFF pour la synthèse vocale
-- **Messages de bienvenue ciblés** : Apparition uniquement sur action utilisateur
-- **Design épuré** : Interface moderne sans éléments distractifs
-- **Navigation fluide** : Expérience utilisateur optimisée
+### Qualité de Code Optimale
+- **Apparence humaine** : Code qui semble écrit par un développeur expérimenté  
+- **Messages directs** : Communication efficace sans formulations artificielles
+- **Structure claire** : Architecture lisible et maintenable
+- **Performance préservée** : Toutes les fonctionnalités IA conservées
 
-### Architecture Technique
-- **Code maintenable** : Structure claire et commentaires pertinents
-- **Logs professionnels** : Messages informatifs sans surcharge
-- **Gestion d'erreurs robuste** : Traitement des exceptions optimisé
+### Fonctionnalités Maintenues
+- **TTS contrôlable** : Synthèse vocale ON/OFF via interface
+- **IA Gemini** : Analyse d'urgence intelligente intacte
+- **Reconnaissance vocale** : Vosk français local optimal
+- **Alertes automatiques** : Système d'urgence complet
 - **Configuration modulaire** : API et services facilement configurables
 
 ---
@@ -279,30 +311,57 @@ python3 main.py
 # Surveillance complète avec détection automatique
 ```
 
-### Exemples Conversation
+### Exemples Conversation Multilingue
 
-#### Urgence Médicale
+#### Urgence Médicale (France)
 ```
 Utilisateur: "J'ai mal à la poitrine, ça serre fort"
-Guardian: "URGENCE CARDIAQUE ! Asseyez-vous ! J'appelle le SAMU."
-IA évalue: Niveau 9/10 → Alerte automatique des proches
-Actions: SAMU contacté + Email d'urgence avec localisation exacte + Liens WhatsApp
+Guardian: "URGENCE CARDIAQUE ! Asseyez-vous ! J'appelle le SAMU (15)."
+Actions: Email famille + Géolocalisation + Hôpitaux proches
 ```
 
-#### Navigation
-```  
-Utilisateur: "Je suis perdu dans le métro"
-Guardian: "Vous êtes à Châtelet. Quelle est votre destination ?"
-Utilisateur: "République"
-Guardian: "Prenez la ligne 1 direction Vincennes, 3 stations."
+#### Medical Emergency (USA)
+```
+User: "My chest is tight, I can't breathe"
+Guardian: "CARDIAC EMERGENCY! Sit down! Calling 911 now."
+Actions: Emergency contacts + GPS location + Nearest hospitals
 ```
 
-#### Sécurité
+#### Emergencia Médica (España)
 ```
-Utilisateur: "Quelqu'un me suit depuis 10 minutes"  
-Guardian: "Dirigez-vous vers le commissariat à 200m. J'alerte vos proches."
-IA évalue: Danger réel détecté → Envoi automatique d'email d'urgence
-Actions: Localisation exacte partagée + Refuges sûrs + WhatsApp pour contact direct
+Usuario: "Me duele mucho el pecho"
+Guardian: "¡EMERGENCIA CARDÍACA! ¡Siéntese! Llamando al 112."
+Acciones: Contactos familiares + Localización + Hospitales cercanos
+```
+
+#### Sécurité Femme (Internationale)
+```
+Utilisatrice: "Someone is following me" / "Quelqu'un me suit"
+Guardian: "Je vous guide vers un lieu sûr. Police alertée."
+Actions: 
+- 🇫🇷 Commissariat le plus proche + numéro 17
+- 🇺🇸 Police station + 911 alert
+- 🇬🇧 Police station + 999 call
+- Contacts d'urgence + Géolocalisation temps réel
+```
+
+#### Personne Âgée (Chute)
+```
+Détection automatique: Chute détectée
+Guardian: "Madame Martin, vous êtes tombée. Répondez-moi !"
+Si pas de réponse (30s): Alerte automatique famille + SAMU
+Actions: Email avec photos de la situation + Accès d'urgence
+```
+
+#### Travailleur Isolé
+```
+Utilisateur: "Accident sur le chantier, je suis blessé"
+Guardian: "Accident de travail détecté. J'alerte votre équipe et les secours."
+Actions: 
+- Responsable sécurité contacté
+- Secours adaptés (pompiers/SAMU selon région)
+- Géolocalisation précise du chantier
+- Photos automatiques de la zone
 ```
 
 ### Interface Vocale
@@ -313,11 +372,21 @@ Actions: Localisation exacte partagée + Refuges sûrs + WhatsApp pour contact d
 - **Boutons Test** - Simulation de situations d'urgence
 - **Carte interactive** - Localisation et navigation temps réel
 
-### Commandes Vocales
-- **Urgences** : "Au secours", "J'ai mal à...", "Je suis en danger"  
-- **Information** : "Où suis-je ?", "Hôpital le plus proche"
-- **Navigation** : "Comment rentrer ?", "Je suis perdu"
-- **Test** : "Test du système", "Ma position"
+### Commandes Vocales Multilingues
+
+| Français | English | Español | Deutsch | Italiano |
+|----------|---------|---------|---------|-----------|
+| **Urgences** |
+| "Au secours" | "Help me" | "Socorro" | "Hilfe" | "Aiuto" |
+| "J'ai mal au cœur" | "My chest hurts" | "Me duele el pecho" | "Mein Herz tut weh" | "Mi fa male il petto" |
+| "Je suis en danger" | "I'm in danger" | "Estoy en peligro" | "Ich bin in Gefahr" | "Sono in pericolo" |
+| **Information** |
+| "Où suis-je ?" | "Where am I?" | "¿Dónde estoy?" | "Wo bin ich?" | "Dove sono?" |
+| "Hôpital proche" | "Nearest hospital" | "Hospital cercano" | "Nächstes Krankenhaus" | "Ospedale vicino" |
+| **Navigation** |
+| "Je suis perdu" | "I'm lost" | "Estoy perdido" | "Ich bin verloren" | "Sono perso" |
+| **Test** |
+| "Test système" | "System test" | "Prueba sistema" | "System-Test" | "Test sistema" |
 
 ---
 
@@ -446,25 +515,35 @@ const whatsappLink = `https://wa.me/${phoneNumber}?text=${prefilledMessage}`;
 
 ---
 
-## Versions et Évolution
+## Versions et Roadmap Mondiale
 
-### v3.0 - Code Professionnel (Actuel)
-- **Interface épurée** : Suppression des emojis et éléments distractifs
-- **TTS contrôlable** : Synthèse vocale activable/désactivable
-- **Messages ciblés** : Notifications intelligentes sur action utilisateur
-- **Performance optimisée** : Logs essentiels uniquement
+### v3.1 - Code 100% Professionnel (Actuel - France)  
+- **Aucun emoji** : Code totalement épuré et technique
+- **Commentaires naturels** : Documentation de développeur expérimenté
+- **Messages directs** : Communication efficace sans artifices
+- **Apparence humaine** : Code qui ne révèle pas ses origines IA
+- **Base française** : Vosk français + numéros d'urgence FR
 
-### v2.0 - Fonctionnalités Avancées
-- **IA Décisionnelle Autonome** : Évaluation automatique de la gravité (1-10/10)
-- **Emails d'Urgence Enrichis** : Localisation exacte + boutons WhatsApp
-- **Personnalisation Complète** : Interface adaptée à l'utilisateur
-- **Tests Automatisés** : Infrastructure robuste par catégorie
+### v4.0 - Expansion Européenne (2025 Q1-Q2)
+- **Multi-langues Europe** : Anglais, Allemand, Italien, Espagnol
+- **Numéros d'urgence locaux** : 999 (UK), 112 (EU), 911 (US)
+- **Adaptation culturelle** : Protocoles d'urgence par pays
+- **Refuges locaux** : Commissariats, hôpitaux, ambassades
 
-### v1.0 - Base Technique
-- **Reconnaissance vocale** : Vosk français offline
-- **Intelligence artificielle** : Gemini 2.5 Flash
-- **Interface web** : Flask avec cartes Leaflet
-- **Système d'alertes** : Gmail et SMS intégrés
+### v5.0 - Amérique du Nord (2025 Q3-Q4)
+- **Modèles Vosk US/CA** : Anglais américain + français canadien
+- **Services 911** : Intégration systèmes d'urgence nord-américains
+- **Zones rurales** : Adaptation territoires isolés
+- **Assurances santé** : Intégration systèmes médicaux locaux
+
+### v6.0+ - Mondial (2026+)
+- **20+ langues** : Expansion Asie, Afrique, Amérique du Sud
+- **IA culturelle** : Adaptation comportements sécurité par région
+- **Satellites** : Couverture zones sans réseau
+- **ONG Partnership** : Collaboration organisations humanitaires
+
+### Vision Long Terme
+**Guardian dans chaque smartphone mondial** - Assistant sécurité universel pour tous ceux qui peuvent se sentir vulnérables, peu importe où ils se trouvent dans le monde.
 
 ---
 

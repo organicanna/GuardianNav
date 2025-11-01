@@ -1345,9 +1345,9 @@
             
             const randomTest = testMessages[Math.floor(Math.random() * testMessages.length)];
             
-            addMessage('system', `🧪 Test automatique: ${randomTest.description}`, '🔧');
-            addMessage('system', '💬 Simulation de commande vocale...', '🎭');
-            addMessage('user', randomTest.text, '👤');
+            addMessage('system', `Test: ${randomTest.description}`, 'TEST');
+            addMessage('system', 'Simulation vocale...', 'SIM');
+            addMessage('user', randomTest.text, 'USER');
             
             // Simulation d'un délai de traitement réaliste
             showTyping();
@@ -1499,7 +1499,7 @@
                 let urgencyText = urgencyLevel >= 7 ? '🚨 ÉLEVÉ' : 
                                  urgencyLevel >= 5 ? '⚠️ MODÉRÉ' : '✅ NORMAL';
                 
-                addMessage('system', `Niveau d'urgence: ${urgencyLevel}/10 ${urgencyText}`, '📊');
+                addMessage('system', `Urgence: ${urgencyLevel}/10 ${urgencyText}`, 'INFO');
                 
                 // Réponse de Guardian (nouvelle logique)
                 let response = "Situation analysée avec succès.";
@@ -1513,14 +1513,14 @@
                 
                 // Indication si email envoyé
                 if (data.email_sent) {
-                    addMessage('system', '📧 Email d\'urgence envoyé aux contacts d\'urgence', '✅');
+                    addMessage('system', 'Email d\'urgence envoyé', 'OK');
                 }
                 
                 // Indication du statut Guardian
                 if (data.guardian_active) {
-                    addMessage('system', '🧠 Analyse IA Guardian complète', '✅');
+                    addMessage('system', 'Analyse Guardian terminée', 'OK');
                 } else {
-                    addMessage('system', '⚠️ Mode fallback activé', '�');
+                    addMessage('system', 'Mode fallback actif', 'INFO');
                 }
                 
                 addFormattedGuardianMessage(response, data);

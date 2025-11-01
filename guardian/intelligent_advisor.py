@@ -152,39 +152,39 @@ class IntelligentAdvisor:
         
         advice_templates = {
             "medical": [
-                "🏥 Reste calme et évalue ta blessure",
-                "📞 Si c'est grave, appelle le 15 (SAMU) immédiatement",
-                "🩹 Si tu peux, applique une pression sur les saignements",
-                "📍 Communique ta position exacte aux secours",
-                "👥 Demande de l'aide aux personnes autour de toi"
+                "Évalue la gravité de tes symptômes",
+                "Appelle le 15 (SAMU) si urgent",
+                "Applique les premiers secours si possible",
+                "Dirige-toi vers l'hôpital le plus proche",
+                "Note l'heure et la nature des symptômes"
             ],
             "security": [
-                "🚨 Mets-toi en sécurité immédiatement",
-                "📞 Appelle le 17 (Police) si tu es en danger",
-                "🏃 Dirige-toi vers un lieu public et éclairé",
-                "📱 Partage ta localisation avec tes contacts",
-                "👀 Mémorise les détails de ce qui s'est passé"
+                "Mets-toi en sécurité immédiatement",
+                "Appelle le 17 (Police) si danger",
+                "Va vers un lieu public et éclairé",
+                "Partage ta localisation avec tes contacts",
+                "Mémorise les détails"
             ],
             "lost": [
-                "📍 Reste où tu es, ne t'éloigne pas davantage",
-                "📱 Active le GPS et partage ta position",
-                "🗺️ Cherche des points de repère autour de toi",
-                "👥 Demande ton chemin aux passants ou commerçants",
-                "🔋 Économise la batterie de ton téléphone"
+                "Reste où tu es",
+                "Active le GPS et partage ta position",
+                "Cherche des points de repère",
+                "Demande ton chemin aux passants",
+                "Économise la batterie"
             ],
             "technical": [
-                "🔧 Évalue si c'est un problème que tu peux résoudre",
-                "📞 Contacte l'assistance technique appropriée",
-                "📱 Trouve un téléphone ou WiFi alternatif",
-                "🚶 Cherche un moyen de transport alternatif",
-                "⏰ Informe tes contacts du retard potentiel"
+                "Évalue si tu peux résoudre le problème",
+                "Contacte l'assistance technique",
+                "Trouve un téléphone ou WiFi alternatif",
+                "Cherche un moyen de transport alternatif",
+                "Informe tes contacts du retard"
             ],
             "general": [
-                "😌 Reste calme et respire profondément",
-                "📋 Fais une liste de ce que tu peux faire",
-                "👥 N'hésite pas à demander de l'aide",
-                "📞 Contacte quelqu'un de confiance",
-                "🏠 Dirige-toi vers un lieu sûr si possible"
+                "Reste calme et respire",
+                "Liste ce que tu peux faire",
+                "N'hésite pas à demander de l'aide",
+                "Contacte quelqu'un de confiance",
+                "Va vers un lieu sûr"
             ]
         }
         
@@ -267,7 +267,7 @@ class SmartResponseSystem:
         if user_response.lower().strip() == "non":
             return {
                 "type": "emergency_follow_up",
-                "message": "🚨 Que se passe-t-il ? Décris-moi la situation :",
+                "message": "Que se passe-t-il ? Décris-moi la situation :",
                 "next_action": "wait_for_description",
                 "urgency": "high"
             }
@@ -294,25 +294,25 @@ class SmartResponseSystem:
             }
     
     def _format_advice_message(self, analysis: Dict[str, Any]) -> str:
-        """Formate les conseils en message lisible"""
+        """Format advice as readable message"""
         emergency_type = analysis["emergency_type"]
         advice_list = analysis["advice"]
         immediate_actions = analysis["immediate_actions"]
         
         message = f"""
-🤖 **Analyse de la situation** ({emergency_type})
-📊 Niveau d'urgence: {analysis["urgency_level"]}
+Analyse: {emergency_type}
+Urgence: {analysis["urgency_level"]}/10
 
-🚀 **Actions immédiates:**
-{chr(10).join(f"   • {action}" for action in immediate_actions)}
+Actions immédiates:
+{chr(10).join(f"• {action}" for action in immediate_actions)}
 
-💡 **Conseils détaillés:**
+Conseils:
 {chr(10).join(advice_list)}
 
-📍 **Services d'urgence:**
+Services d'urgence:
 """
         
         for service_type, service_info in analysis["emergency_services"].items():
-            message += f"   • {service_info['name']} - {service_info['distance']}\n"
+            message += f"• {service_info['name']} - {service_info['distance']}\n"
         
         return message
