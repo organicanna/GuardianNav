@@ -1,32 +1,121 @@
-# Configuration API pour Guardian
+# Configuration API pour Guardian - Template Complet
 # Remplacez les valeurs par vos vraies clés API
 
-# Google AI API (Gemini)
-GOOGLE_AI_API_KEY: "your-google-ai-api-key-here"
+# =========================================
+# RECONNAISSANCE VOCALE ET IA
+# =========================================
 
-# Gmail API (pour les alertes d'urgence)
-GMAIL_CREDENTIALS_PATH: "path/to/gmail/credentials.json"
-GMAIL_TOKEN_PATH: "path/to/gmail/token.json"
+# Google Gemini 2.5 Flash (IA spécialisée urgence)
+google_gemini:
+  api_key: "YOUR_GOOGLE_GEMINI_API_KEY"
+  model: "gemini-2.5-flash"
+  enabled: true
+  base_url: "https://generativelanguage.googleapis.com/v1beta"
 
-# Google Maps API (géolocalisation)
-GOOGLE_MAPS_API_KEY: "your-google-maps-api-key-here"
+# Vosk (reconnaissance vocale française offline - aucune clé requise)
+vosk:
+  model_path: "models/vosk-model-small-fr-0.22"
+  language: "fr-FR"
+  enabled: true
 
-# Configuration email d'urgence
-EMERGENCY_EMAIL:
-  sender: "guardian.alert@example.com"
-  recipients:
-    - "contact1@example.com"
-    - "contact2@example.com"
+# =========================================
+# APIS DE LOCALISATION ET NAVIGATION
+# =========================================
 
-# Configuration SMS (optionnel)
-SMS_CONFIG:
-  service: "twilio"  # ou autre service SMS
-  api_key: "your-sms-api-key"
-  phone_numbers:
-    - "+33123456789"
-    - "+33987654321"
+# What3Words API (localisation précise en 3 mots)
+what3words:
+  api_key: "YOUR_WHAT3WORDS_API_KEY"
+  enabled: true
+  base_url: "https://api.what3words.com/v3"
 
-# Configuration Vertex AI (optionnel)
-VERTEX_AI:
-  project_id: "your-gcp-project-id"
-  location: "europe-west1"
+# Google Maps Platform (géolocalisation et cartes)
+google_maps:
+  api_key: "YOUR_GOOGLE_MAPS_API_KEY"
+  enabled: true
+
+# Google Directions API (calcul d'itinéraires sécurisés)
+google_directions:
+  api_key: "YOUR_GOOGLE_DIRECTIONS_API_KEY"
+  enabled: true
+  base_url: "https://maps.googleapis.com/maps/api/directions"
+
+# Google Places API (recherche lieux sûrs)
+google_places:
+  api_key: "YOUR_GOOGLE_PLACES_API_KEY"
+  enabled: true
+  base_url: "https://maps.googleapis.com/maps/api/place"
+
+# =========================================
+# COMMUNICATION ET ALERTES
+# =========================================
+
+# Gmail API (emails d'urgence automatiques)
+gmail:
+  client_id: "YOUR_GMAIL_CLIENT_ID"
+  client_secret: "YOUR_GMAIL_CLIENT_SECRET"
+  refresh_token: "YOUR_GMAIL_REFRESH_TOKEN"
+  enabled: true
+
+# Twilio SMS API (alertes SMS automatiques)
+twilio:
+  account_sid: "YOUR_TWILIO_ACCOUNT_SID"
+  auth_token: "YOUR_TWILIO_AUTH_TOKEN"
+  phone_number: "YOUR_TWILIO_PHONE_NUMBER"
+  enabled: true
+
+# Google Text-to-Speech (synthèse vocale)
+google_tts:
+  api_key: "YOUR_GOOGLE_TTS_API_KEY"
+  voice_name: "fr-FR-Wavenet-A"
+  language_code: "fr-FR"
+  enabled: true
+
+# =========================================
+# CONTACTS D'URGENCE
+# =========================================
+
+# Contacts automatiques (emails/SMS d'urgence)
+emergency_contacts:
+  - name: "Marie Dupont"
+    phone: "+33612345678"
+    email: "marie.dupont@gmail.com"
+    relation: "famille"
+    priority: 1
+    
+  - name: "Jean Martin"
+    phone: "+33687654321" 
+    email: "jean.martin@gmail.com"
+    relation: "ami"
+    priority: 2
+
+# =========================================
+# CONFIGURATION SYSTÈME
+# =========================================
+
+# Paramètres Guardian
+guardian:
+  urgency_threshold: 7  # Seuil 7/10 pour actions automatiques
+  debug_mode: false
+  log_level: "INFO"
+  
+# Configuration utilisateur
+user:
+  name: "Votre Prénom"
+  phone: "+33123456789"
+  email: "votre.email@gmail.com"
+  
+# =========================================
+# INSTRUCTIONS D'INSTALLATION
+# =========================================
+
+# 1. Copiez ce fichier vers api_keys.yaml
+# 2. Remplacez tous les YOUR_*_API_KEY par vos vraies clés
+# 3. Configurez vos contacts d'urgence
+# 4. Testez: python3 setup_models.py && cd web && python3 web_interface_simple.py
+# 
+# URLs d'obtention des clés :
+# - Google Gemini: https://ai.google.dev/
+# - What3Words: https://developer.what3words.com/
+# - Google Maps: https://console.cloud.google.com/apis/
+# - Twilio: https://console.twilio.com/
+# - Gmail: https://console.cloud.google.com/apis/credentials
