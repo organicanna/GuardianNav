@@ -42,7 +42,7 @@ class GuardianOrchestrator:
         # Agent Gmail pour emails d'urgence
         self.gmail_agent = GmailEmergencyAgent(api_keys_config)
         
-        # Système d'IA et de conseils (fallback si Vertex AI indisponible)
+        # Système d'IA et de conseils (fallback si Gemini indisponible)
         self.intelligent_advisor = IntelligentAdvisor()
         self.smart_response_system = SmartResponseSystem(self.intelligent_advisor)
         
@@ -268,7 +268,7 @@ class GuardianOrchestrator:
         if emergency_services != 'Aucun':
             print(f"\n📞 **SERVICE RECOMMANDÉ:** {emergency_services}")
         
-        # Cas spéciaux selon le niveau d'urgence Vertex AI
+        # Cas spéciaux selon le niveau d'urgence Gemini
         if urgency_level >= 8:
             self._handle_vertex_ai_critical_emergency(reason, vertex_analysis)
         elif urgency_level >= 6:
@@ -289,7 +289,7 @@ class GuardianOrchestrator:
         self._schedule_emergency_escalation(reason, delay)
     
     def _handle_vertex_ai_critical_emergency(self, reason: str, analysis: dict):
-        """Gère les urgences critiques selon Vertex AI (niveau 8-10)"""
+        """Gère les urgences critiques selon Gemini (niveau 8-10)"""
         self.logger.critical("URGENCE CRITIQUE VERTEX AI")
         
         print(f"\n🚨 **URGENCE CRITIQUE DÉTECTÉE PAR IA** 🚨")
@@ -346,7 +346,7 @@ class GuardianOrchestrator:
             self._send_emergency_notifications(emergency_context, reason)
     
     def _handle_vertex_ai_high_emergency(self, reason: str, analysis: dict):
-        """Gère les urgences élevées selon Vertex AI (niveau 6-7)"""
+        """Gère les urgences élevées selon Gemini (niveau 6-7)"""
         print(f"\n🆘 **URGENCE ÉLEVÉE - ASSISTANCE IA RENFORCÉE**")
         
         if self.current_position and self.emergency_locations:
@@ -397,7 +397,7 @@ class GuardianOrchestrator:
             self._send_emergency_notifications(emergency_context, reason)
     
     def _handle_vertex_ai_standard_emergency(self, reason: str, analysis: dict):
-        """Gère les urgences standard avec analyse Vertex AI (niveau 1-5)"""
+        """Gère les urgences standard avec analyse Gemini (niveau 1-5)"""
         print(f"\n📋 **ASSISTANCE AVEC ANALYSE IA PERSONNALISÉE**")
         
         # Message rassurant de Vertex AI

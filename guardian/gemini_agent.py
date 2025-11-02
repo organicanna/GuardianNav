@@ -16,7 +16,7 @@ except ImportError:
     GENAI_AVAILABLE = False
 
 class VertexAIAgent:
-    """Agent Vertex AI pour l'analyse d'urgence avancée avec Gemini via API REST"""
+    """Agent Gemini pour l'analyse d'urgence avancée avec Gemini 2.5 Flash via API REST"""
     
     def __init__(self, api_keys_config: Dict[str, Any] = None):
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
@@ -455,7 +455,7 @@ Réponds UNIQUEMENT avec ce JSON (sans autre texte):
         return analysis
     
     def _fallback_analysis(self, context: str) -> Dict[str, Any]:
-        """Analyse de fallback si Vertex AI échoue"""
+        """Analyse de fallback si Gemini 2.5 Flash échoue"""
         self.logger.warning("Utilisation analyse de fallback")
         
         context_lower = context.lower()
