@@ -56,17 +56,22 @@ try:
     get_nearby_safe_places = demo_module.get_nearby_safe_places
     format_safe_places_response = demo_module.format_safe_places_response
     
+    print(f"🔧 Configuration Guardian: {guardian_config}")
     guardian_agent = GeminiAgent(guardian_config)
+    print(f"✅ Guardian agent créé: {guardian_agent}")
     gmail_agent = GmailEmergencyAgent(guardian_config)
     google_service = GoogleAPIsService(guardian_config)
     
     # Ajouter l'agent Gmail à l'agent principal
     guardian_agent.gmail_agent = gmail_agent
     
-
+    print(f"🔍 Guardian agent disponible: {guardian_agent is not None}")
     
 except Exception as e:
     logging.error(f"Erreur chargement Guardian: {e}")
+    print(f"❌ Exception lors du chargement: {e}")
+    import traceback
+    traceback.print_exc()
     guardian_agent = None
     gmail_agent = None
     google_service = None
@@ -175,7 +180,7 @@ class VoiceRecognizer:
 
 def analyze_situation_with_guardian_ai(situation_text, user_info={}):
     """Analyze situation with Guardian AI"""
-    if not guardian_agent or not guardian_agent.is_available:
+    if not guardian_agent:
         logger.error("Guardian agent non disponible")
         return {
             'success': False,

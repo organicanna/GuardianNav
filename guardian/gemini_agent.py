@@ -25,8 +25,11 @@ class GeminiAgent:
         self.api_keys_config = api_keys_config or {}
         google_config = self.api_keys_config.get('google_cloud', {})
         
-        # Configuration Gemini uniquement
+        # Configuration Gemini (chercher dans les deux emplacements)
         gemini_config = self.api_keys_config.get('gemini', {})
+        if not gemini_config.get('api_key'):
+            # Fallback vers google_cloud.gemini
+            gemini_config = google_config.get('gemini', {})
         
         # Configuration Gemini 2.5 Flash
         if gemini_config.get('api_key'):
