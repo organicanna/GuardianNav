@@ -265,13 +265,13 @@ emergency_contacts:
 
 ---
 
-## 📊 Versions
+## 📊 Version Actuelle
 
-**v3.1 Actuel** - France (Vosk français)  
-**v4.0 Prochaine** - Europe multilingue  
-**v5.0+** - Expansion mondiale
+**v3.1** - Système complet avec reconnaissance vocale française
 
-> Roadmap complète : [docs/INTERNATIONAL_EXPANSION.md](docs/INTERNATIONAL_EXPANSION.md)
+### Ambition Future
+
+**Intégration plateformes de mobilité** - Guardian vise à s'intégrer aux principales plateformes de transport (Uber, RATP, transports publics) pour offrir une protection continue durant les déplacements.
 
 ### Vision Long Terme
 **Guardian dans chaque smartphone mondial** - Assistant sécurité universel pour tous ceux qui peuvent se sentir vulnérables, peu importe où ils se trouvent dans le monde.

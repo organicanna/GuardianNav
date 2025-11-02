@@ -208,6 +208,7 @@ __marimo__/
 
 # GuardianNav specific
 config/api_keys.yaml
+api_keys.yaml
 *.key
 secrets/
 logs/

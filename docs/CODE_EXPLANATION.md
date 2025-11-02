@@ -86,7 +86,7 @@ class VertexAIAgent:
     def __init__(self):
         """
         Configuration Gemini optimisée Guardian
-        - model: gemini-2.5-flash (le plus rapide)
+        - model: gemini-2.5-flash (optimisé pour la rapidité)
         - temperature: 0.1 (réponses cohérentes)
         - max_tokens: 1000 (réponses concises)
         """

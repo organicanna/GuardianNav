@@ -15,8 +15,7 @@ Guide technique détaillé du fonctionnement du code. Explique les algorithmes, 
 ### [DEPLOYMENT.md](DEPLOYMENT.md)
 Guide complet d'installation et de déploiement local. Instructions étape par étape pour configurer Guardian sur votre machine.
 
-### [CHANGELOG.md](CHANGELOG.md)
-Historique des versions et évolutions du projet. Détaille les améliorations, correctifs et nouvelles fonctionnalités de chaque version.
+
 
 ### [CLEANUP_REPORT.md](CLEANUP_REPORT.md)
 Rapport du nettoyage des codes orphelins. Liste les fichiers supprimés et les optimisations apportées au projet.
@@ -29,7 +28,6 @@ Plan d'expansion mondiale de Guardian. Stratégie multilingue, public cible univ
 - **Installation** → [DEPLOYMENT.md](DEPLOYMENT.md)
 - **Architecture** → [ARCHITECTURE.md](ARCHITECTURE.md)  
 - **Détails techniques** → [CODE_EXPLANATION.md](CODE_EXPLANATION.md)
-- **Nouveautés** → [CHANGELOG.md](CHANGELOG.md)
 - **Vision mondiale** → [INTERNATIONAL_EXPANSION.md](INTERNATIONAL_EXPANSION.md)
 
 ## Contribution

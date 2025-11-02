@@ -43,7 +43,6 @@ GuardianNav/
 │   ├── ARCHITECTURE.md        # Architecture système (ce fichier)
 │   ├── CODE_EXPLANATION.md    # Explications techniques détaillées
 │   ├── DEPLOYMENT.md          # Guide d'installation
-│   ├── CHANGELOG.md           # Historique des versions
 │   ├── CLEANUP_REPORT.md      # Rapport de nettoyage
 │   ├── INDEX.md               # Index de la documentation
 │   ├── INTERNATIONAL_EXPANSION.md # Plan d'expansion mondiale
@@ -229,40 +228,22 @@ python web/guardian_web_test.py
 - **Disponibilité APIs** : Google services uptime
 - **Alertes envoyées** : Volume et succès des notifications
 
-## 🔮 Roadmap et Évolutions
 
-### Version Actuelle (v3.1)
-- ✅ **Code 100% professionnel** : Suppression emojis, messages épurés
-- ✅ **Interface web complète** : 9 templates spécialisés
-- ✅ **IA Gemini intégrée** : Analyse contextuelle d'urgence
-- ✅ **Reconnaissance vocale française** : Vosk local optimisé
 
-### Prochaines Versions
+## � Ambition Future
 
-#### v4.0 - Expansion Internationale
-- [ ] **Support multilingue** : Anglais, Espagnol, Italien
-- [ ] **Modèles Vosk internationaux** : 10+ langues
-- [ ] **Numéros d'urgence globaux** : Adaptation par pays
-- [ ] **Fuseaux horaires** : Gestion internationale
+### Intégration Plateformes de Mobilité
+Guardian vise à s'intégrer aux principales plateformes de transport pour offrir une protection continue durant les déplacements :
+- **Uber/Lyft** - Activation automatique Guardian en course
+- **RATP/Transports publics** - Protection dans les transports en commun
+- **Applications de navigation** - Intégration aux GPS pour alertes proactives
+- **Plateformes de covoiturage** - Sécurité renforcée pour trajets partagés
 
-#### v5.0 - Mobile et IA Avancée  
-- [ ] **Application mobile native** : iOS/Android
-- [ ] **IA embarquée** : Traitement edge sans internet
-- [ ] **Analyse vidéo** : Détection visuelle d'urgences
-- [ ] **Wearables** : Intégration montres connectées
-
-#### v6.0 - Réseau Communautaire
-- [ ] **Guardian Network** : Réseau d'entraide mondial
-- [ ] **Blockchain sécurisée** : Identités vérifiées
-- [ ] **IA collective** : Apprentissage distribué
-- [ ] **API publique** : Intégration tiers
-
-## 📋 Architecture Technique Détaillée
+## �📋 Architecture Technique Détaillée
 
 Pour plus d'informations techniques approfondies :
 - **[CODE_EXPLANATION.md](CODE_EXPLANATION.md)** - Détails de l'implémentation
 - **[DEPLOYMENT.md](DEPLOYMENT.md)** - Guide d'installation complet
-- **[CHANGELOG.md](CHANGELOG.md)** - Historique des versions
 
 ---
 
