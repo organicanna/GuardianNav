@@ -197,29 +197,6 @@ python -c "import sounddevice as sd; print(sd.query_devices())"
 
 ---
 
-## Améliorations Récentes (v3.1)
-
-### Code 100% Professionnel
-- **Aucun emoji** : Messages système épurés et techniques
-- **Commentaires naturels** : Documentation concise de développeur
-- **Interface sobre** : Indicateurs textuels clairs (OK, INFO, ERROR)
-- **Logs techniques** : Information essentielle sans artifices
-
-### Qualité de Code Optimale
-- **Apparence humaine** : Code qui semble écrit par un développeur expérimenté  
-- **Messages directs** : Communication efficace sans formulations artificielles
-- **Structure claire** : Architecture lisible et maintenable
-- **Performance préservée** : Toutes les fonctionnalités IA conservées
-
-### Fonctionnalités Maintenues
-- **TTS contrôlable** : Synthèse vocale ON/OFF via interface
-- **IA Gemini** : Analyse d'urgence intelligente intacte
-- **Reconnaissance vocale** : Vosk français local optimal
-- **Alertes automatiques** : Système d'urgence complet
-- **Configuration modulaire** : API et services facilement configurables
-
----
-
 ## Utilisation
 
 ### Interface Web (Recommandé)
@@ -255,19 +232,6 @@ Asseyez-vous et desserrez vos vêtements."
 ✅ SMS aux contacts prioritaires  
 ✅ Guidage vers l'hôpital le plus proche
 ```
-
-### Interface Web
-
-```bash
-cd web && python3 web_interface_simple.py
-# → http://localhost:5001
-```
-
-- **Reconnaissance vocale** : Bouton "Parler" 
-- **Synthèse vocale** : Audio ON/OFF
-- **Tests intégrés** : Simulations d'urgence
-- **Carte GPS** : Navigation temps réel
-
 ---
 
 ## ⚙️ Configuration Rapide
@@ -300,17 +264,6 @@ emergency_contacts:
 > Configuration complète dans [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
 
 ---
-
-## Performance - Comparaison Quantitative
-
-### Benchmarks Guardian vs IA Classique
-
-| Métrique | IA Classique | Guardian Agent | Amélioration |
-|----------|--------------|----------------|--------------|
-| **Temps de réponse** | 15-45s | **< 7s** | **6x plus rapide** |
-| **Reconnaissance** | Cloud 2-5s | **Local 0.5s** | **10x plus rapide** |
-| **Actions** | Manuel | **Automatique** | **Actions réelles** |
-| **Spécialisation** | Généraliste | **100% urgence** | **IA dédiée** |
 
 ## 📊 Versions
 
