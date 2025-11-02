@@ -39,7 +39,7 @@ try:
     with open(config_path, 'r', encoding='utf-8') as f:
         guardian_config = yaml.safe_load(f)
     
-    from guardian.gemini_agent import VertexAIAgent
+    from guardian.gemini_agent import GeminiAgent
     from guardian.gmail_emergency_agent import GmailEmergencyAgent
     from guardian.google_apis_service import GoogleAPIsService
     
@@ -56,7 +56,7 @@ try:
     get_nearby_safe_places = demo_module.get_nearby_safe_places
     format_safe_places_response = demo_module.format_safe_places_response
     
-    guardian_agent = VertexAIAgent(guardian_config)
+    guardian_agent = GeminiAgent(guardian_config)
     gmail_agent = GmailEmergencyAgent(guardian_config)
     google_service = GoogleAPIsService(guardian_config)
     

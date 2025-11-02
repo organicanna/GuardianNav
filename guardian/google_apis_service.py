@@ -1,7 +1,7 @@
 """
 Service d'intégration complète des APIs Google pour Guardian
 🌍 Utilise TOUTES les APIs Google disponibles de manière optimale
-🚀 Vertex AI, Maps, Text-to-Speech, Places, Geocoding, Directions
+🚀 Gemini 2.5 Flash, Maps, Text-to-Speech, Places, Geocoding, Directions
 """
 
 import requests
@@ -20,13 +20,13 @@ class GoogleAPIsService:
         
         # Configuration des APIs
         self.project_id = self.config.get('google_cloud', {}).get('project_id')
-        self.vertex_ai_key = self.config.get('google_cloud', {}).get('vertex_ai', {}).get('api_key')
+        self.gemini_key = self.config.get('gemini', {}).get('api_key')
         self.maps_api_key = self.config.get('google_cloud', {}).get('services', {}).get('maps_api_key')
         self.tts_api_key = self.config.get('google_cloud', {}).get('services', {}).get('text_to_speech_api_key')
         
         # Base URLs
         self.maps_base_url = "https://maps.googleapis.com/maps/api"
-        self.vertex_ai_url = f"https://europe-west1-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/europe-west1/publishers/google/models"
+        self.gemini_url = "https://generativelanguage.googleapis.com/v1beta/models"
         self.tts_url = "https://texttospeech.googleapis.com/v1/text:synthesize"
         
     def _load_config(self, api_keys_config: dict = None) -> dict:
@@ -42,10 +42,10 @@ class GoogleAPIsService:
             self.logger.warning(f"Configuration API non disponible: {e}")
             return {}
             
-    def vertex_ai_emergency_analysis(self, situation_context: str, location: Tuple[float, float]) -> Dict:
-        """Analyse d'urgence complète avec Vertex AI Gemini Pro"""
+    def gemini_emergency_analysis(self, situation_context: str, location: Tuple[float, float]) -> Dict:
+        """Analyse d'urgence complète avec Gemini 2.5 Flash"""
         
-        if not self.vertex_ai_key:
+        if not self.gemini_key:
             return self._simulation_vertex_analysis()
             
         prompt = f"""

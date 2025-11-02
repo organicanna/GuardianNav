@@ -82,7 +82,7 @@ class VoiceRecognizer:
 **Rôle** : Analyse contextuelle avec Google Gemini 2.5 Flash
 
 ```python
-class VertexAIAgent:
+class GeminiAgent:
     def __init__(self):
         """
         Configuration Gemini optimisée Guardian
@@ -145,7 +145,7 @@ class GuardianAgent:
     def __init__(self):
         # Initialisation tous les agents
         self.voice_agent = VoiceRecognizer()
-        self.ai_agent = VertexAIAgent() 
+        self.ai_agent = GeminiAgent() 
         self.speech_agent = SpeechSynthesizer()
         self.gmail_agent = GmailEmergencyAgent()
         self.gps_agent = GPSAgent()

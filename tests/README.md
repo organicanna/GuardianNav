@@ -7,10 +7,10 @@ Ce dossier contient tous les tests pour le système Guardian.
 ### 🧪 Tests Fonctionnels Principaux
 - **`test_whatsapp.py`** - Test de l'intégration WhatsApp dans les emails d'urgence
 - **`test_email_content.py`** - Test du contenu des emails avec localisation et situation réelles
-- **`test_hybrid_approach.py`** - Test de l'approche hybride Vertex AI + TTS + Système d'urgence
+- **`test_hybrid_approach.py`** - Test de l'approche hybride Gemini + TTS + Système d'urgence
 
 ### 🤖 Tests IA et Agents
-- **`test_gemini_simple.py`** - Test simple de l'analyse d'urgence avec Vertex AI Gemini  
+- **`test_gemini_simple.py`** - Test simple de l'analyse d'urgence avec Gemini 2.5 Flash  
 - **`test_guardian_fall_response.py`** - Test de la réponse Guardian aux chutes détectées
 - **`test_static_agent.py`** - Test de l'agent statique GPS
 

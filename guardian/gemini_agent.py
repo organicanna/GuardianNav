@@ -1,6 +1,6 @@
 """
-Vertex AI Agent for Guardian - Enhanced with Google GenAI
-Advanced emergency analysis using Google Generative AI and Vertex AI
+Gemini Agent for Guardian - Emergency Analysis with Google Gemini 2.5 Flash
+Advanced emergency analysis using Google Generative AI
 """
 import logging
 import json
@@ -15,37 +15,33 @@ try:
 except ImportError:
     GENAI_AVAILABLE = False
 
-class VertexAIAgent:
+class GeminiAgent:
     """Agent Gemini pour l'analyse d'urgence avancée avec Gemini 2.5 Flash via API REST"""
     
     def __init__(self, api_keys_config: Dict[str, Any] = None):
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
         
-        # Configuration API - Prioriser Gemini sur Vertex AI
+        # Configuration API Gemini
         self.api_keys_config = api_keys_config or {}
         google_config = self.api_keys_config.get('google_cloud', {})
         
-        # Configuration Gemini (prioritaire)
-        gemini_config = google_config.get('gemini', {})
-        vertex_config = google_config.get('vertex_ai', {})
+        # Configuration Gemini uniquement
+        gemini_config = self.api_keys_config.get('gemini', {})
         
-        # Utiliser Gemini si disponible, sinon Vertex AI
-        if gemini_config.get('enabled', False) and gemini_config.get('api_key'):
+        # Configuration Gemini 2.5 Flash
+        if gemini_config.get('api_key'):
             self.api_key = gemini_config.get('api_key')
-            self.model_name = gemini_config.get('model', 'gemini-1.5-flash-latest')
+            self.model_name = gemini_config.get('model', 'gemini-2.5-flash')
             self.base_url = gemini_config.get('base_url', 'https://generativelanguage.googleapis.com/v1beta')
             self.api_type = 'gemini'
-            self.logger.info("Configuration: API Gemini (Generative Language)")
+            self.logger.info("Configuration: API Gemini 2.5 Flash")
         else:
-            # Fallback vers Vertex AI
-            self.api_key = vertex_config.get('api_key')
-            self.model_name = "gemini-1.5-flash-002"
-            self.region = vertex_config.get('region', 'europe-west1')
-            self.api_type = 'vertex'
-            self.logger.info("Configuration: Vertex AI (fallback)")
+            self.api_key = None
+            self.model_name = "gemini-2.5-flash"
+            self.api_type = 'gemini'
+            self.logger.warning("Configuration Gemini incomplète - mode simulation")
             
-        self.project_id = google_config.get('project_id')
-        self.enabled = gemini_config.get('enabled', vertex_config.get('enabled', True))
+        self.enabled = gemini_config.get('enabled', True)
         
         self.is_available = False
         
@@ -56,7 +52,7 @@ class VertexAIAgent:
             self.logger.warning("Configuration API incomplète - fonctionnement en mode simulation")
     
     def _initialize_api(self):
-        """Initialise la connexion à l'API Gemini/Vertex AI"""
+        """Initialise la connexion à l'API Gemini"""
         try:
             # Initialiser le client Google GenAI si disponible
             if self.api_type == 'gemini' and GENAI_AVAILABLE:
@@ -103,7 +99,7 @@ class VertexAIAgent:
     
     def _make_api_request(self, prompt: str, max_tokens: int = 1000) -> Optional[Dict]:
         """Effectue une requête à l'API Gemini"""
-        if not self.api_key or self.api_key == "YOUR_VERTEX_AI_API_KEY":
+        if not self.api_key or self.api_key == "YOUR_GEMINI_API_KEY":
             self.logger.info("API Key non configurée - mode simulation")
             return self._simulate_response(prompt)
         
@@ -116,7 +112,7 @@ class VertexAIAgent:
             if self.api_type == 'gemini':
                 api_url = f"{self.base_url}/models/{self.model_name}:generateContent?key={self.api_key}"
             else:
-                # Vertex AI (fallback)
+                # Gemini API
                 api_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={self.api_key}"
             
             headers = {
@@ -231,7 +227,7 @@ class VertexAIAgent:
     
     def _simulate_response(self, prompt: str) -> Dict:
         """Generate simulated response based on contextual analysis"""
-        self.logger.info("Vertex AI simulation mode - advanced analysis")
+        self.logger.info("Gemini simulation mode - advanced analysis")
         
         # Analyse approfondie du prompt pour une réponse très réaliste
         prompt_lower = prompt.lower()
@@ -373,7 +369,7 @@ class VertexAIAgent:
     
     def analyze_emergency_situation(self, context: str, location: Tuple[float, float] = None, 
                                   user_input: str = "", time_of_day: str = "jour") -> Dict[str, Any]:
-        """Analyse une situation d'urgence avec Vertex AI Gemini"""
+        """Analyse une situation d'urgence avec Gemini 2.5 Flash"""
         
         # Construction du prompt contextuel
         location_str = f"GPS {location[0]:.6f}, {location[1]:.6f}" if location else "Non disponible"
@@ -407,7 +403,7 @@ Réponds UNIQUEMENT avec ce JSON (sans autre texte):
                     analysis = json.loads(response_text.strip())
                     analysis = self._validate_analysis_response(analysis)
                     
-                    self.logger.info("Analyse Vertex AI générée avec succès")
+                    self.logger.info("Analyse Gemini générée avec succès")
                     return analysis
                     
                 except json.JSONDecodeError as e:
@@ -415,7 +411,7 @@ Réponds UNIQUEMENT avec ce JSON (sans autre texte):
                     return self._fallback_analysis(context)
             
         except Exception as e:
-            self.logger.error(f"Erreur analyse Vertex AI: {e}")
+            self.logger.error(f"Erreur analyse Gemini: {e}")
         
         return self._fallback_analysis(context)
     
@@ -609,7 +605,7 @@ Réponds UNIQUEMENT avec ce JSON (sans autre texte):
         return message
     
     def test_connection(self) -> bool:
-        """Test la connexion à l'API Vertex AI"""
+        """Test la connexion à l'API Gemini"""
         try:
             response = self._make_api_request("Test", max_tokens=5)
             return response is not None and 'candidates' in response
@@ -617,7 +613,7 @@ Réponds UNIQUEMENT avec ce JSON (sans autre texte):
             return False
     
     def test_vertex_ai_connection(self) -> Dict[str, Any]:
-        """Test la connexion Vertex AI avec retour détaillé (compatibilité)"""
+        """Test la connexion Gemini avec retour détaillé (compatibilité)"""
         try:
             # Test de base
             connection_ok = self.test_connection()

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
 Agent de Conversation Vocale pour Guardian
-🎤 Reconnaissance vocale (Speech-to-Text) + 🔊 Synthèse vocale (Text-to-Speech) + 🧠 Vertex AI
-Permet de parler avec Guardian et recevoir des réponses intelligentes de Vertex AI
+🎤 Reconnaissance vocale (Speech-to-Text) + 🔊 Synthèse vocale (Text-to-Speech) + 🧠 Gemini 2.5 Flash
+Permet de parler avec Guardian et recevoir des réponses intelligentes de Gemini
 """
 
 import logging
@@ -28,7 +28,7 @@ except ImportError:
 # Imports conditionnels pour éviter les erreurs
 try:
     from .speech_agent import SpeechAgent
-    from .gemini_agent import VertexAIAgent
+    from .gemini_agent import GeminiAgent
     GUARDIAN_MODULES_AVAILABLE = True
 except ImportError:
     try:
@@ -39,7 +39,7 @@ except ImportError:
         sys.path.insert(0, str(Path(__file__).parent))
         
         from speech_agent import SpeechAgent
-        from gemini_agent import VertexAIAgent
+        from gemini_agent import GeminiAgent
         GUARDIAN_MODULES_AVAILABLE = True
     except ImportError:
         GUARDIAN_MODULES_AVAILABLE = False
@@ -87,9 +87,9 @@ class VoiceConversationAgent:
             self.speech_agent = SpeechAgent(self.api_keys_config)
             self.logger.info("✅ Agent de synthèse vocale initialisé")
             
-            # Agent Vertex AI pour les réponses intelligentes
-            self.vertex_ai_agent = VertexAIAgent(self.api_keys_config)
-            self.logger.info("✅ Agent Vertex AI initialisé")
+            # Agent Gemini pour les réponses intelligentes
+            self.gemini_agent = GeminiAgent(self.api_keys_config)
+            self.logger.info("✅ Agent Gemini initialisé")
             
         except Exception as e:
             self.logger.error(f"❌ Erreur lors de l'initialisation des agents: {e}")
@@ -374,23 +374,23 @@ class VoiceConversationAgent:
             self.stop_conversation()
             return
             
-        # Obtenir une réponse de Vertex AI
+        # Obtenir une réponse de Gemini
         self._generate_ai_response(text)
         
     def _generate_ai_response(self, user_input: str):
         """
-        Génère une réponse intelligente avec Vertex AI
+        Génère une réponse intelligente avec Gemini
         
         Args:
             user_input: Message de l'utilisateur
         """
         try:
-            # Contexte pour Vertex AI
+            # Contexte pour Gemini
             context = f"L'utilisateur dit: '{user_input}'"
             
-            if self.vertex_ai_agent.is_available:
-                # Utiliser Vertex AI pour une réponse intelligente
-                analysis = self.vertex_ai_agent.analyze_emergency_situation(
+            if self.gemini_agent.is_available:
+                # Utiliser Gemini pour une réponse intelligente
+                analysis = self.gemini_agent.analyze_emergency_situation(
                     context,
                     user_input=user_input,
                     location=(48.8566, 2.3522)  # Position par défaut Paris
@@ -472,7 +472,7 @@ class VoiceConversationAgent:
             'is_speaking': self.is_speaking,
             'recognition_engine': self.recognition_type,
             'speech_available': hasattr(self, 'speech_agent') and self.speech_agent.is_available(),
-            'vertex_ai_available': hasattr(self, 'vertex_ai_agent') and self.vertex_ai_agent.is_available,
+            'gemini_available': hasattr(self, 'gemini_agent') and self.gemini_agent.is_available,
         }
 
 def main():
@@ -495,7 +495,7 @@ def main():
     status = voice_agent.get_status_info()
     print(f"🔊 Synthèse vocale: {'✅' if status['speech_available'] else '❌'}")
     print(f"🎤 Reconnaissance: {status['recognition_engine']}")
-    print(f"🧠 Vertex AI: {'✅' if status['vertex_ai_available'] else '❌'}")
+    print(f"🧠 Gemini: {'✅' if status['gemini_available'] else '❌'}")
     
     # Callbacks de test
     def on_speech(text):

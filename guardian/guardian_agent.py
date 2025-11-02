@@ -6,7 +6,7 @@ import queue
 from guardian.GPS_agent import StaticAgent
 from guardian.voice_agent import VoiceAgent
 from guardian.speech_agent import SpeechAgent
-from guardian.gemini_agent import VertexAIAgent
+from guardian.gemini_agent import GeminiAgent
 from guardian.sms_agent import SMSAgent
 from guardian.gmail_emergency_agent import GmailEmergencyAgent
 from guardian.emergency_response import EmergencyResponse
@@ -36,8 +36,8 @@ class GuardianOrchestrator:
         # Agent SMS pour notifications d'urgence
         self.sms_agent = SMSAgent(api_keys_config)
         
-        # Agent Vertex AI pour l'analyse avancée
-        self.vertex_ai_agent = VertexAIAgent(api_keys_config)
+        # Agent Gemini pour l'analyse avancée
+        self.gemini_agent = GeminiAgent(api_keys_config)
         
         # Agent Gmail pour emails d'urgence
         self.gmail_agent = GmailEmergencyAgent(api_keys_config)
@@ -135,9 +135,9 @@ class GuardianOrchestrator:
             reason = self.response_queue.get(timeout=120)  # 2 minutes pour expliquer
             self.logger.warning(f"Motif reçu: {reason}")
             
-            # Analyser la situation avec Vertex AI ou IA de fallback
-            if self.vertex_ai_agent.is_available:
-                ai_analysis = self.vertex_ai_agent.analyze_emergency_situation(
+            # Analyser la situation avec Gemini ou IA de fallback
+            if self.gemini_agent.is_available:
+                ai_analysis = self.gemini_agent.analyze_emergency_situation(
                     reason, 
                     {
                         'position': self.current_position,
@@ -146,18 +146,18 @@ class GuardianOrchestrator:
                     }
                 )
                 
-                # Message personnalisé de Vertex AI
-                personalized_message = self.vertex_ai_agent.get_personalized_emergency_message(ai_analysis)
+                # Message personnalisé de Gemini
+                personalized_message = self.gemini_agent.get_personalized_emergency_message(ai_analysis)
                 print("\n" + "="*60)
-                print(f"🤖 ANALYSE VERTEX AI GEMINI:")
+                print(f"🤖 ANALYSE GEMINI 2.5 FLASH:")
                 print(personalized_message)
                 print("="*60)
                 
                 # Synthèse vocale des conseils IA
                 self.speech_agent.speak_alert("info", ai_analysis.get('specific_advice', ''))
                 
-                # Déclencher l'assistance avec l'analyse Vertex AI
-                self._trigger_emergency_assistance_with_vertex_ai(reason, ai_analysis)
+                # Déclencher l'assistance avec l'analyse Gemini
+                self._trigger_emergency_assistance_with_gemini(reason, ai_analysis)
                 
             else:
                 # Fallback vers l'ancien système IA
@@ -238,45 +238,45 @@ class GuardianOrchestrator:
         escalation_delay = 300 * urgency_multiplier.get(ai_analysis['urgency_level'], 1.0)  # 1.5-10 min
         self._schedule_emergency_escalation(reason, int(escalation_delay))
     
-    def _trigger_emergency_assistance_with_vertex_ai(self, reason: str, vertex_analysis: dict):
-        """Déclenche l'assistance d'urgence avec analyse Vertex AI avancée"""
-        self.logger.critical(f"Déclenchement assistance d'urgence avec Vertex AI: {reason}")
+    def _trigger_emergency_assistance_with_gemini(self, reason: str, gemini_analysis: dict):
+        """Déclenche l'assistance d'urgence avec analyse Gemini avancée"""
+        self.logger.critical(f"Déclenchement assistance d'urgence avec Gemini: {reason}")
         
-        urgency_level = vertex_analysis.get('urgency_level', 5)
-        emergency_type = vertex_analysis.get('emergency_type', 'Urgence')
+        urgency_level = gemini_analysis.get('urgency_level', 5)
+        emergency_type = gemini_analysis.get('emergency_type', 'Urgence')
         
-        # Actions immédiates basées sur l'analyse Vertex AI
-        print(f"\n🧠 **VERTEX AI GEMINI ACTIVÉ** - Type: {emergency_type}")
-        print(f"🚨 Niveau d'urgence: {urgency_level}/10 ({vertex_analysis.get('urgency_category', 'modérée')})")
+        # Actions immédiates basées sur l'analyse Gemini
+        print(f"\n🧠 **GEMINI 2.5 FLASH ACTIVÉ** - Type: {emergency_type}")
+        print(f"🚨 Niveau d'urgence: {urgency_level}/10 ({gemini_analysis.get('urgency_category', 'modérée')})")
         
         # Afficher les risques identifiés
-        risks = vertex_analysis.get('risks_identified', [])
+        risks = gemini_analysis.get('risks_identified', [])
         if risks:
             print(f"\n⚠️ **RISQUES IDENTIFIÉS:**")
             for risk in risks:
                 print(f"   • {risk}")
         
         # Actions immédiates
-        actions = vertex_analysis.get('immediate_actions', [])
+        actions = gemini_analysis.get('immediate_actions', [])
         if actions:
             print(f"\n📋 **ACTIONS IMMÉDIATES:**")
             for i, action in enumerate(actions, 1):
                 print(f"   {i}. {action}")
         
         # Services d'urgence recommandés
-        emergency_services = vertex_analysis.get('emergency_services', 'Aucun')
+        emergency_services = gemini_analysis.get('emergency_services', 'Aucun')
         if emergency_services != 'Aucun':
             print(f"\n📞 **SERVICE RECOMMANDÉ:** {emergency_services}")
         
         # Cas spéciaux selon le niveau d'urgence Gemini
         if urgency_level >= 8:
-            self._handle_vertex_ai_critical_emergency(reason, vertex_analysis)
+            self._handle_gemini_critical_emergency(reason, gemini_analysis)
         elif urgency_level >= 6:
-            self._handle_vertex_ai_high_emergency(reason, vertex_analysis)
+            self._handle_gemini_high_emergency(reason, gemini_analysis)
         else:
-            self._handle_vertex_ai_standard_emergency(reason, vertex_analysis)
+            self._handle_gemini_standard_emergency(reason, gemini_analysis)
         
-        # Programmer l'escalade basée sur l'urgence Vertex AI
+        # Programmer l'escalade basée sur l'urgence Gemini
         escalation_delays = {
             10: 60,   # 1 minute pour urgence maximale
             9: 120,   # 2 minutes pour critique
@@ -288,9 +288,9 @@ class GuardianOrchestrator:
         delay = escalation_delays.get(urgency_level, 600)
         self._schedule_emergency_escalation(reason, delay)
     
-    def _handle_vertex_ai_critical_emergency(self, reason: str, analysis: dict):
+    def _handle_gemini_critical_emergency(self, reason: str, analysis: dict):
         """Gère les urgences critiques selon Gemini (niveau 8-10)"""
-        self.logger.critical("URGENCE CRITIQUE VERTEX AI")
+        self.logger.critical("URGENCE CRITIQUE GEMINI")
         
         print(f"\n🚨 **URGENCE CRITIQUE DÉTECTÉE PAR IA** 🚨")
         print(f"🤖 Confidence Gemini: Situation nécessitant intervention immédiate")
@@ -311,8 +311,8 @@ class GuardianOrchestrator:
                 emergency_help, transports, current_location=self.current_position
             )
             
-            # Alerte immédiate avec analyse Vertex AI
-            enhanced_reason = f"{reason}\n\n🧠 ANALYSE VERTEX AI GEMINI:\n"
+            # Alerte immédiate avec analyse Gemini
+            enhanced_reason = f"{reason}\n\n🧠 ANALYSE GEMINI 2.5 FLASH:\n"
             enhanced_reason += f"- Type: {analysis['emergency_type']}\n"
             enhanced_reason += f"- Urgence: {analysis['urgency_level']}/10\n"
             enhanced_reason += f"- Conseils IA: {analysis.get('specific_advice', '')}\n\n{help_message}"
@@ -335,7 +335,7 @@ class GuardianOrchestrator:
             self._send_emergency_notifications(emergency_context, reason)
         else:
             # Alerte critique sans localisation
-            enhanced_reason = f"{reason}\n\n🧠 ANALYSE VERTEX AI CRITIQUE:\n{analysis.get('specific_advice', '')}"
+            enhanced_reason = f"{reason}\n\n🧠 ANALYSE GEMINI CRITIQUE:\n{analysis.get('specific_advice', '')}"
             self.emergency_response.send_immediate_danger_alert(self.current_position, enhanced_reason)
             
             # Envoyer aussi le SMS d'urgence
@@ -345,7 +345,7 @@ class GuardianOrchestrator:
             }
             self._send_emergency_notifications(emergency_context, reason)
     
-    def _handle_vertex_ai_high_emergency(self, reason: str, analysis: dict):
+    def _handle_gemini_high_emergency(self, reason: str, analysis: dict):
         """Gère les urgences élevées selon Gemini (niveau 6-7)"""
         print(f"\n🆘 **URGENCE ÉLEVÉE - ASSISTANCE IA RENFORCÉE**")
         
@@ -359,8 +359,8 @@ class GuardianOrchestrator:
                 refuges, transports, current_location=self.current_position
             )
             
-            # Notification avec analyse Vertex AI complète
-            enhanced_reason = f"{reason}\n\n🧠 ANALYSE VERTEX AI:\n"
+            # Notification avec analyse Gemini complète
+            enhanced_reason = f"{reason}\n\n🧠 ANALYSE GEMINI:\n"
             enhanced_reason += f"- Type: {analysis['emergency_type']}\n"
             enhanced_reason += f"- Niveau: {analysis['urgency_level']}/10 ({analysis['urgency_category']})\n"
             enhanced_reason += f"- Conseils: {analysis.get('specific_advice', '')}\n"
@@ -386,7 +386,7 @@ class GuardianOrchestrator:
             self._send_emergency_notifications(emergency_context, reason)
         else:
             # Fallback sans localisation
-            enhanced_reason = f"{reason}\n\n🧠 ANALYSE VERTEX AI:\n{analysis.get('specific_advice', '')}"
+            enhanced_reason = f"{reason}\n\n🧠 ANALYSE GEMINI:\n{analysis.get('specific_advice', '')}"
             self.emergency_response.send_location_to_contacts(self.current_position, enhanced_reason)
             
             # Envoyer aussi le SMS d'urgence
@@ -396,18 +396,18 @@ class GuardianOrchestrator:
             }
             self._send_emergency_notifications(emergency_context, reason)
     
-    def _handle_vertex_ai_standard_emergency(self, reason: str, analysis: dict):
+    def _handle_gemini_standard_emergency(self, reason: str, analysis: dict):
         """Gère les urgences standard avec analyse Gemini (niveau 1-5)"""
         print(f"\n📋 **ASSISTANCE AVEC ANALYSE IA PERSONNALISÉE**")
         
-        # Message rassurant de Vertex AI
+        # Message rassurant de Gemini
         reassurance = analysis.get('reassurance_message', '')
         if reassurance:
             print(f"💬 {reassurance}")
             self.speech_agent.speak_alert("confirmation", reassurance)
         
         # Notification standard avec conseils IA
-        enhanced_reason = f"{reason}\n\n🤖 CONSEILS VERTEX AI:\n{analysis.get('specific_advice', '')}"
+        enhanced_reason = f"{reason}\n\n🤖 CONSEILS GEMINI:\n{analysis.get('specific_advice', '')}"
         
         if analysis.get('follow_up_needed', True):
             enhanced_reason += f"\n\nSuivi recommandé par l'IA."
@@ -421,7 +421,7 @@ class GuardianOrchestrator:
         }
         self._send_emergency_notifications(emergency_context, reason)
         
-        print(f"\n✅ Contacts notifiés avec analyse personnalisée Vertex AI (Email + SMS)")
+        print(f"\n✅ Contacts notifiés avec analyse personnalisée Gemini (Email + SMS)")
 
     def _handle_immediate_danger_situation(self, reason: str, ai_analysis: dict):
         """Gère une situation de danger immédiat (agression, menace, etc.)"""
@@ -679,18 +679,18 @@ class GuardianOrchestrator:
         if immediate:
             reason += f"⚠️ Personne immobile depuis {fall_info.get('time_since_fall', 0):.0f} secondes après la chute"
         
-        # Utiliser Vertex AI pour analyser la situation de chute
-        if self.vertex_ai_agent.is_available:
-            # Analyse avancée de chute avec Vertex AI
+        # Utiliser Gemini pour analyser la situation de chute
+        if self.gemini_agent.is_available:
+            # Analyse avancée de chute avec Gemini
             user_response_text = None
             if user_confirmed:
                 user_response_text = "Je suis blessé après ma chute"
             elif timeout:
                 user_response_text = None  # Aucune réponse
             
-            vertex_analysis = self.vertex_ai_agent.analyze_fall_emergency(fall_info, user_response_text)
+            gemini_analysis = self.gemini_agent.analyze_fall_emergency(fall_info, user_response_text)
             
-            print(f"\n🧠 **ANALYSE VERTEX AI DE LA CHUTE:**")
+            print(f"\n🧠 **ANALYSE GEMINI DE LA CHUTE:**")
             print(f"   🎯 Type: {vertex_analysis['emergency_type']}")
             print(f"   📊 Urgence: {vertex_analysis['urgency_level']}/10")
             

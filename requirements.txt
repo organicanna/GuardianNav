@@ -13,7 +13,7 @@ pygame>=2.5.2               # Lecture audio pour TTS
 google-cloud-texttospeech>=2.16.3  # Google Cloud Text-to-Speech (dernière version)
 
 # === INTELLIGENCE ARTIFICIELLE ===
-google-cloud-aiplatform>=1.38.1    # Vertex AI / Gemini (nouvelle dépendance)
+google-generativeai>=0.3.0         # Gemini 2.5 Flash API
 google-cloud-speech>=2.21.0        # Google Cloud Speech-to-Text (optionnel)
 
 # === APIS GOOGLE CLOUD ===
