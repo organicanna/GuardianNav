@@ -234,6 +234,119 @@
                 max-width: 90%;
             }
         }
+
+        /* Notification audio */
+        .audio-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--guardian-white);
+            border: 2px solid var(--guardian-primary);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 24px rgba(126, 33, 241, 0.2);
+            z-index: 1000;
+            max-width: 350px;
+            display: none;
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        .audio-notification.show {
+            display: block;
+        }
+
+        .notification-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--guardian-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+        }
+
+        .notification-text {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            color: var(--guardian-text);
+            margin-bottom: 4px;
+        }
+
+        .notification-message {
+            font-size: 0.9rem;
+            color: var(--guardian-gray);
+            line-height: 1.4;
+        }
+
+        .notification-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 16px;
+        }
+
+        .notification-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .notification-btn.primary {
+            background: var(--guardian-gradient);
+            color: white;
+        }
+
+        .notification-btn.primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(126, 33, 241, 0.3);
+        }
+
+        .notification-btn.secondary {
+            background: #f1f3f4;
+            color: var(--guardian-gray);
+            border: 1px solid var(--guardian-gray-light);
+        }
+
+        .notification-btn.secondary:hover {
+            background: #e8eaed;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .conversation-footer {
+            background: var(--guardian-white);
+            border-top: 1px solid var(--guardian-gray-light);
+            padding: 16px;
+            text-align: center;
+            color: var(--guardian-gray);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
     </style>
 </head>
 <body>
@@ -262,6 +375,27 @@
                 <p class="guardian-subtitle">Assistant de Sécurité Intelligente</p>
             </div>
         </header>
+
+        <!-- Navigation -->
+        <div class="navigation-bar" style="background: var(--guardian-white); padding: 1rem; text-align: center; border-bottom: 1px solid var(--guardian-gray-light); box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <div style="display: flex; justify-content: center; align-items: center; gap: 1.5rem; flex-wrap: wrap;">
+                <a href="/" style="text-decoration: none; color: var(--guardian-text); padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s; font-weight: 500; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.background='var(--guardian-purple-light)'; this.style.color='white';" onmouseout="this.style.background=''; this.style.color='var(--guardian-text)';">
+                    🏠 Accueil
+                </a>
+                <a href="/demo" style="text-decoration: none; color: var(--guardian-text); padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s; font-weight: 500; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.background='var(--guardian-purple-light)'; this.style.color='white';" onmouseout="this.style.background=''; this.style.color='var(--guardian-text)';">
+                    🎯 Démonstration
+                </a>
+                <a href="/conversation" style="text-decoration: none; color: var(--guardian-purple); padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; background: var(--guardian-purple-light); color: white;">
+                    💬 Conversation
+                </a>
+                <a href="/map" style="text-decoration: none; color: var(--guardian-text); padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s; font-weight: 500; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.background='var(--guardian-purple-light)'; this.style.color='white';" onmouseout="this.style.background=''; this.style.color='var(--guardian-text)';">
+                    🗺️ Carte
+                </a>
+                <a href="/emergency" style="text-decoration: none; color: var(--guardian-text); padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s; font-weight: 500; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.background='var(--guardian-error)'; this.style.color='white';" onmouseout="this.style.background=''; this.style.color='var(--guardian-text)';">
+                    🚨 Urgence
+                </a>
+            </div>
+        </div>
 
         <div class="main-content">
             <div class="conversation-container">
@@ -299,6 +433,12 @@
                         rows="2"></textarea>
                     <button id="sendButton" class="send-button" onclick="sendMessage()">📤 Envoyer</button>
                 </div>
+
+                <!-- Espace pour texte en bas -->
+                <div class="conversation-footer">
+                    🛡️ Guardian - Assistant de sécurité intelligent alimenté par Gemini<br>
+                    Conversation sécurisée et confidentielle
+                </div>
             </div>
         </div>
 
@@ -306,11 +446,35 @@
         <div style="text-align: center; margin: 20px;">
             <a href="/" class="guardian-button secondary">🏠 Retour à l'accueil</a>
         </div>
+
+        <!-- Notification pour activation audio -->
+        <div class="audio-notification" id="audioNotification">
+            <div class="notification-header">
+                <div class="notification-icon">🔊</div>
+                <div class="notification-text">
+                    <div class="notification-title">Activation de la voix Guardian</div>
+                    <div class="notification-message">
+                        Souhaitez-vous que Guardian vous parle à voix haute ? 
+                        Cela permettra d'entendre ses réponses en plus de les lire.
+                    </div>
+                </div>
+            </div>
+            <div class="notification-buttons">
+                <button class="notification-btn secondary" onclick="declineAudio()">
+                    Non merci
+                </button>
+                <button class="notification-btn primary" onclick="acceptAudio()">
+                    Oui, activer la voix
+                </button>
+            </div>
+        </div>
     </div>
 
     <script>
         let conversationHistory = [];
         let isProcessing = false;
+        let ttsEnabled = false;
+        let audioNotificationShown = false;
 
         let userInfo = {
             firstName: 'Utilisateur',
@@ -341,7 +505,86 @@
             });
 
             messageInput.focus();
+            
+            // Afficher la notification audio après un petit délai
+            setTimeout(showAudioNotification, 3000);
         });
+
+        // Gestion de la notification audio
+        function showAudioNotification() {
+            if (!audioNotificationShown) {
+                audioNotificationShown = true;
+                const notification = document.getElementById('audioNotification');
+                notification.classList.add('show');
+            }
+        }
+
+        function hideAudioNotification() {
+            const notification = document.getElementById('audioNotification');
+            notification.classList.remove('show');
+        }
+
+        function acceptAudio() {
+            ttsEnabled = true;
+            hideAudioNotification();
+            addMessage('system', '🔊 Voix Guardian activée - Vous entendrez maintenant mes réponses');
+            
+            // Test immédiat de la synthèse vocale
+            setTimeout(() => {
+                speakText(`Audio Guardian activé, ${userInfo.firstName || 'utilisateur'}. Je peux maintenant vous parler.`);
+            }, 500);
+        }
+
+        function declineAudio() {
+            ttsEnabled = false;
+            hideAudioNotification();
+            addMessage('system', '🔇 Mode silencieux conservé - Vous lirez mes réponses');
+        }
+
+        // Fonction de synthèse vocale
+        function speakText(text) {
+            if (!ttsEnabled || !window.speechSynthesis) {
+                return;
+            }
+
+            try {
+                // Arrêter toute synthèse en cours
+                window.speechSynthesis.cancel();
+
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'fr-FR';
+                utterance.rate = 1.0;
+                utterance.pitch = 1.0;
+                utterance.volume = 0.8;
+
+                // Essayer de sélectionner une voix française
+                const voices = window.speechSynthesis.getVoices();
+                const frenchVoice = voices.find(voice => 
+                    voice.lang.startsWith('fr') && !voice.name.includes('eSpeak')
+                );
+
+                if (frenchVoice) {
+                    utterance.voice = frenchVoice;
+                }
+
+                utterance.onstart = () => {
+                    console.log('🔊 Synthèse vocale démarrée');
+                };
+
+                utterance.onend = () => {
+                    console.log('✅ Synthèse vocale terminée');
+                };
+
+                utterance.onerror = (event) => {
+                    console.error('❌ Erreur synthèse vocale:', event.error);
+                };
+
+                window.speechSynthesis.speak(utterance);
+
+            } catch (error) {
+                console.error('❌ Erreur activation synthèse vocale:', error);
+            }
+        }
 
         async function checkGeminiStatus() {
             try {
@@ -446,6 +689,14 @@
                                             "Réponse reçue de Guardian.";
 
                     addMessage('assistant', assistantResponse, new Date());
+                    
+                    // Utiliser la synthèse vocale si activée
+                    if (ttsEnabled) {
+                        setTimeout(() => {
+                            speakText(assistantResponse);
+                        }, 500);
+                    }
+                    
                     conversationHistory.push({
                         role: 'assistant',
                         message: assistantResponse,
@@ -468,6 +719,13 @@
             } catch (error) {
                 console.error('Erreur lors de l\'envoi:', error);
                 addMessage('system', '❌ Erreur de communication avec le serveur');
+                
+                // Synthèse vocale pour le message d'erreur
+                if (ttsEnabled) {
+                    setTimeout(() => {
+                        speakText("Erreur de communication avec le serveur. Veuillez réessayer.");
+                    }, 500);
+                }
             } finally {
                 hideTyping();
                 isProcessing = false;

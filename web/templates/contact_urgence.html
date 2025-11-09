@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛡️ Guardian - Contact d'Urgence</title>
+    <link rel="stylesheet" href="/static/css/guardian.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #7E21F1 0%, #4745F3 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .form-container {
+            background: var(--guardian-white);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .logo {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--guardian-text);
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            color: var(--guardian-gray);
+            margin-bottom: 2.5rem;
+            font-size: 1.1rem;
+        }
+
+        .user-greeting {
+            background: var(--guardian-purple-light);
+            color: white;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            color: var(--guardian-text);
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            font-size: 1rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem 1.2rem;
+            border: 2px solid var(--guardian-gray-light);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--guardian-primary);
+            box-shadow: 0 0 0 3px rgba(126, 33, 241, 0.1);
+        }
+
+        .btn-start {
+            background: var(--guardian-gradient);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 1rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(126, 33, 241, 0.3);
+        }
+
+        .btn-start:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-back {
+            background: transparent;
+            color: var(--guardian-gray);
+            border: 1px solid var(--guardian-gray-light);
+            padding: 0.8rem 1.5rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-back:hover {
+            background: var(--guardian-gray-light);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <div class="logo">
+            <img src="/static/images/logo.png" alt="Guardian Logo">
+        </div>
+        <h1 class="title">Contact d'Urgence</h1>
+        <p class="subtitle">Qui devons-nous contacter en cas de besoin ?</p>
+        
+        <div class="user-greeting" id="userGreeting">
+            <!-- Sera rempli par JavaScript -->
+        </div>
+        
+        <form id="contactForm">
+            <div class="form-group">
+                <label for="contactFirstName">Prénom du contact *</label>
+                <input type="text" id="contactFirstName" name="contactFirstName" class="form-input" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="contactLastName">Nom du contact *</label>
+                <input type="text" id="contactLastName" name="contactLastName" class="form-input" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="contactEmail">Email du contact *</label>
+                <input type="email" id="contactEmail" name="contactEmail" class="form-input" placeholder="contact@example.com" required>
+            </div>
+            
+            <button type="button" class="btn-back" onclick="goBack()">
+                ← Retour
+            </button>
+            
+            <button type="submit" class="btn-start" id="startBtn" disabled>
+                Lancer la Démonstration 🚀
+            </button>
+        </form>
+    </div>
+
+    <script>
+        // Charger les données utilisateur
+        const userData = JSON.parse(localStorage.getItem('guardianUserData') || '{}');
+        
+        // Rediriger si pas de données utilisateur
+        if (!userData.firstName) {
+            window.location.href = '/';
+        }
+
+        // Afficher le salut personnalisé
+        document.getElementById('userGreeting').textContent = 
+            `Bonjour ${userData.firstName} ${userData.lastName} !`;
+
+        const form = document.getElementById('contactForm');
+        const inputs = form.querySelectorAll('input[required]');
+        const startBtn = document.getElementById('startBtn');
+
+        // Vérifier si tous les champs sont remplis
+        function checkForm() {
+            const allFilled = Array.from(inputs).every(input => input.value.trim() !== '');
+            startBtn.disabled = !allFilled;
+        }
+
+        // Écouter les changements dans les champs
+        inputs.forEach(input => {
+            input.addEventListener('input', checkForm);
+        });
+
+        // Retour à la page précédente
+        function goBack() {
+            window.location.href = '/';
+        }
+
+        // Soumettre le formulaire
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // Sauvegarder les données du contact d'urgence
+            const contactData = {
+                firstName: document.getElementById('contactFirstName').value,
+                lastName: document.getElementById('contactLastName').value,
+                email: document.getElementById('contactEmail').value
+            };
+            
+            // Combiner toutes les données
+            const allData = {
+                user: userData,
+                contact: contactData  // Utiliser 'contact' au lieu de 'emergency_contact'
+            };
+            
+            localStorage.setItem('guardianData', JSON.stringify(allData));
+            
+            // Rediriger vers la démonstration
+            window.location.href = '/demo_navigation';
+        });
+    </script>
+</body>
+</html>

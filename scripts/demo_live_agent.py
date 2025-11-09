@@ -360,9 +360,14 @@ def get_nearby_safe_places(config, location, place_types=['hospital', 'police', 
                 data = response.json()
                 
                 if data['status'] == 'OK':
-                    # Prendre les 2 premiers résultats par type
-                    for place in data.get('results', [])[:2]:
-                        if place.get('business_status') == 'OPERATIONAL':
+                    # Prendre les 2 premiers résultats par type qui sont OUVERTS
+                    for place in data.get('results', []):
+                        # Filtrer uniquement les lieux OUVERTS et OPÉRATIONNELS
+                        is_operational = place.get('business_status') == 'OPERATIONAL'
+                        opening_hours = place.get('opening_hours', {})
+                        is_open = opening_hours.get('open_now', False)
+                        
+                        if is_operational and is_open:
                             # Récupérer les coordonnées du lieu
                             geometry = place.get('geometry', {})
                             location_coords = geometry.get('location', {})
@@ -372,11 +377,15 @@ def get_nearby_safe_places(config, location, place_types=['hospital', 'police', 
                                 'type': place_type,
                                 'rating': place.get('rating', 'N/A'),
                                 'vicinity': place.get('vicinity'),
-                                'open_now': place.get('opening_hours', {}).get('open_now', 'Inconnu'),
+                                'open_now': True,  # Forcément ouvert vu le filtre
                                 'lat': location_coords.get('lat'),
                                 'lng': location_coords.get('lng')
                             }
                             safe_places.append(place_info)
+                            
+                            # Limiter à 2 lieux ouverts par type
+                            if len([p for p in safe_places if p['type'] == place_type]) >= 2:
+                                break
         
         if safe_places:
             print(f"✅ {len(safe_places)} lieux sécurisés trouvés")

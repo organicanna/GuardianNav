@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛡️ Guardian - Informations Utilisateur</title>
+    <link rel="stylesheet" href="/static/css/guardian.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #7E21F1 0%, #4745F3 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .form-container {
+            background: var(--guardian-white);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .logo {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--guardian-text);
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            color: var(--guardian-gray);
+            margin-bottom: 2.5rem;
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            color: var(--guardian-text);
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            font-size: 1rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem 1.2rem;
+            border: 2px solid var(--guardian-gray-light);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--guardian-primary);
+            box-shadow: 0 0 0 3px rgba(126, 33, 241, 0.1);
+        }
+
+        .btn-continue {
+            background: var(--guardian-gradient);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 1rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn-continue:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(126, 33, 241, 0.3);
+        }
+
+        .btn-continue:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <div class="logo">
+            <img src="/static/images/logo.png" alt="Guardian Logo">
+        </div>
+        <h1 class="title">Guardian</h1>
+        <p class="subtitle">Votre assistant de sécurité personnel</p>
+        
+        <form id="userForm">
+            <div class="form-group">
+                <label for="firstName">Prénom *</label>
+                <input type="text" id="firstName" name="firstName" class="form-input" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="lastName">Nom *</label>
+                <input type="text" id="lastName" name="lastName" class="form-input" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Numéro de téléphone *</label>
+                <input type="tel" id="phone" name="phone" class="form-input" placeholder="+33 6 12 34 56 78" required>
+            </div>
+            
+            <button type="submit" class="btn-continue" id="continueBtn" disabled>
+                Continuer →
+            </button>
+        </form>
+    </div>
+
+    <script>
+        const form = document.getElementById('userForm');
+        const inputs = form.querySelectorAll('input[required]');
+        const continueBtn = document.getElementById('continueBtn');
+
+        // Vérifier si tous les champs sont remplis
+        function checkForm() {
+            const allFilled = Array.from(inputs).every(input => input.value.trim() !== '');
+            continueBtn.disabled = !allFilled;
+        }
+
+        // Écouter les changements dans les champs
+        inputs.forEach(input => {
+            input.addEventListener('input', checkForm);
+        });
+
+        // Soumettre le formulaire
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // Sauvegarder les données utilisateur
+            const userData = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                phone: document.getElementById('phone').value
+            };
+            
+            localStorage.setItem('guardianUserData', JSON.stringify(userData));
+            
+            // Rediriger vers la page contact d'urgence
+            window.location.href = '/contact_urgence';
+        });
+    </script>
+</body>
+</html>
