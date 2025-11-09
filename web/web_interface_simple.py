@@ -178,16 +178,132 @@ class VoiceRecognizer:
         """Arrête l'écoute"""
         self.is_listening = False
 
+def fallback_situation_analysis(situation_text, user_info={}):
+    """Analyse de situation de fallback quand Gemini n'est pas disponible"""
+    logger.info("🔄 Activation du système de fallback Guardian")
+    
+    first_name = user_info.get('firstName', 'mon ami')
+    situation = situation_text.lower().strip()
+    
+    # Classification basique par mots-clés
+    emergency_keywords = ['urgence', 'danger', 'secours', 'aide', 'accident', 'blessé', 'sang', 'évanouissement']
+    medical_keywords = ['mal', 'douleur', 'coeur', 'respiration', 'vertiges', 'malaise', 'chute', 'tombé']
+    security_keywords = ['menace', 'agression', 'vol', 'suspect', 'peur', 'suivre', 'harcèlement']
+    location_keywords = ['perdu', 'égaré', 'retrouver', 'direction', 'chemin', 'où']
+    stress_keywords = ['stress', 'anxieux', 'panique', 'angoisse', 'inquiet']
+    
+    # Détermination du niveau d'urgence et des conseils
+    if any(word in situation for word in emergency_keywords):
+        urgency_level = 9
+        emergency_type = "URGENCE MAJEURE"
+        advice = [
+            f"🚨 {first_name}, situation d'urgence détectée!",
+            "📞 Appelez immédiatement le 112 (urgences)",
+            "📍 Restez à votre position actuelle",
+            "🛡️ Guardian surveille votre situation"
+        ]
+        recommendations = [
+            "Appelez le 112 ou 15 immédiatement",
+            "Restez en sécurité et calme",
+            "Gardez votre téléphone allumé"
+        ]
+        email_urgency = True
+    elif any(word in situation for word in medical_keywords):
+        urgency_level = 8
+        emergency_type = "URGENCE MÉDICALE"
+        advice = [
+            f"🏥 {first_name}, problème médical détecté",
+            "🩺 Évaluez l'intensité de vos symptômes",
+            "📞 SAMU 15 si douleurs intenses",
+            "🧘‍♀️ Restez calme et respirez profondément"
+        ]
+        recommendations = [
+            "Appelez le 15 (SAMU) si nécessaire",
+            "Asseyez-vous dans un endroit sûr",
+            "Ne prenez pas de médicaments sans avis médical"
+        ]
+        email_urgency = True
+    elif any(word in situation for word in security_keywords):
+        urgency_level = 7
+        emergency_type = "PROBLÈME DE SÉCURITÉ"
+        advice = [
+            f"🛡️ {first_name}, restez vigilant",
+            "🚶‍♀️ Dirigez-vous vers un lieu public",
+            "👥 Rapprochez-vous d'autres personnes",
+            "📞 17 (Police) si menace directe"
+        ]
+        recommendations = [
+            "Restez dans des zones éclairées et fréquentées",
+            "Appelez le 17 si danger imminent",
+            "Évitez les confrontations"
+        ]
+        email_urgency = False
+    elif any(word in situation for word in location_keywords):
+        urgency_level = 5
+        emergency_type = "PROBLÈME D'ORIENTATION"
+        advice = [
+            f"🧭 {first_name}, ne paniquez pas",
+            "📱 Utilisez votre GPS pour vous localiser",
+            "🏪 Cherchez des commerces ou lieux publics",
+            "📞 Contactez vos proches si besoin"
+        ]
+        recommendations = [
+            "Notez les noms de rues autour de vous",
+            "Demandez de l'aide dans un commerce",
+            "Utilisez les transports en commun si possible"
+        ]
+        email_urgency = False
+    elif any(word in situation for word in stress_keywords):
+        urgency_level = 4
+        emergency_type = "SOUTIEN PSYCHOLOGIQUE"
+        advice = [
+            f"🤗 {first_name}, je comprends votre inquiétude",
+            "🧘‍♀️ Prenez 5 respirations profondes",
+            "💪 Cette sensation va passer",
+            "🌟 Vous n'êtes pas seul(e)"
+        ]
+        recommendations = [
+            "Respirez lentement: 4 temps inspiration, 6 temps expiration",
+            "Trouvez un endroit calme pour vous asseoir",
+            "Contactez un proche ou un professionnel si besoin"
+        ]
+        email_urgency = False
+    else:
+        # Situation générale
+        urgency_level = 3
+        emergency_type = "SURVEILLANCE NORMALE"
+        advice = [
+            f"👋 Bonjour {first_name}",
+            "🛡️ Guardian vous écoute",
+            "💬 Décrivez votre situation plus précisément",
+            "🆘 Je suis là pour vous aider"
+        ]
+        recommendations = [
+            "Soyez plus spécifique sur votre situation",
+            "Guardian est là pour vous accompagner",
+            "N'hésitez pas à demander de l'aide"
+        ]
+        email_urgency = False
+    
+    return {
+        'success': True,
+        'urgency_level': urgency_level,
+        'emergency_type': emergency_type,
+        'advice': advice,
+        'recommendations': recommendations,
+        'immediate_actions': advice[:2],  # Les 2 premières actions
+        'emergency_services': "112 (Urgences générales)" if urgency_level >= 7 else None,
+        'specific_advice': " ".join(advice),
+        'email_urgency': email_urgency,
+        'fallback_mode': True,
+        'response': f"Mode Guardian Fallback activé. {emergency_type} détecté (niveau {urgency_level}/10). " + advice[0]
+    }
+
 def analyze_situation_with_guardian_ai(situation_text, user_info={}):
     """Analyze situation with Guardian AI"""
     if not guardian_agent:
         logger.error("Guardian agent non disponible")
-        return {
-            'success': False,
-            'error': 'Guardian agent non configuré',
-            'advice': ["❌ Service Guardian temporairement indisponible"],
-            'urgency_level': 5
-        }
+        return fallback_situation_analysis(situation_text, user_info)
     
     try:
         user_firstname = user_info.get('firstName', 'mon ami')
@@ -304,12 +420,8 @@ GARDE TA RÉPONSE TRÈS COURTE. La personne est en état de choc et ne peut pas 
         
     except Exception as e:
         logger.error(f"Erreur analyse Guardian: {e}")
-        return {
-            'success': False,
-            'error': str(e),
-            'advice': [f"❌ Erreur Guardian: {e}"],
-            'urgency_level': 5
-        }
+        logger.info("🔄 Basculement vers le système de fallback")
+        return fallback_situation_analysis(situation_text, user_info)
 
 def send_emergency_email_guardian(user_phone, real_location, real_situation, user_fullname):
     """Envoie un email d'urgence aux contacts - logique identique à demo_live_agent.py"""
@@ -353,7 +465,7 @@ def send_emergency_email_guardian(user_phone, real_location, real_situation, use
         return False
 
 # Création de l'application Flask
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static', static_url_path='/static')
 app.config['SECRET_KEY'] = 'guardian_secret_key_2024'
 socketio = SocketIO(app, cors_allowed_origins="*")
 
@@ -394,8 +506,13 @@ def demo():
 
 @app.route('/conversation')
 def conversation():
-    """Page de conversation Guardian seulement"""
+    """Page de conversation avec Gemini"""
     return render_template('conversation.html')
+
+@app.route('/voice-test')
+def voice_test():
+    """Page de test du microphone et reconnaissance vocale Vosk"""
+    return render_template('voice_test.html')
 
 @app.route('/map')
 def map_page():
@@ -406,26 +523,6 @@ def map_page():
 def emergency_page():
     """Page d'interface d'urgence"""
     return render_template('emergency.html')
-
-@app.route('/guardian')
-def guardian_page():
-    """Page Guardian agent dédiée"""
-    return render_template('guardian_agent.html')
-
-@app.route('/guardian/setup')
-def guardian_setup():
-    """Page de configuration Guardian"""
-    return render_template('guardian_setup.html')
-
-@app.route('/debug')
-def debug_page():
-    """Page de debug pour tester l'API Guardian"""
-    return render_template('debug.html')
-
-@app.route('/voice-test')
-def voice_test():
-    """Page de test spécialisée pour la reconnaissance vocale"""
-    return render_template('voice_test.html')
 
 @app.route('/api/status', methods=['GET'])
 def get_status():
@@ -532,20 +629,25 @@ def guardian_analyze():
                 'timestamp': data.get('timestamp', 'N/A')
             })
         else:
-            # Fallback vers l'analyse simple en cas d'erreur Guardian
-            logger.warning("Fallback vers analyse simple")
-            first_name = user_info.get('firstName', 'mon ami')
-            
-            # Analyse contextuelle simple de fallback
-            urgency_level = 3
-            advice = [f"❌ {analysis_result.get('error', 'Erreur Guardian')}"]
-            recommendations = ["Vérifiez la configuration Guardian"]
+            # Fallback vers l'analyse intelligente en cas d'erreur Guardian
+            logger.warning("Activation du système de fallback Guardian")
+            fallback_result = fallback_situation_analysis(situation, user_info)
             
             return jsonify({
-                'urgency_level': urgency_level,
-                'advice': advice,
-                'recommendations': recommendations,
-                'response': analysis_result.get('error', 'Erreur Guardian'),
+                'urgency_level': fallback_result['urgency_level'],
+                'emergency_type': fallback_result['emergency_type'],
+                'advice': fallback_result['advice'],
+                'recommendations': fallback_result['recommendations'],
+                'immediate_actions': fallback_result['immediate_actions'],
+                'emergency_services': fallback_result['emergency_services'],
+                'specific_advice': fallback_result['specific_advice'],
+                'response': fallback_result['response'],
+                'email_sent': False,
+                'status': 'fallback',
+                'guardian_active': False,
+                'fallback_mode': True,
+                'message': 'Mode Guardian Fallback - Analyse basique activée',
+                'location': location,
                 'email_sent': False,
                 'status': 'fallback',
                 'guardian_active': False,
@@ -553,117 +655,6 @@ def guardian_analyze():
                 'location': location,
                 'timestamp': data.get('timestamp', 'N/A')
             })
-        
-        # Cette partie ne devrait jamais être atteinte
-        # Détection d'urgences médicales (code mort - gardé pour compatibilité)
-        if any(word in situation for word in ['chute', 'tombé', 'chuter', 'mal', 'douleur', 'blessé', 'sang', 'accident']):
-            urgency_level = 8
-            advice = [
-                f"🚨 {first_name}, je détecte une urgence potentielle !",
-                "🏥 Restez immobile si possible et évaluez vos blessures",
-                "📍 J'ai enregistré votre position GPS précise",
-                "📞 Souhaitez-vous que j'appelle les secours ?"
-            ]
-            recommendations = [
-                "Ne bougez pas si vous ressentez des douleurs au cou/dos",
-                "Appelez le 15 (SAMU) si nécessaire",
-                "Gardez votre téléphone à portée de main"
-            ]
-        
-        # Détection de détresse psychologique
-        elif any(word in situation for word in ['peur', 'angoisse', 'stress', 'panique', 'anxieux', 'inquiet']):
-            urgency_level = 6
-            advice = [
-                f"🤗 {first_name}, je comprends votre inquiétude",
-                "🧘‍♀️ Prenez quelques respirations profondes avec moi",
-                "�️ Je reste avec vous, vous n'êtes pas seul(e)",
-                "💪 Ensemble, nous allons gérer cette situation"
-            ]
-            recommendations = [
-                "Respirez lentement: 4 temps inspiration, 6 temps expiration",
-                "Regardez autour de vous pour identifier des éléments rassurants",
-                "Rappelez-vous que cette sensation est temporaire"
-            ]
-        
-        # Problème d'orientation
-        elif any(word in situation for word in ['perdu', 'égaré', 'trouvé', 'où', 'direction', 'chemin']):
-            urgency_level = 5
-            advice = [
-                f"Pas de panique {first_name}, je vais vous aider",
-                "Activation du GPS en cours",
-                "Cherchez des points de repère autour de vous",
-                "Restez sur les voies principales"
-            ]
-            recommendations = [
-                "Notez les noms de rues",
-                "Dirigez-vous vers des lieux fréquentés",
-                "Utilisez votre boussole"
-            ]
-        
-        # Fatigue ou malaise
-        elif any(word in situation for word in ['fatigué', 'épuisé', 'vertiges', 'étourdi', 'nausée']):
-            urgency_level = 6
-            advice = [
-                f"{first_name}, écoutons votre corps",
-                "Trouvez un endroit pour vous asseoir",
-                "Hydratez-vous si possible",
-                "Prenez l'air frais"
-            ]
-            recommendations = [
-                "Repos de 10-15 minutes minimum",
-                "Évitez les mouvements brusques",
-                "Contactez quelqu'un si ça persiste"
-            ]
-        
-        # Problèmes de foule ou sécurité
-        elif any(word in situation for word in ['foule', 'monde', 'bousculade', 'danger', 'suspect']):
-            urgency_level = 7
-            advice = [
-                f"{first_name}, analysons l'environnement",
-                "Éloignez-vous calmement des zones denses",
-                "Restez vigilant, gardez vos affaires",
-                "Préparez une sortie"
-            ]
-            recommendations = [
-                "Suivez les sorties de secours",
-                "Restez près des murs",
-                "Gardez les issues en vue"
-            ]
-        
-        # Situation normale
-        else:
-            urgency_level = 3
-            advice = [
-                f"Bonjour {first_name}",
-                "Je vous écoute",
-                "Continuez à me parler",
-                "Votre sécurité est ma priorité"
-            ]
-            recommendations = [
-                "Gardez votre téléphone chargé",
-                "Restez conscient de votre environnement",
-                "N'hésitez pas à me contacter"
-            ]
-        
-        # Ajustement selon l'historique
-        if len(conversation_history) > 3:
-            advice.append("Votre situation semble s'améliorer")
-            urgency_level = max(1, urgency_level - 1)
-        
-        return jsonify({
-            'success': True,
-            'urgency_level': urgency_level,
-            'advice': advice,
-            'recommendations': recommendations,
-            'listening': True,
-            'personalized_message': f"Guardian veille sur vous, {first_name}",
-            'context_analysis': {
-                'situation_type': 'urgence médicale' if urgency_level >= 7 else 
-                                'attention requise' if urgency_level >= 5 else 'surveillance normale',
-                'location': location,
-                'timestamp': data.get('timestamp', 'N/A')
-            }
-        })
         
     except Exception as e:
         logger.error(f"Erreur lors de l'analyse Guardian: {e}")

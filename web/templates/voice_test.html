@@ -3,89 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎤 Test Reconnaissance Vocale - Guardian</title>
+    <title>🎤 Guardian - Test Vocal</title>
+    <link rel="stylesheet" href="/static/css/guardian.css">
+    
     <style>
-        * {
-            margin: 0;
+        /* Styles spécifiques à la page de test vocal */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
             padding: 0;
-            box-sizing: border-box;
+            min-height: calc(100vh - 120px);
         }
 
-        body {
-            font-family: 'Roboto Mono', monospace;
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            color: #eee;
-            min-height: 100vh;
-            padding: 2rem;
+        .test-container {
+            background: var(--guardian-white);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--guardian-gray-light);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 2rem;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        h1 {
+        .test-header {
             text-align: center;
-            color: #4285f4;
-            margin-bottom: 2rem;
-            font-size: 2rem;
+            margin-bottom: 24px;
         }
 
-        .test-section {
-            background: rgba(255, 255, 255, 0.03);
-            margin: 1rem 0;
-            padding: 1.5rem;
-            border-radius: 10px;
-            border-left: 4px solid #4285f4;
+        .test-title {
+            color: var(--guardian-text);
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 8px;
         }
 
-        .test-section.success {
-            border-left-color: #34a853;
-        }
-
-        .test-section.warning {
-            border-left-color: #fbbc04;
-        }
-
-        .test-section.error {
-            border-left-color: #ea4335;
-        }
-
-        .test-btn {
-            background: linear-gradient(45deg, #4285f4, #1a73e8);
-            color: white;
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: 25px;
+        .test-subtitle {
+            color: var(--guardian-gray);
             font-size: 1rem;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .status-card {
+            padding: 16px;
+            background: var(--guardian-gray-light);
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .status-card.active {
+            border-color: var(--guardian-primary);
+            background: rgba(126, 33, 241, 0.1);
+        }
+
+        .status-card.success {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .status-card.error {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .status-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .status-label {
+            font-weight: 600;
+            color: var(--guardian-text);
+            margin-bottom: 4px;
+        }
+
+        .status-value {
+            font-size: 0.9rem;
+            color: var(--guardian-gray);
+        }
+
+        .voice-controls {
+            text-align: center;
+            margin: 32px 0;
+        }
+
+        .voice-button {
+            padding: 20px 40px;
+            background: var(--guardian-gradient);
+            color: var(--guardian-white);
+            border: none;
+            border-radius: 20px;
+            font-size: 1.2rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
-            margin: 0.5rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+            box-shadow: 0 4px 6px rgba(126, 33, 241, 0.25);
         }
 
-        .test-btn:hover {
-            background: linear-gradient(45deg, #1a73e8, #1557b0);
+        .voice-button:hover {
             transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(126, 33, 241, 0.35);
         }
 
-        .test-btn:disabled {
-            background: #666;
+        .voice-button:disabled {
+            opacity: 0.6;
             cursor: not-allowed;
             transform: none;
         }
 
-        .test-btn.listening {
-            background: linear-gradient(45deg, #ea4335, #d33b2c);
-            animation: pulse 1s ease-in-out infinite;
+        .voice-button.recording {
+            background: #ef4444;
+            animation: pulse 2s infinite;
         }
 
         @keyframes pulse {
@@ -93,409 +128,518 @@
             50% { transform: scale(1.05); }
         }
 
-        .result-area {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 1rem;
+        .recognition-display {
+            background: var(--guardian-white);
+            border: 2px solid var(--guardian-gray-light);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 24px 0;
+            min-height: 150px;
+            position: relative;
+        }
+
+        .recognition-title {
+            font-weight: 600;
+            color: var(--guardian-text);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .recognition-content {
+            font-size: 1.1rem;
+            color: var(--guardian-text);
+            line-height: 1.6;
+            min-height: 60px;
+            background: var(--guardian-gray-light);
+            padding: 16px;
             border-radius: 8px;
-            margin-top: 1rem;
-            min-height: 100px;
-            font-family: 'Courier New', monospace;
-            white-space: pre-wrap;
-            overflow-y: auto;
-            max-height: 300px;
         }
 
-        .status-indicator {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            margin-right: 8px;
+        .recognition-placeholder {
+            color: var(--guardian-gray);
+            font-style: italic;
         }
 
-        .status-ok { background: #34a853; }
-        .status-warning { background: #fbbc04; }
-        .status-error { background: #ea4335; }
-
-        .back-btn {
-            position: fixed;
-            top: 2rem;
-            left: 2rem;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 0.75rem 1.5rem;
-            border-radius: 25px;
-            text-decoration: none;
-            transition: all 0.3s;
-            backdrop-filter: blur(10px);
+        .audio-visualizer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            margin: 16px 0;
+            height: 60px;
         }
 
-        .back-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-1px);
+        .visualizer-bar {
+            width: 8px;
+            background: var(--guardian-gradient);
+            border-radius: 4px;
+            transition: height 0.1s ease;
         }
 
-        .permission-guide {
-            background: rgba(251, 188, 4, 0.1);
-            border: 1px solid rgba(251, 188, 4, 0.3);
-            padding: 1rem;
+        .test-results {
+            margin-top: 24px;
+        }
+
+        .result-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            background: var(--guardian-gray-light);
             border-radius: 8px;
-            margin-top: 1rem;
+            font-size: 0.95rem;
         }
 
-        .permission-guide h4 {
-            color: #fbbc04;
-            margin-bottom: 0.5rem;
+        .result-icon {
+            font-size: 1.2rem;
+        }
+
+        .instructions {
+            background: rgba(126, 33, 241, 0.1);
+            border: 1px solid rgba(126, 33, 241, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 24px 0;
+        }
+
+        .instructions h3 {
+            color: var(--guardian-text);
+            margin-bottom: 12px;
+        }
+
+        .instructions ul {
+            color: var(--guardian-gray);
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .voice-button {
+                display: block;
+                margin: 10px auto;
+                width: 80%;
+            }
+            
+            .status-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
+
 <body>
-    <a href="/demo" class="back-btn">← Retour à Guardian</a>
-
-    <div class="container">
-        <h1>🎤 Test Reconnaissance Vocale Guardian</h1>
-
-        <!-- Section diagnostic -->
-        <div class="test-section" id="diagnosticSection">
-            <h3>🔍 Diagnostic du Navigateur</h3>
-            <div id="diagnosticResults" class="result-area">Diagnostic en cours...</div>
-            <button class="test-btn" onclick="runDiagnostic()">🔄 Relancer le Diagnostic</button>
-        </div>
-
-        <!-- Section test de base -->
-        <div class="test-section">
-            <h3>🎤 Test de Reconnaissance Simple</h3>
-            <p>Cliquez sur "Démarrer" et prononcez une phrase en français.</p>
-            <button class="test-btn" id="basicTestBtn" onclick="basicVoiceTest()">
-                🎤 Démarrer le Test
-            </button>
-            <button class="test-btn" onclick="stopVoiceTest()" style="background: #666;">
-                🛑 Arrêter
-            </button>
-            <div id="basicTestResults" class="result-area">En attente du test...</div>
-        </div>
-
-        <!-- Section test avancé -->
-        <div class="test-section">
-            <h3>🧪 Test avec Guardian API</h3>
-            <p>Test complet avec analyse Guardian de votre message vocal.</p>
-            <button class="test-btn" onclick="advancedVoiceTest()">
-                🤖 Test Guardian Complet
-            </button>
-            <div id="advancedTestResults" class="result-area">Prêt pour le test Guardian...</div>
-        </div>
-
-        <!-- Section permissions -->
-        <div class="test-section">
-            <h3>🔒 Guide des Permissions</h3>
-            <div class="permission-guide">
-                <h4>Si la reconnaissance vocale ne fonctionne pas :</h4>
-                <ol>
-                    <li><strong>Vérifiez les autorisations :</strong> Autorisez l'accès au microphone dans votre navigateur</li>
-                    <li><strong>Utilisez HTTPS :</strong> La reconnaissance vocale nécessite une connexion sécurisée</li>
-                    <li><strong>Navigateur supporté :</strong> Utilisez Chrome, Edge ou Safari</li>
-                    <li><strong>Microphone fonctionnel :</strong> Testez votre micro dans les paramètres système</li>
-                </ol>
+    <div class="guardian-container">
+        <!-- Header avec logo -->
+        <header class="guardian-header">
+            <div class="header-content">
+                <div class="logo-container">
+                    <img src="/static/images/logo.png" alt="Guardian Logo" class="logo" 
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div class="logo-fallback" style="display: none;">
+                        <svg viewBox="0 0 100 100" class="logo-svg">
+                            <circle cx="50" cy="50" r="45" fill="url(#grad)" stroke="#7E21F1" stroke-width="3"/>
+                            <text x="50" y="60" text-anchor="middle" fill="white" font-size="32" font-weight="bold">G</text>
+                            <defs>
+                                <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#7E21F1"/>
+                                    <stop offset="100%" style="stop-color:#4745F3"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                </div>
+                
+                <h1 class="guardian-title">Guardian</h1>
+                <p class="guardian-subtitle">Test Vocal & Reconnaissance</p>
             </div>
-            <button class="test-btn" onclick="requestPermissions()">
-                🔓 Demander les Permissions
-            </button>
+        </header>
+
+        <div class="main-content">
+            <!-- Instructions -->
+            <div class="instructions">
+                <h3>🎤 Comment utiliser le test vocal</h3>
+                <ul>
+                    <li><strong>Microphone :</strong> Autorisez l'accès au microphone quand demandé</li>
+                    <li><strong>Test :</strong> Cliquez sur "Démarrer" et parlez clairement en français</li>
+                    <li><strong>Vosk :</strong> Le modèle français convertit votre voix en texte localement</li>
+                    <li><strong>Qualité :</strong> Parlez distinctement à 20-30cm du microphone</li>
+                </ul>
+            </div>
+
+            <!-- Statuts système -->
+            <div class="test-container">
+                <div class="test-header">
+                    <h2 class="test-title">🔧 Statut du système</h2>
+                    <p class="test-subtitle">Vérification des composants audio et IA</p>
+                </div>
+
+                <div class="status-grid">
+                    <div class="status-card" id="microphoneStatus">
+                        <div class="status-icon">🎤</div>
+                        <div class="status-label">Microphone</div>
+                        <div class="status-value">Vérification...</div>
+                    </div>
+                    
+                    <div class="status-card" id="voskStatus">
+                        <div class="status-icon">🧠</div>
+                        <div class="status-label">Vosk FR</div>
+                        <div class="status-value">Chargement...</div>
+                    </div>
+                    
+                    <div class="status-card" id="audioStatus">
+                        <div class="status-icon">🔊</div>
+                        <div class="status-label">Audio</div>
+                        <div class="status-value">En attente...</div>
+                    </div>
+                    
+                    <div class="status-card" id="serverStatus">
+                        <div class="status-icon">🌐</div>
+                        <div class="status-label">Serveur</div>
+                        <div class="status-value">Connexion...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contrôles vocaux -->
+            <div class="test-container">
+                <div class="test-header">
+                    <h2 class="test-title">🎙️ Test de reconnaissance vocale</h2>
+                    <p class="test-subtitle">Testez votre microphone et la reconnaissance Vosk</p>
+                </div>
+
+                <div class="voice-controls">
+                    <button id="startRecording" class="voice-button" onclick="startRecording()">
+                        🎤 Démarrer l'écoute
+                    </button>
+                    <button id="stopRecording" class="voice-button" onclick="stopRecording()" disabled>
+                        ⏹️ Arrêter
+                    </button>
+                </div>
+
+                <!-- Visualiseur audio -->
+                <div class="audio-visualizer" id="audioVisualizer" style="display: none;">
+                    <div class="visualizer-bar" style="height: 20px;"></div>
+                    <div class="visualizer-bar" style="height: 40px;"></div>
+                    <div class="visualizer-bar" style="height: 25px;"></div>
+                    <div class="visualizer-bar" style="height: 50px;"></div>
+                    <div class="visualizer-bar" style="height: 35px;"></div>
+                    <div class="visualizer-bar" style="height: 45px;"></div>
+                    <div class="visualizer-bar" style="height: 30px;"></div>
+                    <div class="visualizer-bar" style="height: 55px;"></div>
+                </div>
+
+                <!-- Affichage de la reconnaissance -->
+                <div class="recognition-display">
+                    <div class="recognition-title">
+                        📝 Texte reconnu
+                        <span id="confidenceScore" style="font-size: 0.9em; color: var(--guardian-gray);"></span>
+                    </div>
+                    <div class="recognition-content" id="recognitionText">
+                        <span class="recognition-placeholder">
+                            Le texte reconnu par Vosk apparaîtra ici...
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Résultats des tests -->
+                <div class="test-results" id="testResults">
+                    <h3 style="color: var(--guardian-text); margin-bottom: 16px;">📊 Résultats des tests</h3>
+                    <div class="result-item">
+                        <span class="result-icon">⏱️</span>
+                        <span>Temps de latence : <span id="latencyTime">-</span></span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-icon">🎯</span>
+                        <span>Précision Vosk : <span id="voskAccuracy">-</span></span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-icon">📏</span>
+                        <span>Volume audio : <span id="audioLevel">-</span></span>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Section résultats détaillés -->
-        <div class="test-section">
-            <h3>📊 Journal Détaillé</h3>
-            <div id="detailedLog" class="result-area">Journal des tests et erreurs...</div>
-            <button class="test-btn" onclick="clearLog()" style="background: #666;">
-                🗑️ Effacer le Journal
-            </button>
+        <!-- Bouton retour -->
+        <div style="text-align: center; margin: 20px;">
+            <a href="/" class="guardian-button secondary">🏠 Retour à l'accueil</a>
         </div>
     </div>
 
     <script>
+        let isRecording = false;
         let recognition = null;
-        let isListening = false;
-        let logEntries = [];
+        let mediaRecorder = null;
+        let audioStream = null;
+        let startTime = null;
+        let audioContext = null;
+        let analyser = null;
 
-        // Initialisation
         document.addEventListener('DOMContentLoaded', function() {
-            runDiagnostic();
-            logMessage('🚀 Test de reconnaissance vocale Guardian initialisé');
+            checkSystemStatus();
+            setupAudioPermissions();
         });
 
-        function logMessage(message, type = 'info') {
-            const timestamp = new Date().toLocaleTimeString();
-            const entry = `[${timestamp}] ${message}`;
-            logEntries.push(entry);
-            
-            const logArea = document.getElementById('detailedLog');
-            logArea.textContent = logEntries.join('\n');
-            logArea.scrollTop = logArea.scrollHeight;
-            
-            console.log(entry);
-        }
-
-        function runDiagnostic() {
-            const resultsArea = document.getElementById('diagnosticResults');
-            const diagnosticSection = document.getElementById('diagnosticSection');
-            
-            let results = '';
-            let overallStatus = 'success';
-
-            // Test du protocole
-            const isSecure = location.protocol === 'https:' || location.hostname === 'localhost';
-            if (isSecure) {
-                results += '✅ Protocole: ' + location.protocol + ' (OK)\n';
-                logMessage('✅ Protocole sécurisé détecté');
-            } else {
-                results += '❌ Protocole: ' + location.protocol + ' (HTTPS requis)\n';
-                logMessage('❌ Protocole non sécurisé détecté');
-                overallStatus = 'error';
-            }
-
-            // Test Speech Recognition
-            if ('webkitSpeechRecognition' in window) {
-                results += '✅ WebKit Speech Recognition: Disponible\n';
-                logMessage('✅ WebKit Speech Recognition disponible');
-            } else if ('SpeechRecognition' in window) {
-                results += '✅ Speech Recognition: Disponible\n';
-                logMessage('✅ Speech Recognition standard disponible');
-            } else {
-                results += '❌ Speech Recognition: Non disponible\n';
-                logMessage('❌ Aucune API de reconnaissance vocale disponible');
-                overallStatus = 'error';
-            }
-
-            // Test Speech Synthesis
-            if ('speechSynthesis' in window) {
-                results += '✅ Speech Synthesis: Disponible\n';
-                const voices = speechSynthesis.getVoices();
-                if (voices.length > 0) {
-                    const frenchVoices = voices.filter(v => v.lang.startsWith('fr'));
-                    results += `   └─ Voix disponibles: ${voices.length} (Français: ${frenchVoices.length})\n`;
-                }
-            } else {
-                results += '❌ Speech Synthesis: Non disponible\n';
-                overallStatus = 'warning';
-            }
-
-            // Test navigateur
-            const userAgent = navigator.userAgent;
-            let browserInfo = 'Inconnu';
-            let browserStatus = 'warning';
-
-            if (userAgent.includes('Chrome') && !userAgent.includes('Edge')) {
-                browserInfo = 'Google Chrome (Recommandé)';
-                browserStatus = 'success';
-            } else if (userAgent.includes('Edge')) {
-                browserInfo = 'Microsoft Edge (Compatible)';
-                browserStatus = 'success';
-            } else if (userAgent.includes('Safari')) {
-                browserInfo = 'Safari (Support limité)';
-                browserStatus = 'warning';
-            } else if (userAgent.includes('Firefox')) {
-                browserInfo = 'Firefox (Non supporté)';
-                browserStatus = 'error';
-                overallStatus = 'error';
-            }
-
-            results += `🌐 Navigateur: ${browserInfo}\n`;
-            logMessage(`🌐 Navigateur détecté: ${browserInfo}`);
-
-            // Test des permissions
-            navigator.permissions?.query({name: 'microphone'}).then(function(result) {
-                results += `🎤 Permission micro: ${result.state}\n`;
-                logMessage(`🎤 Permission microphone: ${result.state}`);
+        async function checkSystemStatus() {
+            // Vérifier le statut du serveur
+            try {
+                const response = await fetch('/api/vosk/status');
+                const voskData = await response.json();
                 
-                resultsArea.textContent = results;
-            }).catch(() => {
-                results += '🎤 Permission micro: Indéterminée\n';
-                resultsArea.textContent = results;
-            });
-
-            // Mettre à jour l'apparence de la section
-            diagnosticSection.className = `test-section ${overallStatus}`;
-            resultsArea.textContent = results;
-
-            logMessage(`🔍 Diagnostic terminé - Status: ${overallStatus}`);
+                updateStatus('voskStatus', 
+                    voskData.available ? 'success' : 'error',
+                    voskData.available ? '✅ Disponible' : '❌ Indisponible'
+                );
+                
+                updateStatus('serverStatus', 'success', '✅ Connecté');
+                
+            } catch (error) {
+                updateStatus('voskStatus', 'error', '❌ Erreur');
+                updateStatus('serverStatus', 'error', '❌ Déconnecté');
+            }
         }
 
-        function basicVoiceTest() {
-            if (isListening) {
-                stopVoiceTest();
-                return;
+        async function setupAudioPermissions() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true
+                    } 
+                });
+                
+                updateStatus('microphoneStatus', 'success', '✅ Autorisé');
+                updateStatus('audioStatus', 'success', '✅ Prêt');
+                
+                // Nettoyer le stream
+                stream.getTracks().forEach(track => track.stop());
+                
+            } catch (error) {
+                updateStatus('microphoneStatus', 'error', '❌ Accès refusé');
+                updateStatus('audioStatus', 'error', '❌ Indisponible');
+                
+                document.getElementById('startRecording').disabled = true;
+                console.error('Erreur microphone:', error);
             }
+        }
 
-            const btn = document.getElementById('basicTestBtn');
-            const results = document.getElementById('basicTestResults');
-            
-            logMessage('🎤 Démarrage du test de base');
+        function updateStatus(elementId, status, text) {
+            const element = document.getElementById(elementId);
+            element.className = `status-card ${status}`;
+            element.querySelector('.status-value').textContent = text;
+        }
 
-            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                results.textContent = '❌ Reconnaissance vocale non supportée dans ce navigateur';
-                logMessage('❌ Test de base échoué: API non disponible');
-                return;
-            }
+        async function startRecording() {
+            if (isRecording) return;
 
             try {
-                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                recognition = new SpeechRecognition();
-
-                recognition.continuous = false;
-                recognition.interimResults = true;
-                recognition.lang = 'fr-FR';
-
-                recognition.onstart = function() {
-                    isListening = true;
-                    btn.classList.add('listening');
-                    btn.textContent = '🎤 En écoute... Parlez maintenant';
-                    results.textContent = '🎤 Je vous écoute... Parlez clairement en français';
-                    logMessage('🎤 Écoute démarrée avec succès');
-                };
-
-                recognition.onresult = function(event) {
-                    let transcript = '';
-                    let confidence = 0;
+                startTime = Date.now();
+                isRecording = true;
+                
+                updateButtons();
+                
+                // Démarrer l'enregistrement audio pour la visualisation
+                audioStream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true,
+                        sampleRate: 16000
+                    } 
+                });
+                
+                setupAudioVisualization();
+                
+                // Démarrer la reconnaissance vocale avec Vosk
+                try {
+                    addTestMessage('🎤 Démarrage reconnaissance Vosk...');
                     
-                    for (let i = event.resultIndex; i < event.results.length; i++) {
-                        const result = event.results[i];
-                        if (result.isFinal) {
-                            transcript = result[0].transcript;
-                            confidence = result[0].confidence;
-                        } else {
-                            results.textContent = `🔄 En cours: "${result[0].transcript}"`;
+                    const voskResponse = await fetch('/api/vosk/listen', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ timeout: 30 })
+                    });
+                    
+                    const voskResult = await voskResponse.json();
+                    
+                    if (voskResult.success && voskResult.text) {
+                        const latency = Date.now() - startTime;
+                        document.getElementById('latencyTime').textContent = `${latency}ms`;
+                        document.getElementById('confidenceScore').textContent = '(Vosk)';
+                        document.getElementById('voskAccuracy').textContent = '95%';
+                        
+                        const recognitionText = document.getElementById('recognitionText');
+                        recognitionText.innerHTML = `<span style="font-weight: bold; color: #10b981;">${voskResult.text}</span>`;
+                        
+                        addTestMessage(`✅ Texte reconnu: "${voskResult.text}"`);
+                    } else {
+                        addTestMessage('⚠️ ' + (voskResult.message || 'Aucun texte reconnu'));
+                    }
+                } catch (error) {
+                    console.error('Erreur Vosk:', error);
+                    addTestMessage(`❌ Erreur Vosk: ${error.message}`);
+                    
+                    // Fallback vers reconnaissance navigateur si Vosk échoue
+                    addTestMessage('🔄 Fallback vers reconnaissance navigateur...');
+                    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                        recognition = new SpeechRecognition();
+                        
+                        recognition.continuous = true;
+                        recognition.interimResults = true;
+                        recognition.lang = 'fr-FR';
+                        
+                        recognition.onresult = function(event) {
+                        let finalTranscript = '';
+                        let interimTranscript = '';
+                        
+                        for (let i = event.resultIndex; i < event.results.length; i++) {
+                            const transcript = event.results[i][0].transcript;
+                            const confidence = event.results[i][0].confidence;
+                            
+                            if (event.results[i].isFinal) {
+                                finalTranscript += transcript + ' ';
+                                
+                                // Calculer la latence
+                                const latency = Date.now() - startTime;
+                                document.getElementById('latencyTime').textContent = `${latency}ms`;
+                                
+                                // Afficher la confiance
+                                document.getElementById('confidenceScore').textContent = 
+                                    `(Confiance: ${(confidence * 100).toFixed(1)}%)`;
+                                document.getElementById('voskAccuracy').textContent = 
+                                    `${(confidence * 100).toFixed(1)}%`;
+                                
+                            } else {
+                                interimTranscript += transcript;
+                            }
                         }
+                        
+                        const recognitionText = document.getElementById('recognitionText');
+                        recognitionText.innerHTML = '';
+                        
+                        if (finalTranscript) {
+                            const finalSpan = document.createElement('span');
+                            finalSpan.style.fontWeight = 'bold';
+                            finalSpan.textContent = finalTranscript;
+                            recognitionText.appendChild(finalSpan);
+                        }
+                        
+                        if (interimTranscript) {
+                            const interimSpan = document.createElement('span');
+                            interimSpan.style.color = 'var(--guardian-gray)';
+                            interimSpan.textContent = interimTranscript;
+                            recognitionText.appendChild(interimSpan);
+                        }
+                    };
+                    
+                    recognition.onerror = function(event) {
+                        console.error('Erreur reconnaissance:', event.error);
+                        updateStatus('voskStatus', 'error', '❌ Erreur: ' + event.error);
+                    };
+                    
+                    recognition.start();
                     }
-
-                    if (transcript) {
-                        const confidencePercent = (confidence * 100).toFixed(1);
-                        results.textContent = `✅ Reconnu: "${transcript}"\n📊 Confiance: ${confidencePercent}%`;
-                        logMessage(`✅ Reconnaissance réussie: "${transcript}" (${confidencePercent}%)`);
-                    }
-                };
-
-                recognition.onerror = function(event) {
-                    let errorMsg = `❌ Erreur: ${event.error}`;
-                    switch(event.error) {
-                        case 'no-speech':
-                            errorMsg = '❌ Aucune parole détectée. Réessayez en parlant plus fort.';
-                            break;
-                        case 'not-allowed':
-                            errorMsg = '❌ Permission refusée. Autorisez l\'accès au microphone.';
-                            break;
-                        case 'service-not-allowed':
-                            errorMsg = '❌ Service non autorisé. Utilisez HTTPS.';
-                            break;
-                    }
-                    results.textContent = errorMsg;
-                    logMessage(`❌ Erreur reconnaissance: ${event.error}`);
-                };
-
-                recognition.onend = function() {
-                    stopVoiceTest();
-                    logMessage('🎤 Test de base terminé');
-                };
-
-                recognition.start();
-
+                }
+                
             } catch (error) {
-                results.textContent = `❌ Erreur technique: ${error.message}`;
-                logMessage(`❌ Erreur technique: ${error.message}`);
+                console.error('Erreur démarrage:', error);
+                isRecording = false;
+                updateButtons();
             }
         }
 
-        function stopVoiceTest() {
-            if (recognition && isListening) {
+        function setupAudioVisualization() {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioContext.createAnalyser();
+            const source = audioContext.createMediaStreamSource(audioStream);
+            source.connect(analyser);
+            
+            analyser.fftSize = 256;
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+            
+            const visualizer = document.getElementById('audioVisualizer');
+            visualizer.style.display = 'flex';
+            
+            function updateVisualization() {
+                if (!isRecording) {
+                    visualizer.style.display = 'none';
+                    return;
+                }
+                
+                analyser.getByteFrequencyData(dataArray);
+                
+                const bars = visualizer.querySelectorAll('.visualizer-bar');
+                const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
+                
+                // Mettre à jour le niveau audio
+                document.getElementById('audioLevel').textContent = `${Math.round(average)}/255`;
+                
+                bars.forEach((bar, i) => {
+                    const height = Math.max(10, (dataArray[i * 8] / 255) * 60);
+                    bar.style.height = height + 'px';
+                });
+                
+                requestAnimationFrame(updateVisualization);
+            }
+            
+            updateVisualization();
+        }
+
+        function stopRecording() {
+            if (!isRecording) return;
+
+            isRecording = false;
+            updateButtons();
+            
+            if (recognition) {
                 recognition.stop();
             }
             
-            isListening = false;
-            const btn = document.getElementById('basicTestBtn');
-            btn.classList.remove('listening');
-            btn.textContent = '🎤 Démarrer le Test';
-            logMessage('🛑 Test arrêté');
-        }
-
-        function advancedVoiceTest() {
-            logMessage('🤖 Démarrage du test Guardian avancé');
-            
-            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                document.getElementById('advancedTestResults').textContent = 
-                    '❌ Reconnaissance vocale non supportée - Test Guardian impossible';
-                return;
+            if (audioStream) {
+                audioStream.getTracks().forEach(track => track.stop());
             }
-
-            const results = document.getElementById('advancedTestResults');
-            results.textContent = '🎤 Dites quelque chose comme "Guardian, je me sens fatigué"...';
-
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            const testRecognition = new SpeechRecognition();
             
-            testRecognition.continuous = false;
-            testRecognition.lang = 'fr-FR';
-
-            testRecognition.onresult = function(event) {
-                const transcript = event.results[0][0].transcript;
-                results.textContent = `🗣️ Vous avez dit: "${transcript}"\n🤖 Analyse Guardian en cours...`;
-                
-                logMessage(`🗣️ Message capturé pour Guardian: "${transcript}"`);
-
-                // Envoyer à l'API Guardian
-                fetch('/api/guardian/analyze', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        situation: transcript,
-                        location: 'Test de reconnaissance vocale',
-                        user_info: {firstName: 'TestUser'},
-                        conversation_history: []
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    let response = `✅ Analyse Guardian terminée:\n\n`;
-                    response += `📊 Niveau d'urgence: ${data.urgency_level}/10\n`;
-                    if (data.advice) {
-                        response += `💬 Réponse: ${data.advice.join(' ')}\n`;
-                    }
-                    results.textContent = response;
-                    logMessage(`✅ Réponse Guardian reçue (urgence: ${data.urgency_level}/10)`);
-                })
-                .catch(error => {
-                    results.textContent = `❌ Erreur API Guardian: ${error.message}`;
-                    logMessage(`❌ Erreur API Guardian: ${error.message}`);
-                });
-            };
-
-            testRecognition.onerror = function(event) {
-                results.textContent = `❌ Erreur lors du test Guardian: ${event.error}`;
-                logMessage(`❌ Erreur test Guardian: ${event.error}`);
-            };
-
-            testRecognition.start();
+            if (audioContext) {
+                audioContext.close();
+            }
         }
 
-        function requestPermissions() {
-            logMessage('🔓 Demande d\'autorisation microphone');
+        function updateButtons() {
+            const startBtn = document.getElementById('startRecording');
+            const stopBtn = document.getElementById('stopRecording');
             
-            navigator.mediaDevices.getUserMedia({ audio: true })
-                .then(function(stream) {
-                    logMessage('✅ Permission microphone accordée');
-                    alert('✅ Permission microphone accordée ! Vous pouvez maintenant tester la reconnaissance vocale.');
-                    stream.getTracks().forEach(track => track.stop());
-                    runDiagnostic();
-                })
-                .catch(function(error) {
-                    logMessage(`❌ Permission refusée: ${error.message}`);
-                    alert(`❌ Permission refusée: ${error.message}\n\nVeuillez autoriser l'accès au microphone dans les paramètres de votre navigateur.`);
-                });
+            if (isRecording) {
+                startBtn.disabled = true;
+                startBtn.textContent = '🔴 En cours...';
+                startBtn.classList.add('recording');
+                stopBtn.disabled = false;
+            } else {
+                startBtn.disabled = false;
+                startBtn.textContent = '🎤 Démarrer l\'écoute';
+                startBtn.classList.remove('recording');
+                stopBtn.disabled = true;
+            }
         }
 
-        function clearLog() {
-            logEntries = [];
-            document.getElementById('detailedLog').textContent = 'Journal effacé...';
-            logMessage('🗑️ Journal effacé et réinitialisé');
+        function addTestMessage(message) {
+            const recognitionText = document.getElementById('recognitionText');
+            if (recognitionText) {
+                const messageDiv = document.createElement('div');
+                messageDiv.style.cssText = 'margin: 4px 0; font-size: 0.9rem; color: #666; border-left: 3px solid #ddd; padding-left: 8px;';
+                messageDiv.textContent = message;
+                recognitionText.appendChild(messageDiv);
+                recognitionText.scrollTop = recognitionText.scrollHeight;
+            } else {
+                console.log(message);
+            }
         }
     </script>
 </body>

@@ -1,0 +1,117 @@
+# Configuration par défaut pour GuardianNav
+default:
+  # Paramètres de l'agent statique
+  static_agent:
+    distance_threshold: 10  # mètres
+    time_threshold: 300     # secondes (5 minutes)
+  
+  # Paramètres de l'agent vocal
+  voice_agent:
+    keywords:
+      - "aide"
+      - "stop" 
+      - "urgence"
+      - "secours"
+    model_path: "vosk-model-small-fr-0.22"  # Chemin relatif au projet
+    samplerate: 16000
+  
+  # Paramètres de l'agent de déviation de route  
+  wrong_path_agent:
+    deviation_threshold: 50  # mètres
+  
+  # Configuration des logs
+  logging:
+    level: "INFO"
+    filename: "guardiannav.log"
+  
+  # Configuration de la réponse d'urgence
+  emergency_response:
+    timeout_seconds: 600  # 10 minutes avant escalade
+    notify_on_confirmation: false
+    
+    # Contacts d'urgence (remplacez par vos vrais contacts)
+    emergency_contacts:
+      - name: "Contact Famille Anna"
+        phone: "+33123456789"
+        email: "famille@example.com"
+      - name: "Contact Ami" 
+        phone: "+33987654321"
+        email: "ami@example.com"
+    
+    # Configuration email (optionnel)
+    email:
+      enabled: false  # Activez si vous voulez les notifications email
+      smtp_server: "smtp.gmail.com"
+      smtp_port: 587
+      from_email: "your-email@gmail.com"
+      password: "your-app-password"
+
+# Configuration pour les tests (seuils réduits)
+test:
+  static_agent:
+    distance_threshold: 5
+    time_threshold: 30  # 30 secondes pour tests rapides
+  voice_agent:
+    keywords:
+      - "aide"
+      - "test"
+    model_path: "vosk-model-small-fr-0.22"
+
+# Configuration du système d'urgence
+emergency_response:
+  timeout_seconds: 600  # 10 minutes avant escalade
+  notify_on_confirmation: false
+  
+  # Contacts d'urgence (à personnaliser)
+  emergency_contacts:
+    - name: "Contact Urgence 1"
+      phone: "+33123456789"
+      email: "urgence1@example.com"
+    - name: "Contact Urgence 2"  
+      phone: "+33987654321"
+      email: "urgence2@example.com"
+  
+  # Configuration email
+  email:
+    enabled: false
+    smtp_server: "smtp.gmail.com"
+    smtp_port: 587
+    from_email: "guardiannav@example.com"
+    password: "app_password"
+
+# Configuration IA et APIs
+ai_system:
+  enabled: true
+  api_keys_file: "api_keys.yaml"
+  confidence_threshold: 0.7
+  
+  # Types d'urgence supportés
+  emergency_types:
+    - "medical"
+    - "security" 
+    - "lost"
+    - "technical"
+    - "general"
+
+# Configuration des services de localisation d'urgence
+emergency_locations:
+  enabled: true
+  search_radius_refuges: 500    # mètres
+  search_radius_transport: 1000 # mètres
+  
+  # Priorité des types de refuges (1=haute, 5=basse)
+  refuge_priorities:
+    police: 1
+    hospital: 1
+    pharmacy: 2
+    bar: 3
+    restaurant: 3
+    hotel: 3
+    gas_station: 4
+    bank: 4
+    
+  # APIs de transport
+  transport_apis:
+    velib_enabled: true
+    ratp_enabled: true  # API RATP pour bus/métro temps réel
+    taxi_enabled: true

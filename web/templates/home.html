@@ -4,133 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🛡️ Guardian - Assistant de Sécurité</title>
+    <link rel="stylesheet" href="/static/css/guardian.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #ffffff; /* Fond blanc épuré comme Google */
-            min-height: 100vh;
-            display: flex;
-            align-items: flex-start;
-            justify-content: center;
-            color: #202124; /* Couleur texte Google */
-            overflow-x: hidden;
-            overflow-y: auto;
-            padding: 2rem 0 4rem 0;
-        }
-
+        /* Styles spécifiques à la page d'accueil */
         .main-container {
+            padding: 20px;
             text-align: center;
             animation: fadeInUp 1s ease-out;
         }
 
-        .guardian-logo {
-            width: 200px;
-            height: 240px;
-            margin: 2rem auto;
-            cursor: pointer;
-            transition: all 0.4s ease;
-            user-select: none;
-            position: relative;
-            filter: drop-shadow(0 8px 20px rgba(66, 133, 244, 0.2));
-        }
-
-        .guardian-logo svg {
-            width: 100%;
-            height: 100%;
-            transition: all 0.4s ease;
-        }
-
-        .guardian-logo:hover {
-            transform: scale(1.1) rotateY(5deg);
-            filter: drop-shadow(0 12px 30px rgba(66, 133, 244, 0.4));
-        }
-
-        .guardian-logo:hover svg {
-            transform: rotateZ(2deg);
-        }
-
-        .guardian-logo:active {
-            transform: scale(0.95);
-        }
-
-        .guardian-logo::before {
-            content: '';
-            position: absolute;
-            top: -20px;
-            left: -20px;
-            right: -20px;
-            bottom: -20px;
-            background: radial-gradient(circle, rgba(66, 133, 244, 0.1) 0%, transparent 70%);
-            border-radius: 50%;
-            animation: pulse 3s ease-in-out infinite;
-            z-index: -1;
-        }
-
-        .title {
-            font-size: 3rem;
-            font-weight: 300;
-            margin-bottom: 1rem;
-            color: #202124; /* Couleur texte Google */
-        }
-
-        .subtitle {
-            font-size: 1.5rem;
-            opacity: 0.7;
-            margin-bottom: 3rem;
-            font-weight: 300;
-            color: #5f6368; /* Couleur texte secondaire Google */
-        }
-
-        .demo-button {
-            background: #ffffff;
-            border: 2px solid #e8eaed;
-            color: #5f6368;
-            padding: 1.5rem 3rem;
-            border-radius: 8px;
-            font-size: 1.3rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-            margin: 0 1rem;
-        }
-
-        .demo-button:hover {
-            background: #f8f9fa;
-            border-color: #dadce0;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .demo-button.primary {
-            background: #4285f4;
-            color: white;
-            border-color: #4285f4;
-        }
-
-        .demo-button.primary:hover {
-            background: #3367d6;
-            border-color: #3367d6;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
-        }
-
-        /* Styles pour le formulaire utilisateur */
         .user-form {
-            background: #ffffff;
-            border-radius: 8px;
+            background: var(--guardian-white);
+            border-radius: 16px;
             padding: 2rem;
             margin: 2rem auto;
             max-width: 500px;
-            border: 1px solid #e8eaed;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--guardian-gray-light);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
         }
 
         .form-group {
@@ -140,101 +30,67 @@
 
         .form-group label {
             display: block;
-            color: #202124;
-            font-weight: 500;
+            color: var(--guardian-text);
+            font-weight: 600;
             margin-bottom: 0.5rem;
             font-size: 1.1rem;
         }
 
-        .form-group input {
-            width: 100%;
-            padding: 1rem 1.5rem;
-            border: 2px solid #e8eaed;
-            border-radius: 8px;
-            background: #ffffff;
-            color: #202124;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-            box-sizing: border-box;
-        }
-
-        .form-group input::placeholder {
-            color: #9aa0a6;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #4285f4;
-            background: #ffffff;
-            box-shadow: 0 0 8px rgba(66, 133, 244, 0.2);
-        }
-
         .form-title {
-            color: #202124;
+            color: var(--guardian-text);
             font-size: 1.5rem;
-            font-weight: 400;
+            font-weight: 600;
             margin-bottom: 1.5rem;
             text-align: center;
         }
 
-        .guardian-logo.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
-
-        /* Styles pour le bouton de lancement de la démo */
-        .demo-launch-btn {
-            background: #4285f4;
-            color: white;
-            border: none;
-            padding: 1.2rem 2.5rem;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(66, 133, 244, 0.3);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .demo-launch-btn:hover:not(.disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(66, 133, 244, 0.4);
-            background: #3367d6;
-        }
-
-        .demo-launch-btn:active:not(.disabled) {
-            transform: translateY(0);
-        }
-
-        .demo-launch-btn.disabled {
-            background: #f8f9fa;
-            color: #9aa0a6;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-
-        .features {
-            position: absolute;
-            bottom: 2rem;
-            left: 50%;
-            transform: translateX(-50%);
+        .navigation-band {
             display: flex;
-            gap: 3rem;
-            opacity: 0.8;
+            justify-content: center;
+            align-items: center;
+            background: var(--guardian-white);
+            border-radius: 16px;
+            margin: 2rem auto;
+            padding: 1rem;
+            max-width: 900px;
+            border: 1px solid var(--guardian-gray-light);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            gap: 0.8rem;
+            flex-wrap: wrap;
         }
 
-        .feature {
+        .nav-link {
+            flex: 1;
+            min-width: 240px;
+            text-decoration: none;
+            color: var(--guardian-white);
+            background: var(--guardian-gradient);
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 600;
             text-align: center;
+            transition: all 0.2s ease;
             font-size: 0.9rem;
+            box-shadow: 0 2px 4px rgba(126, 33, 241, 0.25);
         }
 
-        .feature-icon {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-            display: block;
+        .nav-link:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(126, 33, 241, 0.25);
+        }
+
+        .creator-band {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--guardian-white);
+            border-top: 1px solid var(--guardian-gray-light);
+            color: var(--guardian-gray);
+            text-align: center;
+            padding: 1rem;
+            font-size: 0.9rem;
+            z-index: 1000;
         }
 
         @keyframes fadeInUp {
@@ -248,165 +104,7 @@
             }
         }
 
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 0.3;
-                transform: scale(1);
-            }
-            50% {
-                opacity: 0.1;
-                transform: scale(1.1);
-            }
-        }
-
         /* Responsive */
-        @media (max-width: 768px) {
-            .guardian-logo {
-                width: 150px;
-                height: 180px;
-            }
-            
-            .title {
-                font-size: 2rem;
-            }
-            
-            .subtitle {
-                font-size: 1.2rem;
-            }
-            
-            .demo-button {
-                padding: 1rem 2rem;
-                font-size: 1.1rem;
-                margin: 0.5rem;
-                display: block;
-                margin-bottom: 1rem;
-            }
-            
-            .features {
-                position: static;
-                transform: none;
-                margin-top: 3rem;
-                flex-wrap: wrap;
-                gap: 1.5rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .guardian-logo {
-                width: 120px;
-                height: 144px;
-            }
-            
-            .features {
-                gap: 1rem;
-            }
-        }
-
-        /* Bande de navigation */
-        .navigation-band {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #ffffff;
-            border-radius: 8px;
-            margin: 2rem auto;
-            padding: 1rem;
-            max-width: 900px;
-            border: 1px solid #e8eaed;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            gap: 0.8rem;
-            flex-wrap: wrap;
-        }
-
-        .nav-link {
-            flex: 1;
-            min-width: 180px;
-            text-decoration: none;
-            color: #5f6368;
-            background: #f8f9fa;
-            padding: 0.8rem 1.2rem;
-            border-radius: 6px;
-            font-weight: 500;
-            text-align: center;
-            transition: all 0.3s ease;
-            border: 1px solid #e8eaed;
-            font-size: 0.9rem;
-        }
-
-        .nav-link:hover {
-            transform: translateY(-1px);
-        }
-
-        /* Couleurs Google vives pour chaque bouton */
-        .nav-link[href="/demo"] {
-            background: #4285f4; /* Google Blue vif */
-            border-color: #3367d6;
-            color: white;
-            font-weight: 600;
-        }
-
-        .nav-link[href="/demo"]:hover {
-            background: #3367d6;
-            box-shadow: 0 4px 12px rgba(66, 133, 244, 0.4);
-            transform: translateY(-2px);
-        }
-
-        .nav-link[href="/conversation"] {
-            background: #EA4335; /* Google Red vif */
-            border-color: #d33b2c;
-            color: white;
-            font-weight: 600;
-        }
-
-        .nav-link[href="/conversation"]:hover {
-            background: #d33b2c;
-            box-shadow: 0 4px 12px rgba(234, 67, 53, 0.4);
-            transform: translateY(-2px);
-        }
-
-        .nav-link[href="/debug"] {
-            background: #34A853; /* Google Green vif */
-            border-color: #2d8f47;
-            color: white;
-            font-weight: 600;
-        }
-
-        .nav-link[href="/debug"]:hover {
-            background: #2d8f47;
-            box-shadow: 0 4px 12px rgba(52, 168, 83, 0.4);
-            transform: translateY(-2px);
-        }
-
-        .nav-link[href="/voice-test"] {
-            background: #FBBC05; /* Google Yellow vif */
-            border-color: #f9ab00;
-            color: #1a1a1a;
-            font-weight: 600;
-        }
-
-        .nav-link[href="/voice-test"]:hover {
-            background: #f9ab00;
-            color: #1a1a1a;
-            box-shadow: 0 4px 12px rgba(251, 188, 5, 0.4);
-            transform: translateY(-2px);
-        }
-
-        /* Bandeau créateur */
-        .creator-band {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #f8f9fa;
-            color: #5f6368;
-            text-align: center;
-            padding: 0.8rem;
-            font-size: 0.9rem;
-            border-top: 1px solid #e8eaed;
-            z-index: 1000;
-        }
-
-        /* Responsive pour la navigation */
         @media (max-width: 768px) {
             .navigation-band {
                 flex-direction: column;
@@ -423,143 +121,101 @@
     </style>
 </head>
 <body>
-    <div class="main-container">
-        <h1 class="title">Guardian</h1>
-        <p class="subtitle">Votre Assistant Intelligent de Sécurité</p>
-        
-        <!-- Bande de navigation en haut -->
-        <div class="navigation-band">
-            <a href="/demo" class="nav-link">
-                🗺️ Démo Complète
-            </a>
-            <a href="/conversation" class="nav-link">
-                💬 Conversation
-            </a>
-            <a href="/debug" class="nav-link">
-                🔧 Mode Test
-            </a>
-            <a href="/voice-test" class="nav-link">
-                🎤 Test Vocal
-            </a>
-        </div>
-        
-        <!-- Formulaire d'informations utilisateur -->
-        <div class="user-form">
-            <div class="form-title">Informations utilisateur</div>
-            <div class="form-group">
-                <label for="firstName">Prénom *</label>
-                <input type="text" id="firstName" name="firstName" placeholder="Votre prénom" required>
-            </div>
-            <div class="form-group">
-                <label for="lastName">Nom *</label>
-                <input type="text" id="lastName" name="lastName" placeholder="Votre nom" required>
-            </div>
-            <div class="form-group">
-                <label for="phone">Numéro de téléphone *</label>
-                <input type="tel" id="phone" name="phone" placeholder="Ex: 06 12 34 56 78" required>
+    <div class="guardian-container">
+        <div class="main-container">
+            <!-- Header avec logo -->
+            <div class="guardian-header">
+                <!-- Espace pour votre logo -->
+                <img src="/static/images/logo.png" alt="Guardian Logo" class="guardian-logo" id="guardianLogo" 
+                     onerror="this.style.display='none'; document.getElementById('defaultLogo').style.display='block';">
+                
+                <!-- Logo par défaut si votre logo n'est pas encore uploadé -->
+                <div id="defaultLogo" style="display: none;">
+                    <svg class="guardian-logo" viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="shieldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#7E21F1;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#4745F3;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        
+                        <path d="M100 20 L170 50 L170 120 Q170 180 100 220 Q30 180 30 120 L30 50 Z" 
+                              fill="url(#shieldGradient)" 
+                              stroke="#e5e7eb" 
+                              stroke-width="2"/>
+                        
+                        <text x="100" y="140" 
+                              font-family="'Inter', sans-serif" 
+                              font-size="80" 
+                              font-weight="bold" 
+                              text-anchor="middle" 
+                              fill="white">G</text>
+                    </svg>
+                </div>
+                
+                <h1 class="guardian-title">Guardian</h1>
+                <p class="guardian-subtitle">Votre Assistant Intelligent de Sécurité</p>
             </div>
             
-            <!-- Bouton pour lancer la démo -->
-            <div style="text-align: center; margin-top: 2rem;">
-                <button class="demo-launch-btn disabled" id="launchBtn" onclick="startDemo()">
-                    🚀 Lancer la Démonstration Guardian
-                </button>
+            <!-- Navigation -->
+            <div class="navigation-band">
+                <a href="/conversation" class="nav-link">💬 Conversation</a>
+                <a href="/voice-test" class="nav-link">🎤 Test Vocal</a>
+            </div>
+            
+            <!-- Formulaire utilisateur -->
+            <div class="user-form guardian-card">
+                <div class="form-title">Informations utilisateur</div>
+                <div class="form-group">
+                    <label for="firstName">Prénom *</label>
+                    <input type="text" id="firstName" name="firstName" class="guardian-input" placeholder="Votre prénom" required>
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Nom *</label>
+                    <input type="text" id="lastName" name="lastName" class="guardian-input" placeholder="Votre nom" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Numéro de téléphone *</label>
+                    <input type="tel" id="phone" name="phone" class="guardian-input" placeholder="Ex: 06 12 34 56 78" required>
+                </div>
+                
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button class="btn-guardian btn-guardian-emergency disabled" id="launchBtn" onclick="startDemo()">
+                        🚀 Lancer la Démonstration Guardian
+                    </button>
+                </div>
             </div>
         </div>
         
-        <div class="guardian-logo" id="guardianLogo">
-            <svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
-                <!-- Bouclier principal -->
-                <defs>
-                    <linearGradient id="shieldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:#4285F4;stop-opacity:1" />
-                        <stop offset="25%" style="stop-color:#34A853;stop-opacity:1" />
-                        <stop offset="50%" style="stop-color:#EA4335;stop-opacity:1" />
-                        <stop offset="100%" style="stop-color:#FBBC05;stop-opacity:1" />
-                    </linearGradient>
-                    <filter id="drop-shadow">
-                        <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#4285F4" flood-opacity="0.3"/>
-                    </filter>
-                </defs>
-                
-                <!-- Contour extérieur du bouclier -->
-                <path d="M100 20 L170 50 L170 120 Q170 180 100 220 Q30 180 30 120 L30 50 Z" 
-                      fill="url(#shieldGradient)" 
-                      stroke="#ffffff" 
-                      stroke-width="4" 
-                      filter="url(#drop-shadow)"/>
-                
-                <!-- Reflet sur le bouclier -->
-                <path d="M100 20 L150 40 L150 100 Q150 140 100 160 Q80 150 70 130 L70 45 Z" 
-                      fill="rgba(255,255,255,0.2)" 
-                      opacity="0.8"/>
-                
-                <!-- G stylisé au centre -->
-                <text x="100" y="140" 
-                      font-family="'Roboto', sans-serif" 
-                      font-size="80" 
-                      font-weight="bold" 
-                      text-anchor="middle" 
-                      fill="white" 
-                      stroke="rgba(0,0,0,0.1)" 
-                      stroke-width="1">G</text>
-                
-                <!-- Étoiles décoratives -->
-                <circle cx="70" cy="80" r="3" fill="#ffffff" opacity="0.7"/>
-                <circle cx="130" cy="90" r="2.5" fill="#ffffff" opacity="0.6"/>
-                <circle cx="85" cy="110" r="2" fill="#ffffff" opacity="0.5"/>
-                <circle cx="115" cy="75" r="2" fill="#ffffff" opacity="0.6"/>
-            </svg>
-        </div>
-        
-        <!-- Bandeau créateur en bas -->
-        <div class="creator-band">
+        <!-- Footer -->
+        <div class="creator-band guardian-footer">
             Fait par InvadHers
         </div>
     </div>
 
     <script>
         function startDemo() {
-            // Vérifier si le bouton est désactivé
             const launchBtn = document.getElementById('launchBtn');
             if (launchBtn.classList.contains('disabled')) {
                 alert('⚠️ Veuillez remplir tous les champs obligatoires');
                 return;
             }
             
-            // Récupérer et valider les informations du formulaire
             const firstName = document.getElementById('firstName').value.trim();
             const lastName = document.getElementById('lastName').value.trim();
             const phone = document.getElementById('phone').value.trim();
             
-            // Validation des champs obligatoires
-            if (!firstName) {
-                alert('⚠️ Veuillez saisir votre prénom');
-                document.getElementById('firstName').focus();
+            if (!firstName || !lastName || !phone) {
+                alert('⚠️ Veuillez remplir tous les champs');
                 return;
             }
             
-            if (!lastName) {
-                alert('⚠️ Veuillez saisir votre nom');
-                document.getElementById('lastName').focus();
-                return;
-            }
-            
-            if (!phone) {
-                alert('⚠️ Veuillez saisir votre numéro de téléphone');
-                document.getElementById('phone').focus();
-                return;
-            }
-            
-            // Validation format téléphone français
             const phoneRegex = /^(?:(?:\+|00)33[\s\-\.]*(?:\(0\)[\s\-\.]*)?|0)[1-9](?:[\s\-\.]?\d{2}){4}$/;
             if (!phoneRegex.test(phone)) {
                 alert('⚠️ Format de téléphone invalide\nExemple: 06 12 34 56 78');
-                document.getElementById('phone').focus();
                 return;
             }
             
-            // Stocker les informations utilisateur
             const userInfo = {
                 firstName: firstName,
                 lastName: lastName,
@@ -569,23 +225,14 @@
             
             sessionStorage.setItem('guardianUserInfo', JSON.stringify(userInfo));
             
-            // Animation du bouton et logo avant redirection
-            launchBtn.style.transform = 'scale(0.95)';
             launchBtn.innerHTML = '🚀 Lancement en cours...';
             launchBtn.disabled = true;
             
-            const logo = document.getElementById('guardianLogo');
-            logo.style.transform = 'scale(1.3) rotateY(180deg)';
-            logo.style.transition = 'all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
-            logo.style.filter = 'drop-shadow(0 15px 35px rgba(66, 133, 244, 0.6))';
-            
-            // Redirection vers la page de démonstration (trajet + conversation)
             setTimeout(() => {
                 window.location.href = '/demo';
             }, 800);
         }
         
-        // Fonction de validation en temps réel
         function validateForm() {
             const firstName = document.getElementById('firstName').value.trim();
             const lastName = document.getElementById('lastName').value.trim();
@@ -594,28 +241,12 @@
             
             if (firstName && lastName && phone) {
                 launchBtn.classList.remove('disabled');
-                launchBtn.style.cursor = 'pointer';
             } else {
                 launchBtn.classList.add('disabled');
-                launchBtn.style.cursor = 'not-allowed';
             }
         }
 
-        // Animation d'entrée progressive des éléments
         document.addEventListener('DOMContentLoaded', function() {
-            const elements = document.querySelectorAll('.demo-button, .feature');
-            elements.forEach((el, index) => {
-                el.style.opacity = '0';
-                el.style.transform = 'translateY(20px)';
-                
-                setTimeout(() => {
-                    el.style.transition = 'all 0.6s ease';
-                    el.style.opacity = '1';
-                    el.style.transform = 'translateY(0)';
-                }, 1000 + (index * 100));
-            });
-            
-            // Validation en temps réel du formulaire
             const formInputs = ['firstName', 'lastName', 'phone'];
             formInputs.forEach(inputId => {
                 const input = document.getElementById(inputId);
@@ -625,7 +256,6 @@
                 }
             });
             
-            // Validation initiale
             validateForm();
         });
     </script>
