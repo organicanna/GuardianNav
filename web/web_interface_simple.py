@@ -391,7 +391,8 @@ CONSIGNE STRICTE: Maximum 1-2 phrases courtes. Sois direct, pas de détails inut
                     user_phone=user_phone,
                     real_location="8 rue de Londres, 75009 Paris (bureaux Google France)",
                     real_situation=situation_text,
-                    user_fullname=user_fullname
+                    user_fullname=user_fullname,
+                    user_info=user_info
                 )
                 
                 if email_sent:
@@ -454,8 +455,8 @@ CONSIGNE STRICTE: Maximum 1-2 phrases courtes. Sois direct, pas de détails inut
         logger.info("🔄 Basculement vers le système de fallback")
         return fallback_situation_analysis(situation_text, user_info)
 
-def send_emergency_email_guardian(user_phone, real_location, real_situation, user_fullname):
-    """Envoie un email d'urgence aux contacts - logique identique à demo_live_agent.py"""
+def send_emergency_email_guardian(user_phone, real_location, real_situation, user_fullname, user_info={}):
+    """Envoie un email d'urgence aux contacts - priorité aux contacts saisis par l'utilisateur"""
     if not gmail_agent or not gmail_agent.is_available:
         return False
     
@@ -463,10 +464,24 @@ def send_emergency_email_guardian(user_phone, real_location, real_situation, use
         # Coordonnées exactes Google France
         demo_location = (48.8756, 2.3264)
         
-        # Obtenir les contacts d'urgence
-        emergency_contacts = guardian_config.get('emergency_contacts', [
-            {"email": "demo@example.com", "name": "Contact Demo"}
-        ])
+        # PRIORITÉ 1: Contact d'urgence saisi par l'utilisateur
+        emergency_contacts = []
+        if user_info and user_info.get('emergencyContact'):
+            emergency_contact = user_info['emergencyContact']
+            if emergency_contact.get('email'):
+                emergency_contacts = [{
+                    "email": emergency_contact['email'],
+                    "name": emergency_contact.get('name', 'Contact d\'urgence'),
+                    "phone": emergency_contact.get('phone', 'Non renseigné')
+                }]
+                print(f"📧 Utilisation du contact d'urgence utilisateur: {emergency_contact['email']}")
+        
+        # PRIORITÉ 2: Contacts par défaut de la configuration si aucun contact utilisateur
+        if not emergency_contacts:
+            emergency_contacts = guardian_config.get('emergency_contacts', [
+                {"email": "demo@example.com", "name": "Contact Demo"}
+            ])
+            print(f"📧 Utilisation des contacts de configuration par défaut")
         
         success_count = 0
         for contact in emergency_contacts:
