@@ -420,8 +420,15 @@ class GeminiAgent:
 ÉCHELLE DE GRAVITÉ:
 - Niveau 1-3 (Faible): Problèmes mineurs, questions, conseils (ex: crevaison, pneu crevé)
 - Niveau 4-6 (Modérée): Inconfort mais non critique (ex: perdu, petite blessure)
-- Niveau 7-8 (Élevée): Attention médicale nécessaire (ex: chute douloureuse, blessure)
-- Niveau 9-10 (Critique): Danger immédiat (ex: inconscient, hémorragie, agression)
+- Niveau 7-8 (Élevée): Attention immédiate nécessaire (ex: chute douloureuse, blessure)
+- Niveau 9-10 (Critique): Danger immédiat pour la vie ou la sécurité
+
+⚠️ SITUATIONS DE DANGER IMMÉDIAT (Niveau 8-10):
+- Être suivi/harcelé par quelqu'un → 8-9/10
+- Agression, menace, harcèlement → 9/10
+- Sentiment de danger imminent → 8/10
+- Inconscient, hémorragie → 10/10
+→ Ces situations nécessitent TOUJOURS un contact des proches et/ou services d'urgence
 
 Situation: {context}
 Moment: {time_of_day}
@@ -430,7 +437,7 @@ Description: {user_input if user_input else 'Aucune information supplémentaire'
 
 TU ES AUTONOME: Prends tes propres décisions, propose des solutions concrètes adaptées à chaque situation.
 - Pour les situations mineures: donne des conseils pratiques et rassurants
-- Pour les situations graves: propose des actions immédiates et des lieux de refuge si pertinent
+- Pour les situations de danger: propose des actions immédiates (refuge, services d'urgence, contact proches)
 - Adapte ton ton et tes recommandations selon la gravité
 
 Réponds UNIQUEMENT avec ce JSON (sans autre texte):
