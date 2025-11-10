@@ -382,12 +382,13 @@ CONSIGNE STRICTE: Maximum 1-2 phrases courtes. Sois direct, pas de détails inut
         
         # 3. ENVOI EMAIL AUTOMATIQUE si urgence >= 8 OU si demandé par l'IA
         email_sent = False
+        email_recipient = None
         should_send_email = urgency_level >= 8 or "DEMANDE_ENVOI_EMAIL_URGENCE" in ai_text
         
         if should_send_email:
             logger.info(f"📧 Envoi email d'urgence (niveau {urgency_level}/10)...")
             if gmail_agent and gmail_agent.is_available:
-                email_sent = send_emergency_email_guardian(
+                email_sent, email_recipient = send_emergency_email_guardian(
                     user_phone=user_phone,
                     real_location="8 rue de Londres, 75009 Paris (bureaux Google France)",
                     real_situation=situation_text,
@@ -444,6 +445,7 @@ CONSIGNE STRICTE: Maximum 1-2 phrases courtes. Sois direct, pas de détails inut
             'response': processed_response,
             'urgency_level': urgency_level,
             'email_sent': email_sent,
+            'email_recipient': email_recipient,  # AJOUT: Email du destinataire
             'safe_places': safe_places_list,  # AJOUT: Retourner les lieux sécurisés
             'advice': [analysis_section] if analysis_section else [processed_response],
             'recommendations': recommendations_list,
@@ -456,9 +458,11 @@ CONSIGNE STRICTE: Maximum 1-2 phrases courtes. Sois direct, pas de détails inut
         return fallback_situation_analysis(situation_text, user_info)
 
 def send_emergency_email_guardian(user_phone, real_location, real_situation, user_fullname, user_info={}):
-    """Envoie un email d'urgence aux contacts - priorité aux contacts saisis par l'utilisateur"""
+    """Envoie un email d'urgence aux contacts - priorité aux contacts saisis par l'utilisateur
+    Returns: (success: bool, recipient_email: str or None)
+    """
     if not gmail_agent or not gmail_agent.is_available:
-        return False
+        return False, None
     
     try:
         # Coordonnées exactes Google France
@@ -484,6 +488,7 @@ def send_emergency_email_guardian(user_phone, real_location, real_situation, use
             print(f"📧 Utilisation des contacts de configuration par défaut")
         
         success_count = 0
+        recipient_email = None
         for contact in emergency_contacts:
             try:
                 subject, html_body, text_body = gmail_agent.create_emergency_email(
@@ -500,15 +505,17 @@ def send_emergency_email_guardian(user_phone, real_location, real_situation, use
                 result = gmail_agent.send_email(contact.get("email"), subject, html_body, text_body)
                 if result.get("success"):
                     success_count += 1
+                    if recipient_email is None:  # Garder le premier email envoyé avec succès
+                        recipient_email = contact.get("email")
                     
             except Exception as e:
                 logger.error(f"Erreur envoi email à {contact.get('name')}: {e}")
                 
-        return success_count > 0
+        return success_count > 0, recipient_email
         
     except Exception as e:
         logger.error(f"Erreur générale envoi email: {e}")
-        return False
+        return False, None
 
 def generate_location_recommendations(urgency_level, coordinates):
     """

@@ -385,6 +385,13 @@ class GmailEmergencyAgent:
                         📅 {current_time}
                     </p>
                 </div>
+                
+                <!-- Bandeau InvadHers -->
+                <div style="background: #F3F4F6; color: #6B7280; padding: 12px; text-align: center; border-top: 1px solid #E5E7EB;">
+                    <p style="margin: 0; font-size: 11px; font-weight: 500;">
+                        Fait par <strong>InvadHers</strong>
+                    </p>
+                </div>
             </div>
         </body>
         </html>
