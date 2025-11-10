@@ -640,43 +640,8 @@ def contact_urgence():
 
 @app.route('/demo_navigation')
 def demo_navigation():
-    """Démonstration de navigation Gare Saint-Lazare → Place Concorde"""
+    """Démonstration principale de navigation avec Guardian"""
     return render_template('demo_navigation.html')
-
-@app.route('/test_bouton')
-def test_bouton():
-    """Page de test du bouton Vosk"""
-    return render_template('test_bouton.html')
-
-@app.route('/demo')
-def demo():
-    """Page de démonstration avec trajet et conversation Guardian"""
-    return render_template('demo_working.html')
-
-@app.route('/admin')
-def admin():
-    """Ancienne page d'accueil avec toutes les fonctionnalités"""
-    return render_template('home.html')
-
-@app.route('/demo_fixed')
-def demo_fixed():
-    """Page de démonstration avec reconnaissance vocale réparée"""
-    return render_template('demo_working.html')
-
-@app.route('/conversation')
-def conversation():
-    """Page de conversation avec Gemini"""
-    return render_template('conversation.html')
-
-@app.route('/voice-test')
-def voice_test():
-    """Page de test du microphone et reconnaissance vocale Vosk"""
-    return render_template('voice_test.html')
-
-@app.route('/map')
-def map_page():
-    """Page avec la carte interactive"""
-    return render_template('map.html')
 
 @app.route('/emergency')
 def emergency_page():
