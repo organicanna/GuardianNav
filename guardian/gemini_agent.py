@@ -415,35 +415,55 @@ class GeminiAgent:
         location_str = f"GPS {location[0]:.6f}, {location[1]:.6f}" if location else "Non disponible"
         
         # Construction d'un prompt structuré pour Gemini avec nuances
-        prompt = f"""Tu es Guardian, un assistant d'urgence intelligent et autonome. Analyse la situation avec DISCERNEMENT et prends tes propres décisions.
+        prompt = f"""Tu es Guardian, un assistant d'urgence intelligent. Analyse la situation et UTILISE CES EXEMPLES PRÉCIS comme référence.
 
-ÉCHELLE DE GRAVITÉ:
-- Niveau 1-3 (Faible): Problèmes mineurs, questions, conseils (ex: crevaison, pneu crevé)
-- Niveau 4-6 (Modérée): Inconfort mais non critique (ex: perdu, petite blessure)
-- Niveau 7-8 (Élevée): Attention immédiate nécessaire (ex: chute douloureuse, blessure)
-- Niveau 9-10 (Critique): Danger immédiat pour la vie ou la sécurité
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EXEMPLES DE CALIBRATION (BASE D'ENTRAÎNEMENT OFFICIELLE):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-⚠️ SITUATIONS DE DANGER IMMÉDIAT (Niveau 8-10):
-- Être suivi/harcelé par quelqu'un → 8-9/10
-- Agression, menace, harcèlement → 9/10
-- Sentiment de danger imminent → 8/10
-- Inconscient, hémorragie → 10/10
-→ Ces situations nécessitent TOUJOURS un contact des proches et/ou services d'urgence
+📊 NIVEAU 1-3 (Faible - PAS D'EMAIL):
+✓ "Je suis tombé à vélo et j'ai crevé, mais ça va" → 2/10
+✓ "Mon pneu de vélo a éclaté" → 2/10
+✓ "Je cherche une pharmacie ouverte" → 1/10
+✓ "Mon téléphone est presque à court de batterie" → 2/10
+✓ "J'ai une petite égratignure au doigt" → 1/10
+
+📊 NIVEAU 4-5 (Modérée - PAS D'EMAIL):
+✓ "Je suis perdu dans un quartier que je ne connais pas" → 4/10
+✓ "J'ai mal à la tête depuis ce matin" → 3/10
+✓ "Il fait nuit et je ne trouve pas mon chemin" → 5/10
+✓ "J'ai trébuché et j'ai mal au genou, mais je peux marcher" → 4/10
+
+📊 NIVEAU 6-7 (Élevée - PAS ENCORE D'EMAIL):
+✓ "Je suis tombé à vélo et j'ai très mal au bras" → 6/10
+✓ "Je me suis coupé profondément en cuisinant, ça saigne beaucoup" → 7/10
+✓ "J'ai chuté dans les escaliers et j'ai du mal à me relever" → 7/10
+
+🚨 NIVEAU 8-10 (CRITIQUE - EMAIL AUTOMATIQUE OBLIGATOIRE):
+✓ "Je pense que quelqu'un me suit depuis 10 minutes" → 8/10 ⚠️
+✓ "Une personne me suit dans la rue et ça me fait peur" → 8/10 ⚠️
+✓ "Quelqu'un me suit depuis 30 minutes" → 8/10 ⚠️
+✓ "Je suis suivie et je n'ose pas rentrer chez moi" → 9/10 ⚠️
+✓ "Je ressens une douleur intense dans la poitrine" → 8/10
+✓ "Je suis tombé de ma moto et je ne peux pas bouger ma jambe" → 8/10
+✓ "Je ne peux plus respirer correctement" → 10/10
+✓ "J'ai été renversé par une voiture, je saigne beaucoup" → 9/10
+✓ "Quelqu'un m'agresse avec une arme" → 10/10
+
+� RÈGLE ABSOLUE: "quelqu'un me suit" / "être suivi" = TOUJOURS 8/10 MINIMUM
 
 Situation: {context}
 Moment: {time_of_day}
 Localisation: {location_str}
 Description: {user_input if user_input else 'Aucune information supplémentaire'}
 
-TU ES AUTONOME: Prends tes propres décisions, propose des solutions concrètes adaptées à chaque situation.
-- Pour les situations mineures: donne des conseils pratiques et rassurants
-- Pour les situations de danger: propose des actions immédiates (refuge, services d'urgence, contact proches)
-- Adapte ton ton et tes recommandations selon la gravité
+TU ES AUTONOME: Propose des solutions concrètes adaptées.
+COMPARE LA SITUATION AUX EXEMPLES CI-DESSUS pour déterminer le bon niveau.
 
 Réponds UNIQUEMENT avec ce JSON (sans autre texte):
 {{
   "emergency_type": "type d'urgence détecté",
-  "urgency_level": nombre de 1 à 10 (SOIS RÉALISTE),
+  "urgency_level": nombre de 1 à 10 (COMPARE AUX EXEMPLES CI-DESSUS),
   "urgency_category": "Faible/Modérée/Élevée/Critique",
   "specific_advice": "conseil personnalisé et concret",
   "immediate_actions": ["action1", "action2", "action3"],

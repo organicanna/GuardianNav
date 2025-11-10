@@ -362,6 +362,18 @@ RAPPEL: Une crevaison de vélo ou pneu crevé = niveau 2-3 maximum (incident min
             processed_response = ai_text
             action = "DEMANDE_LIEUX_SECURISES" if "DEMANDE_LIEUX_SECURISES" in ai_text else "AUCUNE"
         
+        # 🚨 DÉTECTION CRITIQUE PAR MOTS-CLÉS (override si Gemini se trompe)
+        situation_lower = situation_text.lower()
+        critical_keywords = ['suivi', 'suit', 'suivie', 'suivait', 'harcel', 'harcèle', 'harcelé', 'me suit', 'quelqu\'un me', 'personne me']
+        
+        keyword_detected = any(keyword in situation_lower for keyword in critical_keywords)
+        
+        if keyword_detected and urgency_level < 8:
+            logger.warning(f"⚠️ OVERRIDE DE SÉCURITÉ: Mot-clé critique détecté ('{situation_text[:50]}...'), urgence forcée {urgency_level} → 8/10")
+            urgency_level = 8
+            # Mettre à jour le message
+            processed_response = f"🚨 Urgence: {urgency_level}/10<br><br>💬 {message}<br><br>⚠️ <em>Situation critique détectée - vos proches seront contactés automatiquement</em>"
+        
         safe_places_list = []  # AJOUT: Stocker les lieux sécurisés
         
         # Détection de demande explicite de lieux
@@ -379,7 +391,7 @@ RAPPEL: Une crevaison de vélo ou pneu crevé = niveau 2-3 maximum (incident min
             else:
                 logger.info(f"🏪 Recherche automatique de 2 lieux sécurisés (urgence: {urgency_level}/10)...")
             
-            location = "48.8758,2.3251"  # Coordonnées Google France (8 Rue de Londres)
+            location = "48.8758,2.3282"  # Coordonnées Google France (8 Rue de Londres, 75009)
             
             places_info = get_nearby_safe_places(
                 guardian_config, 
@@ -739,10 +751,10 @@ def guardian_analyze():
         current_coords = None
         if isinstance(location_info, dict) and 'coordinates' in location_info:
             coords = location_info['coordinates']
-            current_coords = (coords.get('lat', 48.8758), coords.get('lon', 2.3251))
+            current_coords = (coords.get('lat', 48.8758), coords.get('lon', 2.3282))
         else:
             # Default to Paris center for demo
-            current_coords = (48.8758, 2.3251)
+            current_coords = (48.8758, 2.3282)
         
         logger.info(f"Guardian analysis for: '{situation}' at {current_coords}")
         
