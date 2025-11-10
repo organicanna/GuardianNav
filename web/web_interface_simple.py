@@ -312,22 +312,25 @@ def analyze_situation_with_guardian_ai(situation_text, user_info={}):
         
         full_prompt = f"""Tu es GUARDIAN, assistant IA de sécurité bienveillant.
 
+IMPORTANT - Échelle de gravité réaliste:
+- Niveau 1-3 (Faible): Problèmes mineurs, questions, pannes (ex: crevaison vélo, pneu crevé, demande d'info)
+- Niveau 4-6 (Modérée): Situations inconfortables mais non critiques (ex: perdu, petite blessure)
+- Niveau 7-8 (Élevée): Situations nécessitant attention médicale (ex: chute avec douleur, blessure)
+- Niveau 9-10 (Critique): Danger immédiat, vie en péril (ex: inconscient, hémorragie, arrêt cardiaque)
+
 SITUATION: "{situation_text}"
 UTILISATEUR: {user_firstname}
-LIEU: Paris 9e
+LIEU: Paris 9e (8 rue de Londres, 75009)
 
-RÉPONSE ULTRA-CONCISE (1-2 PHRASES MAXIMUM):
+Réponds UNIQUEMENT avec ce JSON (sans autre texte):
+{{
+  "urgency_level": nombre de 1 à 10 (SOIS RÉALISTE, ne surestime pas les situations mineures),
+  "message": "1-2 phrases courtes avec le conseil immédiat",
+  "action": "DEMANDE_LIEUX_SECURISES"
+}}
 
-**NIVEAU D'URGENCE:** [chiffre]/10
-
-**MESSAGE:**
-[1 phrase courte et directe avec le conseil immédiat]
-
-**ACTION:**
-[Si urgence >= 7: DEMANDE_ENVOI_EMAIL_URGENCE]
-[Si besoin lieu sûr: DEMANDE_LIEUX_SECURISES]
-
-CONSIGNE STRICTE: Maximum 1-2 phrases courtes. Sois direct, pas de détails inutiles."""
+CONSIGNE: Propose TOUJOURS 2 lieux à proximité (pharmacie, hôpital, police) via action=DEMANDE_LIEUX_SECURISES
+RAPPEL: Une crevaison de vélo ou pneu crevé = niveau 2-3 maximum (incident mineur)."""
 
         logger.info("🧠 Analyse IA Guardian en cours...")
         
@@ -340,37 +343,67 @@ CONSIGNE STRICTE: Maximum 1-2 phrases courtes. Sois direct, pas de détails inut
         ai_text = response['candidates'][0]['content']['parts'][0]['text']
         logger.info(f"✅ Réponse Guardian reçue: {ai_text[:100]}...")
         
-        # Extraire le niveau d'urgence
-        urgency_match = re.search(r'\*\*NIVEAU D\'URGENCE:\*\*\s*(\d+)/10', ai_text)
-        urgency_level = int(urgency_match.group(1)) if urgency_match else 5
+        # Parser le JSON
+        import json
+        try:
+            ai_data = json.loads(ai_text.strip())
+            urgency_level = ai_data.get('urgency_level', 5)
+            message = ai_data.get('message', 'Analyse en cours...')
+            action = ai_data.get('action', 'AUCUNE')
+            
+            # Formater la réponse avec le message
+            processed_response = f"🚨 Urgence: {urgency_level}/10<br><br>💬 {message}"
+            
+        except json.JSONDecodeError as e:
+            logger.error(f"Erreur parsing JSON Guardian: {e}")
+            # Fallback: essayer l'ancien format
+            urgency_match = re.search(r'\*\*NIVEAU D\'URGENCE:\*\*\s*(\d+)/10', ai_text)
+            urgency_level = int(urgency_match.group(1)) if urgency_match else 5
+            processed_response = ai_text
+            action = "DEMANDE_LIEUX_SECURISES" if "DEMANDE_LIEUX_SECURISES" in ai_text else "AUCUNE"
         
-        # Initialiser la réponse
-        processed_response = ai_text
         safe_places_list = []  # AJOUT: Stocker les lieux sécurisés
         
-        # 1. Traitement des lieux sécurisés
-        if "DEMANDE_LIEUX_SECURISES" in ai_text:
-            logger.info("🏪 Recherche lieux sécurisés...")
+        # Détection de demande explicite de lieux
+        situation_lower = situation_text.lower()
+        user_asks_for_places = any(keyword in situation_lower for keyword in [
+            'lieu', 'lieux', 'refuge', 'endroit', 'où aller', 'ou aller', 
+            'pharmacie', 'hôpital', 'hopital', 'police', 'station', 
+            'proche', 'proximité', 'près', 'pres', 'autour'
+        ])
+        
+        # 1. Proposer lieux sécurisés si urgence >= 6 OU si demandé explicitement
+        if urgency_level >= 6 or user_asks_for_places:
+            if user_asks_for_places:
+                logger.info(f"🏪 Recherche de lieux (demande explicite de l'utilisateur)")
+            else:
+                logger.info(f"🏪 Recherche automatique de 2 lieux sécurisés (urgence: {urgency_level}/10)...")
+            
             location = "48.8758,2.3251"  # Coordonnées Google France (8 Rue de Londres)
             
             places_info = get_nearby_safe_places(
                 guardian_config, 
                 location,
-                ['hospital', 'police', 'pharmacy', 'gas_station']
+                ['pharmacy', 'hospital', 'police', 'gas_station']
             )
             
             user_coords = location.split(',')
             user_lat, user_lng = float(user_coords[0]), float(user_coords[1])
             
-            # AJOUT: Stocker les lieux pour la carte
+            # Stocker les lieux pour la carte
             if isinstance(places_info, list):
                 safe_places_list = places_info
             
             places_response = format_safe_places_response(places_info, user_lat, user_lng)
-            processed_response = processed_response.replace("DEMANDE_LIEUX_SECURISES", places_response)
+            
+            # Ajouter les lieux à la réponse
+            if places_response and not places_response.startswith("⚠️") and not places_response.startswith("ℹ️"):
+                processed_response += f"<br><br>📍 <strong>Lieux à proximité:</strong><br>{places_response}"
+        else:
+            logger.info(f"ℹ️ Pas de recherche de lieux (urgence: {urgency_level}/10 < 6)")
         
         # 2. Traitement de l'itinéraire sécurisé
-        if "DEMANDE_ITINERAIRE_SECURISE" in ai_text:
+        if "DEMANDE_ITINERAIRE_SECURISE" in (action if 'action' in locals() else processed_response):
             logger.info("🗺️ Calcul itinéraire sécurisé...")
             route_info = get_safe_route_directions(
                 guardian_config, 
@@ -383,7 +416,7 @@ CONSIGNE STRICTE: Maximum 1-2 phrases courtes. Sois direct, pas de détails inut
         # 3. ENVOI EMAIL AUTOMATIQUE si urgence >= 8 OU si demandé par l'IA
         email_sent = False
         email_recipient = None
-        should_send_email = urgency_level >= 8 or "DEMANDE_ENVOI_EMAIL_URGENCE" in ai_text
+        should_send_email = urgency_level >= 8 or "DEMANDE_ENVOI_EMAIL_URGENCE" in (action if 'action' in locals() else processed_response)
         
         if should_send_email:
             logger.info(f"📧 Envoi email d'urgence (niveau {urgency_level}/10)...")
@@ -609,6 +642,11 @@ def contact_urgence():
 def demo_navigation():
     """Démonstration de navigation Gare Saint-Lazare → Place Concorde"""
     return render_template('demo_navigation.html')
+
+@app.route('/test_bouton')
+def test_bouton():
+    """Page de test du bouton Vosk"""
+    return render_template('test_bouton.html')
 
 @app.route('/demo')
 def demo():

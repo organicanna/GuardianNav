@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Bouton Vosk</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 50px;
+            background: #f0f0f0;
+        }
+        .test-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        #listenBtn {
+            background: #4285F4;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        #listenBtn:hover {
+            background: #1a73e8;
+        }
+        #listenBtn.listening {
+            background: #EA4335;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f4f8;
+            border-radius: 5px;
+            min-height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-section">
+        <h1>🧪 Test Bouton Vosk</h1>
+        <p>Ce test vérifie si le bouton répond au clic et si l'API Vosk est accessible.</p>
+        
+        <button id="listenBtn" onclick="toggleListening()">
+            <span>🎤</span>
+            <span>Parler (Vosk)</span>
+        </button>
+        
+        <div class="result" id="result">
+            <strong>Logs :</strong><br>
+            <div id="logs"></div>
+        </div>
+    </div>
+
+    <script>
+        let isListening = false;
+        
+        function log(message) {
+            const logs = document.getElementById('logs');
+            const time = new Date().toLocaleTimeString();
+            logs.innerHTML += `[${time}] ${message}<br>`;
+            console.log(message);
+        }
+        
+        function toggleListening() {
+            log('✅ Bouton cliqué ! La fonction toggleListening() fonctionne.');
+            
+            if (!isListening) {
+                startListening();
+            } else {
+                stopListening();
+            }
+        }
+        
+        async function startListening() {
+            const btn = document.getElementById('listenBtn');
+            log('🎤 Démarrage de startListening()...');
+            
+            isListening = true;
+            btn.classList.add('listening');
+            btn.innerHTML = '<span>🛑</span><span>Arrêter</span>';
+            
+            try {
+                log('📡 Envoi requête à /api/vosk/start...');
+                
+                const response = await fetch('/api/vosk/start', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        duration: 5,  // 5 secondes pour le test
+                        language: 'fr'
+                    })
+                });
+
+                log(`📥 Réponse reçue : status ${response.status}`);
+                
+                const data = await response.json();
+                log(`📊 Données : ${JSON.stringify(data)}`);
+
+                if (data.success && data.transcript) {
+                    log(`✅ Transcription : "${data.transcript}"`);
+                } else {
+                    log(`⚠️ Aucune parole détectée`);
+                }
+                
+            } catch (error) {
+                log(`❌ Erreur : ${error.message}`);
+            } finally {
+                stopListening();
+            }
+        }
+        
+        function stopListening() {
+            isListening = false;
+            const btn = document.getElementById('listenBtn');
+            btn.classList.remove('listening');
+            btn.innerHTML = '<span>🎤</span><span>Parler (Vosk)</span>';
+            log('🛑 Arrêt de l\'écoute');
+        }
+        
+        // Test au chargement
+        log('Page chargée - Prêt pour le test');
+        log(`Type de toggleListening : ${typeof toggleListening}`);
+        log(`Serveur attendu : http://localhost:5002`);
+    </script>
+</body>
+</html>

@@ -4,6 +4,15 @@ Ce dossier contient tous les tests pour le système Guardian.
 
 ## 📋 Structure des Tests
 
+### 🎯 Tests de Calibration IA (NOUVEAU)
+- **`urgency_scenarios/`** - Suite complète de tests pour calibrer l'évaluation des urgences
+  - **38 scénarios** réels catégorisés (Faible, Modérée, Élevée, Critique)
+  - **Tests automatisés** avec rapports détaillés
+  - **Mode interactif** pour tests rapides
+  - **Statistiques** et visualisation
+  - 📖 Voir `tests/urgency_scenarios/README.md` pour détails complets
+  - 🚀 Démarrage rapide : `python3 tests/urgency_scenarios/INDEX.py`
+
 ### 🧪 Tests Fonctionnels Principaux
 - **`test_whatsapp.py`** - Test de l'intégration WhatsApp dans les emails d'urgence
 - **`test_email_content.py`** - Test du contenu des emails avec localisation et situation réelles

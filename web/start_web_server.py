@@ -18,12 +18,14 @@ os.chdir(parent_dir)
 if __name__ == "__main__":
     from web.web_interface_simple import app, socketio
     
+    PORT = int(os.environ.get('PORT', 5002))
+    
     print("🚀 Démarrage du serveur web Guardian...")
-    print("🌐 Interface disponible sur: http://localhost:5001")
+    print(f"🌐 Interface disponible sur: http://localhost:{PORT}")
     print("📱 Pour arrêter: Ctrl+C")
     
     socketio.run(app, 
                 debug=False, 
                 host='0.0.0.0', 
-                port=5001, 
+                port=PORT, 
                 allow_unsafe_werkzeug=True)

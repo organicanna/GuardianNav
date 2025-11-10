@@ -106,17 +106,18 @@ class GeminiAgent:
             self.logger.info("API Key non configurée - mode simulation")
             return self._simulate_response(prompt)
         
-        # Utiliser le client Google GenAI moderne si disponible
-        if hasattr(self, 'use_genai_client') and self.use_genai_client and hasattr(self, 'genai_client'):
-            return self._make_genai_request(prompt, max_tokens)
+        # DÉSACTIVER le client GenAI qui bloque - utiliser directement REST API
+        # if hasattr(self, 'use_genai_client') and self.use_genai_client and hasattr(self, 'genai_client'):
+        #     return self._make_genai_request(prompt, max_tokens)
         
         # Construire l'URL selon le type d'API (méthode REST classique)
         try:
             if self.api_type == 'gemini':
-                api_url = f"{self.base_url}/models/{self.model_name}:generateContent?key={self.api_key}"
+                # Utiliser gemini-2.0-flash-exp avec v1beta qui supporte response_mime_type JSON
+                api_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key={self.api_key}"
             else:
-                # Gemini API
-                api_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={self.api_key}"
+                # Gemini API - utiliser gemini-2.0-flash-exp
+                api_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key={self.api_key}"
             
             headers = {
                 'Content-Type': 'application/json'
@@ -130,7 +131,8 @@ class GeminiAgent:
                     "temperature": 0.1,
                     "maxOutputTokens": max_tokens,
                     "topP": 0.8,
-                    "topK": 10
+                    "topK": 10,
+                    "response_mime_type": "application/json"
                 },
                 "safetySettings": [
                     {
@@ -235,61 +237,96 @@ class GeminiAgent:
         # Analyse approfondie du prompt pour une réponse très réaliste
         prompt_lower = prompt.lower()
         
-        # Détection de mots-clés et contextes
+        # Détection de mots-clés et contextes avec analyse fine
         urgency_indicators = {
-            'critique': ['inconscient', 'sang', 'arrêt cardiaque', 'ne respire plus', 'accident grave'],
-            'élevée': ['chute', 'douleur intense', 'blessé', 'cassé', 'fracture', 'malaise'],
-            'modérée': ['perdu', 'peur', 'inquiet', 'mal', 'problème'],
-            'faible': ['conseil', 'information', 'aide', 'question']
+            'critique': ['inconscient', 'ne respire plus', 'arrêt cardiaque', 'hémorragie', 'accident grave'],
+            'élevée': ['fracture', 'os cassé', 'douleur intense', 'ne peut pas bouger', 'malaise grave'],
+            'modérée': ['perdu', 'peur', 'inquiet', 'blessé', 'mal'],
+            'faible': ['conseil', 'information', 'aide', 'question', 'crevaison', 'panne']
         }
         
+        # Indicateurs de situations NON urgentes (diminuent le niveau)
+        non_urgent_indicators = ['crevaison', 'crevé', 'panne', 'pneu', 'vélo cassé', 'mécanique', 'ça va', 'pas grave']
+        
         medical_keywords = ['douleur', 'mal', 'blessé', 'sang', 'chute', 'malaise', 'étourdissement']
-        security_keywords = ['danger', 'agression', 'menace', 'peur', 'suspect']
+        security_keywords = ['danger', 'agression', 'menace', 'attaque', 'suspect']
         location_keywords = ['perdu', 'égaré', 'ne sais pas où', 'trouve plus']
         
         # Analyze urgency level
         urgency_level = 3  # default
         urgency_category = "Modérée"
         
-        for level, keywords in urgency_indicators.items():
-            if any(word in prompt_lower for word in keywords):
-                if level == 'critique':
-                    urgency_level = 9
-                    urgency_category = "Critique"
-                elif level == 'élevée':
-                    urgency_level = 7
-                    urgency_category = "Élevée"
-                elif level == 'modérée':
-                    urgency_level = 5
-                    urgency_category = "Modérée"
-                else:
-                    urgency_level = 2
-                    urgency_category = "Faible"
-                break
+        # PRIORITÉ 1: Vérifier si c'est une situation NON urgente
+        if any(word in prompt_lower for word in non_urgent_indicators):
+            urgency_level = 2
+            urgency_category = "Faible"
+        # PRIORITÉ 2: Analyser les indicateurs classiques
+        else:
+            for level, keywords in urgency_indicators.items():
+                if any(word in prompt_lower for word in keywords):
+                    if level == 'critique':
+                        urgency_level = 9
+                        urgency_category = "Critique"
+                    elif level == 'élevée':
+                        urgency_level = 7
+                        urgency_category = "Élevée"
+                    elif level == 'modérée':
+                        urgency_level = 5
+                        urgency_category = "Modérée"
+                    else:
+                        urgency_level = 2
+                        urgency_category = "Faible"
+                    break
         
         # Generate detailed contextual response
         if any(word in prompt_lower for word in ['chute', 'tombé', 'chu', 'glissé']):
+            # Vérifier si c'est une chute SANS gravité (vélo avec crevaison)
+            is_minor_fall = any(word in prompt_lower for word in ['crevaison', 'crevé', 'pneu', 'vélo cassé', 'ça va', 'pas grave'])
+            
             body_parts = ['bras', 'jambe', 'dos', 'tête', 'cheville', 'poignet', 'genou']
             injured_part = next((part for part in body_parts if part in prompt_lower), "corps")
             
-            simulated_analysis = {
-                "emergency_type": f"Traumatisme suite à chute - {injured_part}",
-                "urgency_level": min(urgency_level + 2, 10),
-                "urgency_category": "Élevée",
-                "immediate_actions": [
-                    f"Évaluer la douleur du {injured_part}",
-                    "Immobiliser la zone si fracture suspectée",
-                    "Appliquer de la glace si possible"
-                ],
-                "specific_advice": f"Chute avec impact sur le {injured_part}. Si douleur intense ou déformation visible, consultez rapidement. Surveillez les signes de commotion si impact à la tête.",
-                "emergency_services": "SAMU (15) si douleur sévère",
-                "reassurance_message": "Restez calme et évaluez vos symptômes.",
-                "recommended_actions": [
-                    "Tester la mobilité progressivement",
-                    "Surveiller l'évolution de la douleur",
-                    "Consulter si symptômes persistent"
-                ]
-            }
+            if is_minor_fall:
+                # Chute sans gravité (ex: vélo avec crevaison)
+                simulated_analysis = {
+                    "emergency_type": "Incident mineur - Assistance vélo",
+                    "urgency_level": 2,
+                    "urgency_category": "Faible",
+                    "immediate_actions": [
+                        "Vérifier que vous n'êtes pas blessé",
+                        "Mettre le vélo en sécurité (sur le trottoir)",
+                        "Évaluer si vous pouvez réparer ou avez besoin d'aide"
+                    ],
+                    "specific_advice": "Incident de vélo sans gravité apparente. Prenez le temps de vérifier que vous n'avez pas de blessure, puis décidez si vous pouvez réparer ou avez besoin d'assistance routière.",
+                    "emergency_services": "Pas de services d'urgence nécessaires - Aide routière possible",
+                    "reassurance_message": "Pas de panique, c'est un incident courant. L'essentiel est que vous alliez bien.",
+                    "recommended_actions": [
+                        "Vérifier votre état physique (égratignures, douleurs)",
+                        "Appeler un service de dépannage vélo si besoin",
+                        "Contacter un proche pour venir vous chercher si nécessaire"
+                    ]
+                }
+            else:
+                # Chute potentiellement sérieuse
+                simulated_analysis = {
+                    "emergency_type": f"Traumatisme suite à chute - {injured_part}",
+                    "urgency_level": 6,
+                    "urgency_category": "Modérée",
+                    "immediate_actions": [
+                        f"Évaluer la douleur du {injured_part}",
+                        "Immobiliser la zone si fracture suspectée",
+                        "Appliquer de la glace si possible"
+                    ],
+                    "specific_advice": f"Chute avec impact sur le {injured_part}. Si douleur intense ou déformation visible, consultez rapidement. Surveillez les signes de commotion si impact à la tête.",
+                    "emergency_services": "SAMU (15) si douleur sévère ou impossibilité de bouger",
+                    "reassurance_message": "Restez calme et évaluez vos symptômes.",
+                    "recommended_actions": [
+                        "Tester la mobilité progressivement",
+                        "Surveiller l'évolution de la douleur",
+                        "Consulter si symptômes persistent"
+                    ]
+                }
+
         elif any(word in prompt_lower for word in security_keywords):
             threat_level = "élevée" if any(word in prompt_lower for word in ['agression', 'menace', 'danger immédiat']) else "modérée"
             
@@ -377,23 +414,34 @@ class GeminiAgent:
         # Construction du prompt contextuel
         location_str = f"GPS {location[0]:.6f}, {location[1]:.6f}" if location else "Non disponible"
         
-        # Construction d'un prompt structuré pour Gemini
-        prompt = f"""Tu es un assistant d'urgence spécialisé. Analyse la situation suivante et réponds uniquement avec un JSON valide contenant ces champs exacts:
+        # Construction d'un prompt structuré pour Gemini avec nuances
+        prompt = f"""Tu es Guardian, un assistant d'urgence intelligent et autonome. Analyse la situation avec DISCERNEMENT et prends tes propres décisions.
+
+ÉCHELLE DE GRAVITÉ:
+- Niveau 1-3 (Faible): Problèmes mineurs, questions, conseils (ex: crevaison, pneu crevé)
+- Niveau 4-6 (Modérée): Inconfort mais non critique (ex: perdu, petite blessure)
+- Niveau 7-8 (Élevée): Attention médicale nécessaire (ex: chute douloureuse, blessure)
+- Niveau 9-10 (Critique): Danger immédiat (ex: inconscient, hémorragie, agression)
 
 Situation: {context}
 Moment: {time_of_day}
 Localisation: {location_str}
 Description: {user_input if user_input else 'Aucune information supplémentaire'}
 
+TU ES AUTONOME: Prends tes propres décisions, propose des solutions concrètes adaptées à chaque situation.
+- Pour les situations mineures: donne des conseils pratiques et rassurants
+- Pour les situations graves: propose des actions immédiates et des lieux de refuge si pertinent
+- Adapte ton ton et tes recommandations selon la gravité
+
 Réponds UNIQUEMENT avec ce JSON (sans autre texte):
 {{
   "emergency_type": "type d'urgence détecté",
-  "urgency_level": nombre de 1 à 10,
+  "urgency_level": nombre de 1 à 10 (SOIS RÉALISTE),
   "urgency_category": "Faible/Modérée/Élevée/Critique",
-  "specific_advice": "conseil personnalisé en français",
+  "specific_advice": "conseil personnalisé et concret",
   "immediate_actions": ["action1", "action2", "action3"],
-  "emergency_services": "service d'urgence recommandé",
-  "reassurance_message": "message rassurant"
+  "emergency_services": "service recommandé OU 'Aucun service d'urgence nécessaire'",
+  "reassurance_message": "message rassurant et empathique"
 }}"""
         
         try:
@@ -422,15 +470,15 @@ Réponds UNIQUEMENT avec ce JSON (sans autre texte):
         """Valide et nettoie la réponse de l'analyse"""
         
         defaults = {
-            "emergency_type": "Urgence",
+            "emergency_type": "Situation à évaluer",
             "urgency_level": 5,
             "urgency_category": "Modérée", 
-            "immediate_actions": ["Évaluer la situation", "Rester calme"],
-            "specific_advice": "Situation nécessitant attention",
-            "emergency_services": "112",
-            "reassurance_message": "L'aide est en route",
+            "immediate_actions": ["Restez calme", "Évaluez votre environnement"],
+            "specific_advice": "Je suis là pour vous aider. Décrivez-moi votre situation.",
+            "emergency_services": "Aucun service d'urgence nécessaire",
+            "reassurance_message": "Guardian vous accompagne, tout va bien se passer.",
             "follow_up_needed": True,
-            "risk_factors": ["Évaluation nécessaire"],
+            "risk_factors": ["Évaluation en cours"],
             "what3words": ""
         }
         

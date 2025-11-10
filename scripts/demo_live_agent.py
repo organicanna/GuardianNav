@@ -337,7 +337,7 @@ def get_nearby_safe_places(config, location, place_types=['hospital', 'police', 
         if not places_key or places_key.startswith("YOUR_"):
             return "⚠️ API Places non configurée - impossible de trouver des lieux sécurisés"
         
-        print(f"🔍 Recherche de lieux sécurisés à proximité...")
+        print(f"🔍 Recherche de 2 lieux sécurisés à proximité...")
         
         # URL de l'API Google Places - Nearby Search
         places_url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
@@ -346,6 +346,10 @@ def get_nearby_safe_places(config, location, place_types=['hospital', 'police', 
         
         # Rechercher différents types de lieux sécurisés
         for place_type in place_types:
+            # Limiter à 2 lieux au total
+            if len(safe_places) >= 2:
+                break
+                
             params = {
                 'location': location,
                 'radius': 1000,  # 1km de rayon
@@ -360,8 +364,12 @@ def get_nearby_safe_places(config, location, place_types=['hospital', 'police', 
                 data = response.json()
                 
                 if data['status'] == 'OK':
-                    # Prendre les 2 premiers résultats par type qui sont OUVERTS
+                    # Prendre le premier résultat par type qui est OUVERT
                     for place in data.get('results', []):
+                        # Limiter à 2 lieux au total
+                        if len(safe_places) >= 2:
+                            break
+                            
                         # Filtrer uniquement les lieux OUVERTS et OPÉRATIONNELS
                         is_operational = place.get('business_status') == 'OPERATIONAL'
                         opening_hours = place.get('opening_hours', {})
@@ -382,10 +390,7 @@ def get_nearby_safe_places(config, location, place_types=['hospital', 'police', 
                                 'lng': location_coords.get('lng')
                             }
                             safe_places.append(place_info)
-                            
-                            # Limiter à 2 lieux ouverts par type
-                            if len([p for p in safe_places if p['type'] == place_type]) >= 2:
-                                break
+                            break  # Un seul lieu par type
         
         if safe_places:
             print(f"✅ {len(safe_places)} lieux sécurisés trouvés")
