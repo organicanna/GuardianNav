@@ -249,20 +249,28 @@ class GmailEmergencyAgent:
         <body style="margin: 0; padding: 0; font-family: 'Inter', 'Segoe UI', Arial, sans-serif; background-color: #F9FAFB;">
             <div style="max-width: 600px; margin: 0 auto; background-color: white;">
                 
-                <!-- Header avec dégradé Guardian -->
-                <div style="background: linear-gradient(135deg, #7E21F1 0%, #4745F3 100%); color: white; padding: 40px 30px; text-align: center;">
-                    <img src="https://raw.githubusercontent.com/organicanna/GuardianNav/main/web/static/images/logo.png" alt="Guardian Logo" style="width: 80px; height: 80px; margin-bottom: 16px; filter: brightness(0) invert(1);" />
-                    <h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">🛡️ ALERTE GUARDIAN</h1>
-                    <p style="margin: 10px 0 0 0; font-size: 15px; opacity: 0.95; font-weight: 400;">{user_name} a besoin d'assistance</p>
+                <!-- Header BLANC avec logo et nom Guardian -->
+                <div style="background: white; color: #1F2937; padding: 30px; text-align: center; border-bottom: 3px solid #7E21F1;">
+                    <div style="display: inline-block; margin-bottom: 10px;">
+                        <span style="font-size: 48px;">🛡️</span>
+                    </div>
+                    <h1 style="margin: 0; font-size: 32px; font-weight: 700; color: #7E21F1; letter-spacing: 1px;">GUARDIAN</h1>
+                    <p style="margin: 8px 0 0 0; font-size: 14px; color: #6B7280; font-weight: 500;">Système de sécurité personnelle</p>
+                </div>
+                
+                <!-- Bandeau alerte -->
+                <div style="background: #FEE2E2; color: #991B1B; padding: 20px; text-align: center; border-left: 5px solid #DC2626;">
+                    <h2 style="margin: 0; font-size: 20px; font-weight: 700;">⚠️ ALERTE D'URGENCE</h2>
+                    <p style="margin: 5px 0 0 0; font-size: 15px;">{user_name} a besoin d'assistance</p>
                 </div>
                 
                 <div style="padding: 35px 30px;">
                     
-                    <!-- 📍 Localisation -->
-                    <div style="background: #F9FAFB; padding: 25px; border-radius: 12px; border-left: 4px solid #7E21F1; margin-bottom: 24px;">
-                        <h2 style="color: #1F2937; margin: 0 0 18px 0; font-size: 18px; font-weight: 600;">📍 Localisation</h2>
+                    <!-- 📍 Localisation - FOND VIOLET -->
+                    <div style="background: linear-gradient(135deg, #EDE9FE, #DDD6FE); padding: 25px; border-radius: 12px; border-left: 5px solid #7E21F1; margin-bottom: 24px;">
+                        <h2 style="color: #5B21B6; margin: 0 0 18px 0; font-size: 18px; font-weight: 600;">📍 Informations de localisation</h2>
                         
-                        <div style="background: white; padding: 18px; border-radius: 8px; margin-bottom: 16px;">
+                        <div style="background: white; padding: 18px; border-radius: 8px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(126, 33, 241, 0.1);">
                             <table style="width: 100%; border-collapse: collapse;">
                                 <tr>
                                     <td style="padding: 10px 0; font-weight: 500; color: #6B7280; width: 35%;">Personne:</td>
@@ -292,9 +300,9 @@ class GmailEmergencyAgent:
             
             html_body += f"""
                     
-                    <!-- 🗺️ Carte -->
-                    <div style="background: #F0F4FF; padding: 25px; border-radius: 12px; border-left: 4px solid #4745F3; margin-bottom: 24px;">
-                        <h3 style="color: #1F2937; margin: 0 0 16px 0; font-size: 18px; font-weight: 600;">🗺️ Voir sur la carte</h3>
+                    <!-- 🗺️ Carte - FOND VIOLET -->
+                    <div style="background: linear-gradient(135deg, #EDE9FE, #DDD6FE); padding: 25px; border-radius: 12px; border-left: 5px solid #7E21F1; margin-bottom: 24px;">
+                        <h3 style="color: #5B21B6; margin: 0 0 16px 0; font-size: 18px; font-weight: 600;">🗺️ Voir sur la carte</h3>
                         <div style="text-align: center; margin: 20px 0;">
                             <a href="{google_maps_url}" style="display: inline-block; background: linear-gradient(135deg, #7E21F1, #4745F3); color: white; padding: 14px 28px; text-decoration: none; border-radius: 10px; font-weight: 600; margin: 8px; box-shadow: 0 4px 12px rgba(126, 33, 241, 0.3); font-size: 15px;">
                                 �️ Ouvrir Google Maps
@@ -311,21 +319,21 @@ class GmailEmergencyAgent:
         
         html_body += f"""
                     
-                    <!-- 🎯 Actions -->
-                    <div style="background: #ECFDF5; padding: 25px; border-radius: 12px; border-left: 4px solid #10B981; margin-bottom: 24px;">
-                        <h3 style="color: #1F2937; margin: 0 0 16px 0; font-size: 18px; font-weight: 600;">🎯 Que faire ?</h3>
-                        <div style="background: white; padding: 20px; border-radius: 8px;">
+                    <!-- 🎯 Actions - FOND BLEU -->
+                    <div style="background: linear-gradient(135deg, #DBEAFE, #BFDBFE); padding: 25px; border-radius: 12px; border-left: 5px solid #4745F3; margin-bottom: 24px;">
+                        <h3 style="color: #1E40AF; margin: 0 0 16px 0; font-size: 18px; font-weight: 600;">🎯 Que faire ?</h3>
+                        <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(71, 69, 243, 0.1);">
                             <ol style="margin: 0; padding-left: 22px; color: #1F2937;">
                                 <li style="margin: 12px 0; font-size: 15px; line-height: 1.6;">
-                                    <strong style="color: #7E21F1;">Contactez {user_name} immédiatement</strong><br>
+                                    <strong style="color: #4745F3;">Contactez {user_name} immédiatement</strong><br>
                                     <span style="color: #6B7280; font-size: 14px;">Appelez ou envoyez un message via WhatsApp</span>
                                 </li>
                                 <li style="margin: 12px 0; font-size: 15px; line-height: 1.6;">
-                                    <strong style="color: #7E21F1;">Si pas de réponse</strong><br>
+                                    <strong style="color: #4745F3;">Si pas de réponse</strong><br>
                                     <span style="color: #6B7280; font-size: 14px;">Appelez les secours au <strong style="color: #EF4444;">17 (Police)</strong> ou <strong style="color: #EF4444;">112 (Urgences)</strong></span>
                                 </li>
                                 <li style="margin: 12px 0; font-size: 15px; line-height: 1.6;">
-                                    <strong style="color: #7E21F1;">Donnez la localisation exacte</strong><br>
+                                    <strong style="color: #4745F3;">Donnez la localisation exacte</strong><br>
                                     <span style="color: #6B7280; font-size: 14px;">Utilisez les coordonnées GPS ci-dessus</span>
                                 </li>
                             </ol>
@@ -336,10 +344,10 @@ class GmailEmergencyAgent:
         if whatsapp_links:
             html_body += f"""
                     
-                    <!-- 💬 WhatsApp -->
-                    <div style="background: #F0FDF4; padding: 25px; border-radius: 12px; border-left: 4px solid #25D366; margin-bottom: 24px;">
-                        <h3 style="color: #1F2937; margin: 0 0 12px 0; font-size: 18px; font-weight: 600;">💬 Appeler via WhatsApp</h3>
-                        <p style="margin: 0 0 18px 0; color: #6B7280; font-size: 14px;">
+                    <!-- 💬 WhatsApp - FOND VERT -->
+                    <div style="background: linear-gradient(135deg, #D1FAE5, #A7F3D0); padding: 25px; border-radius: 12px; border-left: 5px solid #10B981; margin-bottom: 24px;">
+                        <h3 style="color: #065F46; margin: 0 0 12px 0; font-size: 18px; font-weight: 600;">💬 Appeler via WhatsApp</h3>
+                        <p style="margin: 0 0 18px 0; color: #047857; font-size: 14px;">
                             <strong>Appel gratuit</strong> - Cliquez pour ouvrir WhatsApp
                         </p>
                         <div style="margin: 16px 0;">"""
