@@ -210,7 +210,7 @@ class GmailEmergencyAgent:
                     clean_phone = '+' + clean_phone
             
             # Message WhatsApp pré-rempli pour appeler la personne
-            message = f"Je viens de recevoir une alerte Guardian concernant {user_name}. Je t'appelle immédiatement pour m'assurer que tout va bien !"
+            message = f"Tout va bien ? Je viens de recevoir une alerte de Guardian. Je t'appelle tout de suite"
             
             # URL WhatsApp (encode le message)
             encoded_message = urllib.parse.quote(message)
